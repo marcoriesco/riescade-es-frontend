@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RIESCADE: EmulationStation Frontend</title>
+    <link rel="stylesheet" href="src/css/main.css" />
+    <link rel="stylesheet" href="src/css/systems.css" />
+    <link rel="stylesheet" href="src/css/settings.css" />
+    <!-- O tema será carregado separadamente -->
+  </head>
+  <body>
+    <div id="app">
+      <!-- Área de navegação -->
+      <nav id="navigation" class="hidden">
+        <ul>
+          <li data-screen="systems" class="active">Sistemas</li>
+          <li data-screen="gamelist" class="disabled">Lista de Jogos</li>
+          <li data-screen="settings">Configurações</li>
+        </ul>
+      </nav>
+
+      <!-- Telas do aplicativo -->
+      <div id="screens">
+        <!-- Tela de sistemas -->
+        <section id="systems-screen" class="screen active">
+          <div class="systems-container"></div>
+        </section>
+
+        <!-- Tela de lista de jogos -->
+        <section id="gamelist-screen" class="screen">
+          <div class="header">
+            <button id="back-to-systems">Voltar</button>
+            <h1 id="current-system-name"></h1>
+          </div>
+          <div class="gamelist-container"></div>
+        </section>
+
+        <!-- Tela de configurações -->
+        <section id="settings-screen" class="screen">
+          <div class="header">
+            <button id="back-from-settings">Voltar</button>
+            <h1>Configurações</h1>
+          </div>
+          <div class="settings-container">
+            <div class="settings-section">
+              <h2>Diretórios</h2>
+
+              <div class="setting">
+                <h3>Diretório de ROMs</h3>
+                <div class="setting-input">
+                  <input
+                    type="text"
+                    id="roms-dir"
+                    class="path-input"
+                    readonly
+                  />
+                  <button id="browse-roms-dir">Procurar</button>
+                </div>
+              </div>
+
+              <div class="setting">
+                <h3>Diretório do EmulationStation</h3>
+                <div class="setting-input">
+                  <input
+                    type="text"
+                    id="emulationstation-dir"
+                    class="path-input"
+                    readonly
+                  />
+                  <button id="browse-emulationstation-dir">Procurar</button>
+                </div>
+              </div>
+
+              <div class="setting">
+                <h3>Diretório de Emuladores</h3>
+                <div class="setting-input">
+                  <input
+                    type="text"
+                    id="emulators-dir"
+                    class="path-input"
+                    readonly
+                  />
+                  <button id="browse-emulators-dir">Procurar</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h2>Aparência</h2>
+              <div class="setting">
+                <h3>Tema</h3>
+                <select id="theme-selector">
+                  <option value="default">Padrão</option>
+                </select>
+              </div>
+
+              <div class="setting">
+                <h3>Exibição</h3>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="fullscreen-mode" checked />
+                  Modo tela cheia
+                </label>
+              </div>
+            </div>
+
+            <div class="setting save-container">
+              <button id="save-settings" class="primary-button">
+                Salvar configurações
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Modal de detalhes do jogo -->
+    <div id="gameDetailsModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <div class="game-details">
+          <div class="game-header">
+            <div class="game-image-container">
+              <img class="game-detail-image" src="" alt="Game Image" />
+            </div>
+            <div class="game-info-header">
+              <h2 class="game-title"></h2>
+              <div class="game-metadata">
+                <p>
+                  <strong>Desenvolvedor:</strong>
+                  <span class="game-developer"></span>
+                </p>
+                <p>
+                  <strong>Data de Lançamento:</strong>
+                  <span class="game-release-date"></span>
+                </p>
+                <p><strong>Gênero:</strong> <span class="game-genre"></span></p>
+              </div>
+            </div>
+          </div>
+          <div class="game-description-container">
+            <h3>Descrição</h3>
+            <p class="game-description"></p>
+          </div>
+          <div class="game-actions">
+            <button class="play-button">Jogar</button>
+            <button class="favorite-button">Favoritar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botão de teste da API (visível apenas em desenvolvimento) -->
+    <div
+      id="apiTestButton"
+      style="
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 9999;
+        display: none;
+      "
+    >
+      <button
+        onclick="window.testApiLocal.testAllApis()"
+        style="
+          padding: 10px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        "
+      >
+        Testar API Local
+      </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="src/js/app.js" type="module"></script>
+    <script src="src/js/theme-manager.js" type="module"></script>
+    <script src="src/js/config-parser.js" type="module"></script>
+    <script src="src/js/gamelist-screen.js" type="module"></script>
+    <script src="src/js/api-test.js"></script>
+    <script>
+      // Mostrar botão de teste apenas em desenvolvimento
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Verificando modo de produção...");
+        // Verificar se estamos em modo de produção
+        window.api
+          .getSettings()
+          .then((settings) => {
+            console.log("Configurações:", settings);
+            // Sempre mostrar o botão para testes
+            document.getElementById("apiTestButton").style.display = "block";
+          })
+          .catch((error) => {
+            console.error("Erro ao verificar modo de produção:", error);
+            // Mostrar o botão mesmo em caso de erro
+            document.getElementById("apiTestButton").style.display = "block";
+          });
+      });
+    </script>
+  </body>
+</html>

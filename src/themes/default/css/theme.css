@@ -1,0 +1,210 @@
+/* Default Theme CSS */
+:root {
+  /* Color Variables */
+  --primary-color: #ff1a4f;
+  --background-color: #121212;
+  --surface-color: #1e1e1e;
+  --text-color: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --card-background: #242424;
+  --card-hover: #2a2a2a;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border Radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
+
+/* Global Styles */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Systems View */
+.systems-container {
+  padding: var(--spacing-lg);
+}
+
+.systems-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  height: 60px;
+}
+
+.systems-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md);
+}
+
+.system-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.system-card:hover {
+  transform: translateY(-2px);
+  background-color: var(--card-hover);
+}
+
+.system-logo img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius-sm);
+}
+
+.system-info {
+  margin-top: var(--spacing-sm);
+  text-align: center;
+}
+
+.system-name {
+  margin: 0;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.game-count {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+}
+
+/* Game List View */
+.gamelist-container {
+  padding: var(--spacing-lg);
+}
+
+.gamelist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md);
+}
+
+.game-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-2px);
+}
+
+.game-image img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.game-info {
+  padding: var(--spacing-md);
+}
+
+.game-title {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.game-metadata {
+  display: flex;
+  gap: var(--spacing-sm);
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  margin-bottom: var(--spacing-sm);
+}
+
+.game-description {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .systems-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .game-image img {
+    height: 150px;
+  }
+}
+
+/* Search Bar */
+.search-container {
+  display: flex;
+  margin-bottom: var(--spacing-lg);
+  position: relative;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--card-background);
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(255, 26, 79, 0.2);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: var(--spacing-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: none;
+}
+
+.clear-search-btn.visible {
+  display: block;
+}

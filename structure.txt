@@ -1,0 +1,28 @@
+project-structure/
+├── package.json
+├── main.js
+├── preload.js
+├── index.html
+├── src/
+│   ├── css/
+│   │   ├── main.css
+│   │   ├── systems.css
+│   │   ├── gamelist.css
+│   │   └── settings.css
+│   ├── js/
+│   │   ├── app.js
+│   │   ├── config-parser.js
+│   │   ├── systems-screen.js
+│   │   ├── gamelist-screen.js
+│   │   └── settings-screen.js
+│   └── components/
+│       ├── system-card.js
+│       ├── game-card.js
+│       └── navigation.js
+├── assets/
+│   └── icons/
+└── themes/
+    └── default/
+        ├── system_logos/
+        ├── backgrounds/
+        └── theme.xml

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste da API Local</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      pre {
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        padding: 10px;
+        overflow: auto;
+        max-height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Teste da API Local</h1>
+
+    <div class="container">
+      <h2>Verificar API</h2>
+      <button id="checkApi">Verificar API</button>
+      <pre id="apiResult">Resultado aparecerá aqui...</pre>
+    </div>
+
+    <div class="container">
+      <h2>Listar Sistemas</h2>
+      <button id="listSystems">Listar Sistemas</button>
+      <pre id="systemsResult">Resultado aparecerá aqui...</pre>
+    </div>
+
+    <div class="container">
+      <h2>Listar Jogos</h2>
+      <select id="systemSelect">
+        <option value="">Selecione um sistema</option>
+      </select>
+      <button id="listGames">Listar Jogos</button>
+      <pre id="gamesResult">Resultado aparecerá aqui...</pre>
+    </div>
+
+    <div class="container">
+      <h2>Obter Temas</h2>
+      <button id="getThemes">Obter Temas</button>
+      <pre id="themesResult">Resultado aparecerá aqui...</pre>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Verificar API
+        document
+          .getElementById("checkApi")
+          .addEventListener("click", function () {
+            const result = document.getElementById("apiResult");
+
+            try {
+              if (window.api) {
+                result.textContent =
+                  "API disponível: " + JSON.stringify(window.api, null, 2);
+
+                if (window.api.localApi) {
+                  result.textContent +=
+                    "\n\nAPI Local disponível: " +
+                    JSON.stringify(Object.keys(window.api.localApi), null, 2);
+                } else {
+                  result.textContent += "\n\nAPI Local não disponível";
+                }
+              } else {
+                result.textContent = "API não disponível";
+              }
+            } catch (error) {
+              result.textContent = "Erro ao verificar API: " + error.message;
+            }
+          });
+
+        // Listar Sistemas
+        document
+          .getElementById("listSystems")
+          .addEventListener("click", async function () {
+            const result = document.getElementById("systemsResult");
+            const systemSelect = document.getElementById("systemSelect");
+
+            try {
+              result.textContent = "Carregando sistemas...";
+
+              let systems;
+              if (
+                window.api &&
+                window.api.localApi &&
+                window.api.localApi.systems
+              ) {
+                systems = await window.api.localApi.systems.getAll();
+              } else if (window.api) {
+                systems = await window.api.getSystems();
+              } else {
+                throw new Error("API não disponível");
+              }
+
+              result.textContent = JSON.stringify(systems, null, 2);
+
+              // Preencher o select de sistemas
+              systemSelect.innerHTML =
+                '<option value="">Selecione um sistema</option>';
+              systems.forEach((system) => {
+                const option = document.createElement("option");
+                option.value = system.name || system;
+                option.textContent = system.name || system;
+                systemSelect.appendChild(option);
+              });
+            } catch (error) {
+              result.textContent = "Erro ao listar sistemas: " + error.message;
+            }
+          });
+
+        // Listar Jogos
+        document
+          .getElementById("listGames")
+          .addEventListener("click", async function () {
+            const result = document.getElementById("gamesResult");
+            const systemSelect = document.getElementById("systemSelect");
+            const systemName = systemSelect.value;
+
+            if (!systemName) {
+              result.textContent = "Selecione um sistema primeiro";
+              return;
+            }
+
+            try {
+              result.textContent = "Carregando jogos...";
+
+              let games;
+              if (
+                window.api &&
+                window.api.localApi &&
+                window.api.localApi.games
+              ) {
+                games = await window.api.localApi.games.getBySystem(systemName);
+              } else if (window.api) {
+                games = await window.api.getGames(systemName);
+              } else {
+                throw new Error("API não disponível");
+              }
+
+              result.textContent = JSON.stringify(games, null, 2);
+            } catch (error) {
+              result.textContent = "Erro ao listar jogos: " + error.message;
+            }
+          });
+
+        // Obter Temas
+        document
+          .getElementById("getThemes")
+          .addEventListener("click", async function () {
+            const result = document.getElementById("themesResult");
+
+            try {
+              result.textContent = "Carregando temas...";
+
+              let themes;
+              if (
+                window.api &&
+                window.api.localApi &&
+                window.api.localApi.themes
+              ) {
+                themes = await window.api.localApi.themes.getAll();
+              } else if (window.api) {
+                themes = await window.api.getThemes();
+              } else {
+                throw new Error("API não disponível");
+              }
+
+              result.textContent = JSON.stringify(themes, null, 2);
+            } catch (error) {
+              result.textContent = "Erro ao obter temas: " + error.message;
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

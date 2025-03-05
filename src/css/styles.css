@@ -1,0 +1,218 @@
+/* Game Details Modal */
+.game-details-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.game-details-modal.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.game-details-container {
+  background-color: var(--card-color, #242424);
+  border-radius: 8px;
+  width: 80%;
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  color: var(--text-color, #ffffff);
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--text-color, #ffffff);
+  font-size: 24px;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+.close-modal-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.game-header {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.game-image {
+  flex: 0 0 200px;
+  margin-right: 20px;
+}
+
+.game-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.game-info {
+  flex: 1;
+}
+
+.game-title {
+  font-size: 24px;
+  margin: 0 0 10px 0;
+  color: var(--primary-color, #ff1a4f);
+}
+
+.game-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.game-metadata span {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.game-description {
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.game-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.play-button,
+.favorite-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.play-button {
+  background-color: var(--primary-color, #ff1a4f);
+  color: white;
+}
+
+.play-button:hover {
+  background-color: var(--primary-color-hover, #e01846);
+}
+
+.favorite-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-color, #ffffff);
+}
+
+.favorite-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Loading spinner inside modal */
+.game-details-modal .loading {
+  color: white;
+  font-size: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.game-details-modal .loading:after {
+  content: "";
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary-color, #ff1a4f);
+  animation: spin 1s ease-in-out infinite;
+  margin-top: 15px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .game-header {
+    flex-direction: column;
+  }
+
+  .game-image {
+    flex: 0 0 auto;
+    margin-right: 0;
+    margin-bottom: 15px;
+    max-width: 100%;
+  }
+
+  .game-details-container {
+    width: 95%;
+    padding: 15px;
+  }
+}
+
+/* Make sure the clear search button is visible when needed */
+.clear-search-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 10;
+  min-width: 30px;
+  min-height: 30px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  display: none !important;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+}
+
+.clear-search-btn.visible {
+  display: block !important;
+}
+
+/* Adicionar hover e focus para melhor feedback visual */
+.clear-search-btn:hover,
+.clear-search-btn:focus {
+  color: #f0f0f0;
+  outline: none;
+  background-color: rgba(100, 100, 100, 0.5);
+}

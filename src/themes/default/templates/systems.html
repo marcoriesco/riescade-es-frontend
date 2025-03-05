@@ -1,0 +1,49 @@
+<div class="systems-container">
+  <!-- Header -->
+  <header class="systems-header">
+    <h1>{{app.title}}</h1>
+    <div class="system-info">
+      <span class="total-games">{{stats.totalGames}} Games</span>
+      <span class="total-systems">{{stats.totalSystems}} Systems</span>
+    </div>
+  </header>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <input
+      type="text"
+      id="system-search"
+      class="search-input"
+      placeholder="Pesquisar sistemas..."
+    />
+    <button id="clear-search" class="clear-search-btn">×</button>
+  </div>
+
+  <!-- Systems Grid -->
+  <div class="systems-grid">
+    <!-- BEGIN systems -->
+    <div
+      class="system-card"
+      data-system-id="{{id}}"
+      data-system-name="{{name}}"
+    >
+      <div class="system-logo">
+        <img
+          src="{{logoPath}}"
+          alt="{{name}}"
+          onerror="this.src='assets/icons/default-system.png'; this.onerror=null;"
+        />
+      </div>
+      <div class="system-info">
+        <h2 class="system-name">{{name}}</h2>
+        <span class="game-count">{{gameCount}} games</span>
+      </div>
+      <!-- Optional background image -->
+      <div
+        class="system-background"
+        style="background-image: url('{{background}}')"
+      ></div>
+    </div>
+    <!-- END systems -->
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EmulationStation Frontend</title>
+    <link rel="stylesheet" href="src/css/main.css" />
+    <link rel="stylesheet" href="src/css/settings.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Área de navegação -->
+      <nav id="navigation" class="hidden">
+        <ul>
+          <li data-screen="systems" class="active">Sistemas</li>
+          <li data-screen="gamelist" class="disabled">Lista de Jogos</li>
+          <li data-screen="settings">Configurações</li>
+        </ul>
+      </nav>
+
+      <!-- Telas do aplicativo -->
+      <div id="screens">
+        <!-- Tela de sistemas -->
+        <section id="systems-screen" class="screen active">
+          <div class="systems-container"></div>
+        </section>
+
+        <!-- Tela de lista de jogos -->
+        <section id="gamelist-screen" class="screen">
+          <div class="header">
+            <button id="back-to-systems">Voltar</button>
+            <h1 id="current-system-name"></h1>
+          </div>
+          <div class="gamelist-container"></div>
+        </section>
+
+        <!-- Tela de configurações -->
+        <section id="settings-screen" class="screen">
+          <div class="header">
+            <button id="back-from-settings">Voltar</button>
+            <h1>Configurações</h1>
+          </div>
+          <div class="settings-container">
+            <div class="settings-section">
+              <h2>Diretórios</h2>
+              <!-- Configurações de diretórios serão adicionadas aqui -->
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="src/js/app.js"></script>
+  </body>
+</html>

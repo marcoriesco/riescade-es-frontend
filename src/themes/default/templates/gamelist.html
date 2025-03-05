@@ -1,0 +1,51 @@
+<!-- Game List Template -->
+<div class="gamelist-container">
+  <!-- Header with system info -->
+  <header class="gamelist-header">
+    <div class="system-info">
+      <img
+        class="system-logo"
+        src="{{system.logoPath}}"
+        alt="{{system.name}}"
+      />
+      <h1>{{system.name}}</h1>
+    </div>
+    <div class="game-count">{{system.gameCount}} games</div>
+  </header>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <input
+      type="text"
+      id="game-search"
+      class="search-input"
+      placeholder="Pesquisar jogos..."
+    />
+    <button id="clear-search" class="clear-search-btn">×</button>
+  </div>
+
+  <!-- Game Grid -->
+  <div class="games-grid">
+    <!-- BEGIN games -->
+    <div class="game-card" data-game-id="{{id}}" data-game-path="{{path}}">
+      <!-- Game Cover/Screenshot -->
+      <div class="game-image">
+        <img src="{{image}}" alt="{{title}}" />
+      </div>
+
+      <!-- Game Info -->
+      <div class="game-info">
+        <h2 class="game-title">{{title}}</h2>
+        <div class="game-metadata">
+          <span class="developer">{{developer}}</span>
+          <span class="release-date">{{releaseDate}}</span>
+          <span class="genre">{{genre}}</span>
+        </div>
+        <p class="game-description">{{description}}</p>
+      </div>
+
+      <!-- Media Preview (optional) -->
+    </div>
+    <!-- END games -->
+  </div>
+</div>
