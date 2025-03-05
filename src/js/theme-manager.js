@@ -449,13 +449,43 @@ export class ThemeManager {
       }
 
       console.log("Renderizando systems view com tema:", this.currentTheme);
-      console.log("Dados para renderização:", data);
+      console.log("Número de sistemas a renderizar:", data.systems.length);
 
       // Carregar o template
       const template = await this.loadTemplate("systems");
       if (!template) {
         console.error("Template 'systems' não encontrado");
-        return null;
+
+        // FALLBACK: Se não encontrar o template, gerar HTML diretamente
+        let html = `
+          <div class="systems-grid">
+        `;
+
+        // Gerar HTML para cada sistema
+        data.systems.forEach((system) => {
+          const logoPath = this.getSystemLogoPath(system.name);
+          html += `
+            <div class="system-card" data-system-id="${
+              system.name
+            }" data-system-name="${system.name}">
+              <div class="system-logo">
+                <img src="${logoPath}" alt="${
+            system.name
+          }" onerror="this.style.display='none'; this.parentNode.textContent='${
+            system.fullname || system.name
+          }'">
+              </div>
+              <div class="system-name">${system.fullname || system.name}</div>
+              <div class="system-info">
+                <span class="game-count">${system.gameCount || 0} jogos</span>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+        console.log("Template gerado diretamente como fallback");
+        return html;
       }
 
       // Adicionar caminhos dos logos para cada sistema
@@ -479,19 +509,83 @@ export class ThemeManager {
         systems: systemsWithLogos,
       };
 
-      console.log("Dados preparados para renderização:", templateData);
+      console.log("Dados preparados para renderização:", {
+        totalSystems: templateData.systems.length,
+        firstSystem: templateData.systems[0]?.name,
+      });
 
-      // Renderizar usando Mustache
-      const rendered = Mustache.render(template, templateData);
+      // Renderizar manualmente - mais confiável que usar Mustache em alguns casos
+      let html = template;
+
+      // Substituir variáveis simples
+      html = html.replace(/\{\{app.title\}\}/g, templateData.app.title);
+      html = html.replace(
+        /\{\{stats.totalGames\}\}/g,
+        templateData.stats.totalGames
+      );
+      html = html.replace(
+        /\{\{stats.totalSystems\}\}/g,
+        templateData.stats.totalSystems
+      );
+
+      // Processar o loop de sistemas
+      const systemsTemplateMatch = html.match(
+        /<!-- BEGIN systems -->([\s\S]*?)<!-- END systems -->/
+      );
+      if (systemsTemplateMatch && systemsTemplateMatch[1]) {
+        const systemTemplate = systemsTemplateMatch[1];
+        let systemsHtml = "";
+
+        templateData.systems.forEach((system) => {
+          let systemHtml = systemTemplate;
+          systemHtml = systemHtml.replace(/\{\{id\}\}/g, system.id);
+          systemHtml = systemHtml.replace(/\{\{name\}\}/g, system.name);
+          systemHtml = systemHtml.replace(
+            /\{\{fullname\}\}/g,
+            system.fullname || system.name
+          );
+          systemHtml = systemHtml.replace(/\{\{logoPath\}\}/g, system.logoPath);
+          systemHtml = systemHtml.replace(
+            /\{\{gameCount\}\}/g,
+            system.gameCount || 0
+          );
+          systemsHtml += systemHtml;
+        });
+
+        html = html.replace(systemsTemplateMatch[0], systemsHtml);
+      } else {
+        console.error(
+          "Não foi possível encontrar o bloco de template para sistemas"
+        );
+      }
+
       console.log("Template systems renderizado com sucesso");
-
-      return rendered;
+      return html;
     } catch (error) {
       console.error("Error rendering systems view:", error);
-      throw new Error(`Failed to render systems view: ${error.message}`);
+
+      // SUPER FALLBACK - apenas gerar uma grade básica de sistemas
+      let html = `<div class="systems-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">`;
+      data.systems.forEach((system) => {
+        html += `
+          <div class="system-card" data-system-id="${
+            system.name
+          }" data-system-name="${system.name}" 
+               style="background-color: #333; padding: 20px; border-radius: 10px; cursor: pointer; text-align: center;">
+            <div class="system-name" style="font-weight: bold; margin-top: 10px; color: white;">${
+              system.fullname || system.name
+            }</div>
+            <div class="system-info" style="font-size: 0.8em; color: #ccc;">
+              <span class="game-count">${system.gameCount || 0} jogos</span>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+
+      return html;
     }
   }
-
   // Render the game list view
   async renderGameListView(system, games) {
     console.log("ThemeManager: Iniciando renderização da lista de jogos");
@@ -513,9 +607,12 @@ export class ThemeManager {
       // Preparar dados para o template
       const templateData = {
         system: system,
-        games: games || [],
-        theme: this.currentTheme,
-        helpers: this.templateHelpers,
+        games: games || [], // Passar a lista completa de jogos
+        currentTheme: this.currentTheme,
+        // Adicionar helpers para o Mustache
+        hasGames: function () {
+          return games && games.length > 0;
+        },
       };
 
       console.log("ThemeManager: Dados preparados para renderização:", {

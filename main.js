@@ -720,7 +720,7 @@ ipcMain.handle("get-system-theme-data", async (event, systemName) => {
         logo: path.join(
           themesBasePath,
           "default",
-          "system_logos",
+          "logos",
           `${systemName}.png`
         ),
         background: path.join(
@@ -760,7 +760,7 @@ ipcMain.handle("get-system-theme-data", async (event, systemName) => {
       logo: path.join(
         themesBasePath,
         "default",
-        "system_logos",
+        "assets/logos",
         `${systemName}.png`
       ),
       background: path.join(

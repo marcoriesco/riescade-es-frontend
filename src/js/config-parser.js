@@ -33,7 +33,8 @@ export class ConfigParser {
             extensions: system.extension ? system.extension.split(" ") : [],
             // Determinar caminho do logo
             logoPath:
-              system.logo || `themes/default/system_logos/${system.name}.png`,
+              system.logo ||
+              `src/themes/default/assets/logos/${system.name}.png`,
             // Definir cores padrão se não especificadas
             color: system.color || "#1a88ff",
           };

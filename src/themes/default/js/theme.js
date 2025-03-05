@@ -1,14 +1,29 @@
 // Default Theme JavaScript
 class DefaultTheme {
   constructor() {
+    this.name = "default";
+    this.description = "Default theme for RIESCADE";
+    this.version = "1.0.0";
+    this.author = "RIESCADE Team";
     this.init();
   }
 
   init() {
+    // Carregar Font Awesome
+    this.loadFontAwesome();
+
     // Add event listeners when theme is loaded
     this.addSystemCardHoverEffects();
     this.addGameCardHoverEffects();
     this.setupLazyLoading();
+  }
+
+  loadFontAwesome() {
+    // Carregar CSS do Font Awesome
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "src/themes/default/css/fontawesome.css";
+    document.head.appendChild(link);
   }
 
   // Add hover effects to system cards
@@ -76,7 +91,13 @@ class DefaultTheme {
       }, 100);
     });
   }
+
+  loadTheme() {
+    // Implement theme loading logic here
+  }
 }
 
 // Initialize theme when script loads
 window.defaultTheme = new DefaultTheme();
+
+module.exports = DefaultTheme;

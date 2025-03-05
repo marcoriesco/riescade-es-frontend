@@ -1,25 +1,20 @@
 <div class="systems-container">
-  <!-- Header -->
-  <header class="systems-header">
+  <div class="systems-header">
     <h1>{{app.title}}</h1>
-    <div class="system-info">
+    <div class="systems-stats">
       <span class="total-games">{{stats.totalGames}} Games</span>
       <span class="total-systems">{{stats.totalSystems}} Systems</span>
     </div>
-  </header>
-
-  <!-- Search Bar -->
-  <div class="search-container">
-    <input
-      type="text"
-      id="system-search"
-      class="search-input"
-      placeholder="Pesquisar sistemas..."
-    />
-    <button id="clear-search" class="clear-search-btn">×</button>
+    <div class="systems-search">
+      <input
+        type="text"
+        id="system-search"
+        placeholder="Pesquisar sistemas..."
+      />
+      <button id="clear-search"><i class="fas fa-times"></i></button>
+    </div>
   </div>
 
-  <!-- Systems Grid -->
   <div class="systems-grid">
     <!-- BEGIN systems -->
     <div
@@ -31,18 +26,13 @@
         <img
           src="{{logoPath}}"
           alt="{{name}}"
-          onerror="this.src='assets/icons/default-system.png'; this.onerror=null;"
+          onerror="this.style.display='none'; this.parentNode.textContent='{{fullname}}'"
         />
       </div>
+      <div class="system-name">{{fullname}}</div>
       <div class="system-info">
-        <h2 class="system-name">{{name}}</h2>
-        <span class="game-count">{{gameCount}} games</span>
+        <span class="game-count">{{gameCount}} jogos</span>
       </div>
-      <!-- Optional background image -->
-      <div
-        class="system-background"
-        style="background-image: url('{{background}}')"
-      ></div>
     </div>
     <!-- END systems -->
   </div>

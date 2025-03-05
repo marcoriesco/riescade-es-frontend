@@ -6,17 +6,13 @@ export class GameListScreen {
     this.configParser = new ConfigParser();
     this.container = document.querySelector(".gamelist-container");
     this.currentSystem = null;
+    this.games = [];
 
     // Verificar se a API está disponível
-    if (!window.api || !window.api.localApi) {
-      console.error(
-        "GameListScreen: API local não está disponível. Verifique se o preload.js está configurado corretamente."
-      );
+    if (!window.api) {
+      console.error("GameListScreen: API do Electron não disponível");
     } else {
-      console.log(
-        "GameListScreen: API local detectada:",
-        Object.keys(window.api.localApi)
-      );
+      console.log("GameListScreen: API detectada:", Object.keys(window.api));
     }
   }
 
@@ -41,50 +37,155 @@ export class GameListScreen {
     this.games = []; // Initialize games array
 
     try {
-      console.log("GameListScreen: Verificando disponibilidade da API IPC");
-      if (window.api && typeof window.api.invoke === "function") {
-        console.log("GameListScreen: Usando API IPC para carregar jogos");
-        const response = await window.api.invoke(
-          "api:games:getGamesBySystem",
-          systemName
-        );
-        console.log("GameListScreen: Resposta da API:", response);
+      // Verificar qual API está disponível
+      const hasIpcApi = window.api && typeof window.api.invoke === "function";
+      const hasLocalApi =
+        window.api && window.api.localApi && window.api.localApi.games;
+      const hasReadGameList =
+        window.api && typeof window.api.readGameList === "function";
 
-        if (response && !response.error) {
-          this.games = response.games || [];
-          console.log(
-            `GameListScreen: ${this.games.length} jogos carregados via API`
-          );
-        } else {
-          console.error(
-            "GameListScreen: Erro na resposta da API:",
-            response.error
-          );
-          this.games = [];
-        }
-      } else {
-        console.log(
-          "GameListScreen: API IPC não disponível, usando método legado"
-        );
-        await this.loadGamesWithLegacyMethod(systemName);
-      }
-
-      console.log(
-        `GameListScreen: ${this.games.length} jogos carregados do sistema ${systemName}`
-      );
-
-      // Adicionar tratamento de erro para imagens na lista de jogos
-      this.games.forEach((game) => {
-        if (!game.image) {
-          console.log(
-            `GameListScreen: Jogo ${
-              game.id || game.path
-            } sem imagem, usando padrão`
-          );
-        }
+      console.log("GameListScreen: APIs disponíveis:", {
+        hasIpcApi,
+        hasLocalApi,
+        hasReadGameList,
       });
 
-      // Renderizar a visualização da lista de jogos usando o gerenciador de temas
+      let response = null;
+
+      // Tentar carregar usando a API IPC
+      if (hasIpcApi) {
+        try {
+          console.log("GameListScreen: Tentando API IPC (invoke)");
+          response = await window.api.invoke(
+            "api:games:getGamesBySystem",
+            systemName
+          );
+          console.log(
+            "GameListScreen: Resposta da API IPC:",
+            JSON.stringify(response, null, 2)
+          );
+        } catch (ipcError) {
+          console.error("GameListScreen: Erro na API IPC:", ipcError);
+        }
+      }
+
+      // Se não conseguiu via IPC, tentar API Local
+      if (!response && hasLocalApi) {
+        try {
+          console.log("GameListScreen: Tentando API Local");
+          response = await window.api.localApi.games.getBySystem(systemName);
+          console.log(
+            "GameListScreen: Resposta da API Local:",
+            JSON.stringify(response, null, 2)
+          );
+        } catch (localApiError) {
+          console.error("GameListScreen: Erro na API Local:", localApiError);
+        }
+      }
+
+      // Se não conseguiu via API Local, tentar readGameList
+      if (!response && hasReadGameList) {
+        try {
+          console.log("GameListScreen: Tentando readGameList");
+          response = await window.api.readGameList(systemName);
+          console.log(
+            "GameListScreen: Resposta do readGameList:",
+            JSON.stringify(response, null, 2)
+          );
+        } catch (readError) {
+          console.error("GameListScreen: Erro no readGameList:", readError);
+        }
+      }
+
+      // Processar a resposta se houver
+      console.log("GameListScreen: Processando resposta:", {
+        hasResponse: !!response,
+        responseType: response ? typeof response : "undefined",
+        hasError: response?.error,
+        hasGameList: response?.gameList,
+        isArray: Array.isArray(response),
+      });
+
+      if (response && !response.error) {
+        if (response.gameList && response.gameList.game) {
+          console.log("GameListScreen: Encontrado gameList.game na resposta");
+          this.games = Array.isArray(response.gameList.game)
+            ? response.gameList.game
+            : [response.gameList.game];
+        } else if (Array.isArray(response)) {
+          console.log("GameListScreen: Resposta é um array");
+          this.games = response;
+        } else if (typeof response === "object") {
+          console.log(
+            "GameListScreen: Resposta é um objeto, procurando por jogos"
+          );
+          // Tentar encontrar os jogos em diferentes formatos possíveis
+          if (response.games) {
+            this.games = Array.isArray(response.games)
+              ? response.games
+              : [response.games];
+          } else if (response.game) {
+            this.games = Array.isArray(response.game)
+              ? response.game
+              : [response.game];
+          }
+        }
+      }
+
+      console.log("GameListScreen: Jogos encontrados:", {
+        quantidade: this.games.length,
+        primeiro: this.games[0]
+          ? {
+              id: this.games[0].id,
+              name: this.games[0].name,
+              path: this.games[0].path,
+            }
+          : null,
+      });
+
+      // Se nenhum método funcionou, tentar o método legado
+      if (this.games.length === 0) {
+        console.log(
+          "GameListScreen: Nenhum jogo encontrado via APIs, tentando método legado"
+        );
+        const legacyGames = await this.loadGamesWithLegacyMethod(systemName);
+        if (legacyGames && legacyGames.length > 0) {
+          this.games = legacyGames;
+        }
+      }
+
+      // Processar os jogos carregados
+      if (this.games.length > 0) {
+        console.log("GameListScreen: Processando jogos carregados");
+        this.games = this.games.map((game) => {
+          const processedGame = {
+            ...game,
+            id: game.id || game.path,
+            name: game.name || game.path,
+            path: game.path,
+            image: game.image || "",
+            desc: game.desc || "",
+            developer: game.developer || "",
+            publisher: game.publisher || "",
+            genre: game.genre || "",
+            players: game.players || "",
+            rating: game.rating || "",
+            releasedate: game.releasedate || "",
+            video: game.video || "",
+          };
+          return processedGame;
+        });
+
+        console.log("GameListScreen: Primeiro jogo processado:", this.games[0]);
+      } else {
+        console.log("GameListScreen: Nenhum jogo encontrado para processar");
+        this.showEmptyState(
+          `Nenhum jogo encontrado para o sistema ${systemName}`
+        );
+        return false;
+      }
+
+      // Renderizar a lista de jogos
       try {
         console.log("GameListScreen: Renderizando a lista de jogos com o tema");
         const renderedGameList = await this.app.themeManager.renderGameListView(
@@ -95,25 +196,12 @@ export class GameListScreen {
         if (renderedGameList) {
           console.log("GameListScreen: Lista de jogos renderizada com sucesso");
           this.container.innerHTML = renderedGameList;
-
-          // Esconder mensagem de carregamento
           this.hideLoading();
-
-          // Aplicar tema da lista de jogos para o sistema atual
           this.app.themeManager.applyGameListTheme(systemName);
-
-          // Adicionar eventos aos elementos da lista de jogos
           this.addGameListEvents();
-
           return true;
         } else {
-          console.error(
-            "GameListScreen: Falha ao renderizar a lista de jogos - sem HTML retornado"
-          );
-          this.showEmptyState(
-            `Não foi possível renderizar a lista de jogos do sistema ${systemName}.`
-          );
-          return false;
+          throw new Error("HTML não retornado pelo renderizador");
         }
       } catch (renderError) {
         console.error(
@@ -135,146 +223,32 @@ export class GameListScreen {
     }
   }
 
-  // Método de fallback para carregar jogos com o método antigo
   async loadGamesWithLegacyMethod(systemName) {
+    console.log("GameListScreen: Usando método legado para carregar jogos");
     try {
-      console.log(
-        `GameListScreen: loadGamesWithLegacyMethod iniciado para sistema "${systemName}"`
-      );
+      // Tentar obter jogos via ConfigParser
+      console.log("GameListScreen: Tentando obter jogos via ConfigParser");
+      const games = await this.configParser.getGames(systemName);
 
-      // Verificar se o container existe
-      if (!this.container) {
-        this.container = document.querySelector(".gamelist-container");
-        if (!this.container) {
-          console.error(
-            "GameListScreen: Container de lista de jogos não encontrado no DOM"
-          );
-          // Tentar criar o container se não existir
-          const gameListScreen = document.getElementById("gamelist-screen");
-          if (gameListScreen) {
-            this.container = document.createElement("div");
-            this.container.className = "gamelist-container";
-            this.container.id = "gamelist-container";
-            gameListScreen.appendChild(this.container);
-            console.log(
-              "GameListScreen: Container de lista de jogos criado dinamicamente"
-            );
-          } else {
-            console.error(
-              "GameListScreen: Elemento gamelist-screen não encontrado, impossível criar container"
-            );
-            return false;
-          }
-        }
-      }
-
-      // Obter dados do sistema
-      const systems = await this.configParser.getSystems();
-      const systemData = systems.find((sys) => sys.name === systemName);
-      console.log("GameListScreen: Dados do sistema obtidos:", systemData);
-
-      if (!systemData) {
-        console.error(
-          `GameListScreen: Sistema "${systemName}" não encontrado no configParser`
-        );
-        this.showEmptyState(`Sistema "${systemName}" não encontrado.`);
-        return false;
-      }
-
-      // Obter jogos do sistema
-      console.log(
-        `GameListScreen: Obtendo jogos do sistema "${systemName}" via configParser`
-      );
-      this.games = (await this.configParser.getGames(systemName)) || [];
-
-      if (!this.games || this.games.length === 0) {
-        console.log(
-          `GameListScreen: Nenhum jogo encontrado para o sistema "${systemName}"`
-        );
-        this.showEmptyState(`Nenhum jogo encontrado para ${systemName}.`);
-        return false;
+      if (!games || games.length === 0) {
+        console.log("GameListScreen: Nenhum jogo encontrado via ConfigParser");
+        return [];
       }
 
       console.log(
-        `GameListScreen: ${this.games.length} jogos obtidos via configParser`
+        `GameListScreen: ${games.length} jogos obtidos via ConfigParser`
       );
-      if (this.games.length > 0) {
-        console.log("GameListScreen: Exemplo do primeiro jogo:", this.games[0]);
-      }
-
-      // Criar objeto de sistema com informações completas
-      const system = {
-        name: systemName,
-        ...systemData,
-        logoPath:
-          systemData.logoPath ||
-          this.app.themeManager.getSystemLogoPath(systemName),
-      };
-
-      console.log("GameListScreen: Objeto de sistema preparado:", system);
-      this.currentSystem = system;
-
-      // Renderizar a visualização da lista de jogos usando o gerenciador de temas
-      try {
-        console.log(
-          "GameListScreen: Renderizando a lista de jogos com o tema (método legado)"
-        );
-        const renderedGameList = await this.app.themeManager.renderGameListView(
-          system,
-          this.games
-        );
-
-        if (renderedGameList) {
-          console.log(
-            "GameListScreen: Lista de jogos renderizada com sucesso (método legado)"
-          );
-          this.container.innerHTML = renderedGameList;
-
-          // Esconder mensagem de carregamento
-          this.hideLoading();
-
-          // Aplicar tema da lista de jogos para o sistema atual
-          this.app.themeManager.applyGameListTheme(systemName);
-
-          // Adicionar eventos aos elementos da lista de jogos
-          this.addGameListEvents();
-
-          return true;
-        } else {
-          console.error(
-            "GameListScreen: Falha ao renderizar a lista de jogos - sem HTML retornado (método legado)"
-          );
-          this.showEmptyState(
-            `Não foi possível renderizar a lista de jogos do sistema ${systemName}.`
-          );
-          return false;
-        }
-      } catch (renderError) {
-        console.error(
-          "GameListScreen: Erro ao renderizar lista de jogos (método legado):",
-          renderError
-        );
-        this.showEmptyState(
-          `Erro ao renderizar lista de jogos: ${renderError.message}`
-        );
-        return false;
-      }
+      this.games = games;
+      return games;
     } catch (error) {
       console.error(
-        "GameListScreen: Erro no método legado de carregamento de jogos:",
+        "GameListScreen: Erro ao carregar jogos via método legado:",
         error
       );
-      this.showEmptyState(
-        `Erro ao carregar jogos do sistema ${systemName}: ${error.message}`
-      );
-      return false;
+      return [];
     }
   }
 
-  /**
-   * Mostra uma mensagem de carregamento na tela
-   * @param {string} message - Mensagem a ser exibida
-   */
   showLoading(message = "Carregando...") {
     console.log(
       `GameListScreen: Mostrando mensagem de carregamento: "${message}"`
@@ -309,9 +283,6 @@ export class GameListScreen {
     this.container.appendChild(loadingElement);
   }
 
-  /**
-   * Esconde a mensagem de carregamento
-   */
   hideLoading() {
     console.log("GameListScreen: Escondendo mensagem de carregamento");
 
@@ -332,10 +303,6 @@ export class GameListScreen {
     }
   }
 
-  /**
-   * Mostra uma mensagem de estado vazio quando não há jogos
-   * @param {string} message - Mensagem a ser exibida
-   */
   showEmptyState(message = "Nenhum jogo encontrado.") {
     console.log(`GameListScreen: Mostrando estado vazio: "${message}"`);
 
@@ -372,14 +339,11 @@ export class GameListScreen {
     if (backButton) {
       backButton.addEventListener("click", () => {
         console.log("GameListScreen: Botão de voltar para sistemas clicado");
-        this.app.showSystemsScreen();
+        this.app.showScreen("systems");
       });
     }
   }
 
-  /**
-   * Adiciona eventos aos elementos da lista de jogos
-   */
   addGameListEvents() {
     console.log("GameListScreen: Adicionando eventos à lista de jogos");
 
@@ -522,9 +486,6 @@ export class GameListScreen {
     );
   }
 
-  /**
-   * Configura a funcionalidade de pesquisa na lista de jogos
-   */
   setupSearchFunctionality() {
     console.log("GameListScreen: Configurando funcionalidade de pesquisa");
 
@@ -595,8 +556,8 @@ export class GameListScreen {
           const noResults = document.createElement("div");
           noResults.className = "no-search-results";
           noResults.innerHTML = `
-            <p>Nenhum jogo encontrado para "${searchTerm}"</p>
-          `;
+          <p>Nenhum jogo encontrado para "${searchTerm}"</p>
+        `;
           this.container.appendChild(noResults);
         }
       } else if (noResultsElement) {
@@ -630,6 +591,289 @@ export class GameListScreen {
     );
   }
 
+  async renderGameListView(system, games) {
+    console.log("ThemeManager: Iniciando renderização da lista de jogos");
+    console.log("ThemeManager: Sistema:", system);
+    console.log("ThemeManager: Número de jogos:", games ? games.length : 0);
+
+    try {
+      // Garantir que games é sempre um array
+      const gamesList = games || [];
+
+      // Carregar o template da lista de jogos
+      console.log("ThemeManager: Tentando carregar template 'gamelist'");
+      const template = await this.loadTemplate("gamelist");
+
+      if (!template) {
+        console.error("ThemeManager: Template 'gamelist' não encontrado");
+
+        // Renderizar uma versão básica sem template
+        let html = `
+          <div class="gamelist-container">
+            <div class="gamelist-header">
+              <div class="system-info">
+                <div class="system-logo">
+                  <img src="${this.getSystemLogoPath(system.name)}" alt="${
+          system.name
+        }">
+                </div>
+                <h2>${system.fullname || system.name}</h2>
+              </div>
+              <div class="game-search-container">
+                <input type="text" id="game-search" placeholder="Pesquisar jogos...">
+                <button id="clear-search" class="clear-search-btn"><i class="fas fa-times"></i></button>
+              </div>
+              <button id="back-to-systems" class="btn-back">Voltar</button>
+            </div>
+            
+            <div class="games-grid">`;
+
+        // Verificar se temos jogos para exibir
+        if (gamesList.length > 0) {
+          // Adicionar cada jogo ao HTML
+          gamesList.forEach((game) => {
+            const imagePath =
+              game.image || "themes/default/assets/icons/default-game.png";
+            const favoriteClass = game.favorite ? "active" : "";
+
+            html += `
+              <div class="game-card" data-game-id="${
+                game.id || ""
+              }" data-game-path="${game.path || ""}">
+                <div class="game-image">
+                  <img src="${imagePath}" alt="${
+              game.name || "Jogo"
+            }" onerror="this.src='assets/icons/default-game.png'">
+                </div>
+                <div class="game-info">
+                  <h3 class="game-title">${game.name || "Sem Nome"}</h3>
+                  <div class="game-metadata">
+                    <span class="developer">${
+                      game.developer || "Desconhecido"
+                    }</span>
+                    <span class="release-date">${
+                      game.releaseDate || "N/A"
+                    }</span>
+                  </div>
+                </div>
+                <div class="game-actions">
+                  <button class="play-button" title="Jogar"><i class="fas fa-play"></i></button>
+                  <button class="favorite-button ${favoriteClass}" title="Favorito"><i class="fas fa-heart"></i></button>
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          // Exibir mensagem de lista vazia
+          html += `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-ghost"></i>
+              </div>
+              <p>Nenhum jogo encontrado para o sistema ${
+                system.name || system.fullname
+              }.</p>
+            </div>
+          `;
+        }
+
+        html += `
+            </div>
+          </div>
+        `;
+
+        return html;
+      }
+
+      console.log("ThemeManager: Template 'gamelist' carregado com sucesso");
+
+      // Preparar dados para o template
+      const templateData = {
+        system: system,
+        games: gamesList,
+        theme: this.currentTheme,
+      };
+
+      // Renderizar usando o template
+      let html = template;
+
+      // Substituir variáveis relacionadas ao sistema
+      html = html.replace(/\{\{system\.name\}\}/g, system.name || "");
+      html = html.replace(
+        /\{\{system\.fullname\}\}/g,
+        system.fullname || system.name || ""
+      );
+      html = html.replace(
+        /\{\{system\.logoPath\}\}/g,
+        this.getSystemLogoPath(system.name || "")
+      );
+
+      // Processar o bloco de jogos
+      const gamesBlockMatch = html.match(
+        /<!-- BEGIN games -->([\s\S]*?)<!-- END games -->/
+      );
+
+      if (gamesBlockMatch && gamesBlockMatch[1]) {
+        const gameTemplate = gamesBlockMatch[1];
+        let gamesHtml = "";
+
+        // Se não houver jogos, mostrar mensagem apropriada
+        if (gamesList.length === 0) {
+          gamesHtml = `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-ghost"></i>
+              </div>
+              <p>Nenhum jogo encontrado para o sistema ${
+                system.name || system.fullname
+              }.</p>
+            </div>
+          `;
+        } else {
+          // Renderizar cada jogo usando o template
+          gamesList.forEach((game) => {
+            let gameHtml = gameTemplate;
+
+            // Substituir todas as variáveis do jogo
+            gameHtml = gameHtml.replace(/\{\{id\}\}/g, game.id || "");
+            gameHtml = gameHtml.replace(
+              /\{\{name\}\}/g,
+              game.name || "Sem Nome"
+            );
+            gameHtml = gameHtml.replace(/\{\{path\}\}/g, game.path || "");
+
+            // Imagem - usar a imagem definida ou padrão
+            const imagePath =
+              game.image || game.imagePath || "assets/icons/default-game.png";
+            gameHtml = gameHtml.replace(/\{\{imagePath\}\}/g, imagePath);
+
+            // Outras propriedades
+            gameHtml = gameHtml.replace(
+              /\{\{developer\}\}/g,
+              game.developer || "Desconhecido"
+            );
+            gameHtml = gameHtml.replace(
+              /\{\{publisher\}\}/g,
+              game.publisher || "Desconhecido"
+            );
+            gameHtml = gameHtml.replace(/\{\{genre\}\}/g, game.genre || "N/A");
+            gameHtml = gameHtml.replace(
+              /\{\{releaseDate\}\}/g,
+              game.releaseDate || "N/A"
+            );
+            gameHtml = gameHtml.replace(
+              /\{\{description\}\}/g,
+              game.desc || game.description || "Sem descrição disponível"
+            );
+
+            // Status de favorito
+            const favoriteClass = game.favorite ? "active" : "";
+            gameHtml = gameHtml.replace(
+              /\{\{favoriteClass\}\}/g,
+              favoriteClass
+            );
+
+            gamesHtml += gameHtml;
+          });
+        }
+
+        // Substituir o bloco de jogos completo
+        html = html.replace(gamesBlockMatch[0], gamesHtml);
+      }
+
+      return html;
+    } catch (error) {
+      console.error("ThemeManager: Erro ao renderizar lista de jogos:", error);
+
+      // Em caso de erro, mostrar uma mensagem de erro básica
+      return `
+        <div class="gamelist-container">
+          <div class="gamelist-header">
+            <div class="system-info">
+              <h2>${system.fullname || system.name || "Sistema"}</h2>
+            </div>
+            <button id="back-to-systems" class="btn-back">Voltar</button>
+          </div>
+          
+          <div class="error-message">
+            <p>Ocorreu um erro ao carregar a lista de jogos.</p>
+            <p>Detalhes: ${error.message}</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  generateGameListHTML(system, games) {
+    console.log("ThemeManager: Gerando HTML da lista de jogos diretamente");
+
+    let html = `
+      <div class="gamelist-header">
+        <div class="system-info">
+          <div class="system-logo">
+            <img src="${this.getSystemLogoPath(system.name)}" alt="${
+      system.name
+    }">
+          </div>
+          <h2>${system.fullname || system.name}</h2>
+        </div>
+        <div class="game-search-container">
+          <input type="text" id="game-search" placeholder="Pesquisar jogos...">
+          <button id="clear-search" class="clear-search-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <button id="back-to-systems" class="btn-back">Voltar</button>
+      </div>
+      
+      <div class="games-grid">
+    `;
+
+    // Gerar HTML para cada jogo
+    if (games && games.length > 0) {
+      games.forEach((game) => {
+        const imagePath =
+          game.imagePath ||
+          game.image ||
+          this.getGameImagePath(system.name, game.id);
+        const favoriteClass = game.favorite ? "active" : "";
+
+        html += `
+          <div class="game-card" data-game-id="${
+            game.id || ""
+          }" data-game-path="${game.path || ""}">
+            <div class="game-image">
+              <img src="${imagePath}" alt="${
+          game.name || "Jogo"
+        }" onerror="this.src='assets/icons/default-game.png'">
+            </div>
+            <div class="game-info">
+              <h3 class="game-title">${game.name || "Sem Nome"}</h3>
+              <div class="game-metadata">
+                <span class="developer">${
+                  game.developer || "Desconhecido"
+                }</span>
+                <span class="release-date">${game.releaseDate || "N/A"}</span>
+              </div>
+            </div>
+            <div class="game-actions">
+              <button class="play-button" title="Jogar"><i class="fas fa-play"></i></button>
+              <button class="favorite-button ${favoriteClass}" title="Favorito"><i class="fas fa-heart"></i></button>
+            </div>
+          </div>
+        `;
+      });
+    } else {
+      html += `
+        <div class="empty-state">
+          <p>Nenhum jogo encontrado para este sistema.</p>
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+
+    return html;
+  }
+
   async launchGame(game) {
     console.log(`=== INICIANDO LANÇAMENTO DO JOGO ===`);
     console.log(`Dados do jogo recebidos:`, game);
@@ -643,74 +887,57 @@ export class GameListScreen {
         return;
       }
 
-      const systemName = this.currentSystem.name || this.currentSystem;
+      const systemName =
+        typeof this.currentSystem === "string"
+          ? this.currentSystem
+          : this.currentSystem.name;
+
       console.log(`Sistema atual:`, systemName);
 
       // Mostrar tela de carregamento
       this.showGameLaunchingScreen(game, systemName);
 
-      // Verificar se a API local está disponível
-      if (window.api && window.api.localApi && window.api.localApi.games) {
-        try {
-          console.log("Usando API local para obter configuração de lançamento");
+      // Método primário: usar a API direta para lançar o jogo
+      console.log("Tentando lançar jogo via API direta...");
+      if (window.api && typeof window.api.launchGame === "function") {
+        // Preparar dados do jogo para lançamento
+        const gameData = {
+          systemName: systemName,
+          gamePath: game.path,
+          gameId: game.id,
+        };
 
-          // Obter configuração de lançamento do sistema
-          const launchConfigResponse =
-            await window.api.localApi.systems.getLaunchConfig(systemName);
+        console.log(`Dados preparados para API:`, gameData);
 
-          if (launchConfigResponse.error) {
-            console.error(
-              "Erro ao obter configuração de lançamento:",
-              launchConfigResponse.error
-            );
-          } else {
-            console.log(
-              "Configuração de lançamento obtida:",
-              launchConfigResponse.launchConfig
-            );
-          }
+        // Chamar a API para lançar o jogo
+        const result = await window.api.launchGame(gameData);
+        console.log(`Resposta da API launchGame:`, result);
 
-          // Preparar dados do jogo para lançamento
-          const gameData = {
-            systemName: systemName,
-            gamePath: game.path,
-            gameId: game.id,
-            // Adicionar configuração de lançamento se disponível
-            launchConfig: launchConfigResponse?.launchConfig || null,
-          };
-
-          console.log(`Dados preparados para API:`, gameData);
-
-          // Chamar a API para lançar o jogo
-          const result = await window.api.launchGame(gameData);
-
-          console.log(`Resposta da API launchGame:`, result);
-
-          // Verificar resultado
-          if (result && result.success) {
-            console.log(`Jogo lançado com sucesso:`, result);
-            // Manter a tela de carregamento por um tempo antes de escondê-la
-            setTimeout(() => {
-              this.hideGameLaunchingScreen();
-            }, 2000);
-          } else {
-            const errorMsg =
-              result?.error || "Erro desconhecido ao lançar o jogo";
-            console.error(errorMsg);
-            alert(errorMsg);
+        // Verificar resultado
+        if (result && result.success) {
+          console.log(`Jogo lançado com sucesso:`, result);
+          // Manter a tela de carregamento por um tempo antes de escondê-la
+          setTimeout(() => {
             this.hideGameLaunchingScreen();
-          }
-
+          }, 2000);
           return result;
-        } catch (error) {
-          console.error("Erro ao usar API local para lançar jogo:", error);
-          // Fallback para API antiga
-          return this.launchGameWithLegacyApi(game, systemName);
+        } else {
+          const errorMsg =
+            result?.error || "Erro desconhecido ao lançar o jogo";
+          console.error(errorMsg);
+          alert(errorMsg);
+          this.hideGameLaunchingScreen();
+          return { success: false, error: errorMsg };
         }
-      } else {
-        console.log("API local não disponível, usando API antiga");
-        return this.launchGameWithLegacyApi(game, systemName);
       }
+
+      // Se a API direta não estiver disponível, mostrar erro
+      console.error("API launchGame não disponível");
+      alert(
+        "Função para lançar jogos não está disponível. Verifique a configuração do aplicativo."
+      );
+      this.hideGameLaunchingScreen();
+      return { success: false, error: "API launchGame não disponível" };
     } catch (error) {
       console.error("Erro ao lançar jogo:", error);
       alert(`Erro ao lançar jogo: ${error.message}`);
@@ -719,46 +946,6 @@ export class GameListScreen {
     }
   }
 
-  // Método de fallback para lançar jogos com a API antiga
-  async launchGameWithLegacyApi(game, systemName) {
-    try {
-      // Preparar dados do jogo para lançamento
-      const gameData = {
-        systemName: systemName,
-        gamePath: game.path,
-        gameId: game.id,
-      };
-
-      console.log(`Dados preparados para API antiga:`, gameData);
-
-      // Chamar a API para lançar o jogo
-      const result = await window.api.launchGame(gameData);
-
-      console.log(`Resposta da API launchGame:`, result);
-
-      // Verificar resultado
-      if (result && result.success) {
-        console.log(`Jogo lançado com sucesso:`, result);
-        // Manter a tela de carregamento por um tempo antes de escondê-la
-        setTimeout(() => {
-          this.hideGameLaunchingScreen();
-        }, 2000);
-      } else {
-        const errorMsg = result?.error || "Erro desconhecido ao lançar o jogo";
-        console.error(errorMsg);
-        alert(errorMsg);
-        this.hideGameLaunchingScreen();
-      }
-
-      return result;
-    } catch (error) {
-      console.error("Erro ao lançar jogo com API antiga:", error);
-      this.hideGameLaunchingScreen();
-      return { success: false, error: error.message };
-    }
-  }
-
-  // Método para mostrar a tela de loading de lançamento do jogo
   showGameLaunchingScreen(game, systemName) {
     console.log(
       "Mostrando tela de lançamento para jogo:",
@@ -772,67 +959,34 @@ export class GameListScreen {
 
     // Obter o caminho da capa do jogo se disponível
     const gameImagePath =
-      game.image || this.app.themeManager.getGameImagePath(systemName, game.id);
-    const systemTheme = this.app.themeManager.getSystemThemeData(systemName);
-    const systemLogo =
-      systemTheme?.logo || this.app.themeManager.getSystemLogoPath(systemName);
+      game.image ||
+      game.imagePath ||
+      this.app.themeManager.getGameImagePath(systemName, game.id);
+    const systemLogo = this.app.themeManager.getSystemLogoPath(systemName);
 
     console.log("Imagem do jogo:", gameImagePath);
     console.log("Logo do sistema:", systemLogo);
 
-    // Verificar se o tema atual tem um template de loading personalizado
-    let launchTemplate = null;
-    try {
-      launchTemplate = this.app.themeManager.getTemplate("launch");
-      console.log("Template de lançamento encontrado");
-    } catch (e) {
-      console.log(
-        "Template de loading personalizado não encontrado, usando padrão"
-      );
-    }
-
-    if (launchTemplate) {
-      // Renderizar o template personalizado
-      const templateData = {
-        game: {
-          name: game.name || game.path || "Jogo sem título",
-          id: game.id,
-          path: game.path,
-        },
-        system: {
-          name: systemName,
-          logo: systemLogo,
-        },
-        gameImage: gameImagePath,
-      };
-
-      console.log("Dados para template de lançamento:", templateData);
-      overlay.innerHTML = this.app.themeManager.renderTemplate(
-        launchTemplate,
-        templateData
-      );
-    } else {
-      // Template de loading padrão
-      overlay.innerHTML = `
-        <div class="launch-content">
-          <div class="system-logo">
-            <img src="${systemLogo}" alt="${systemName}" onerror="this.style.display='none'">
-          </div>
-          <h2>${game.name || game.path || "Jogo sem título"}</h2>
-          <div class="game-image">
-            ${
-              gameImagePath
-                ? `<img src="${gameImagePath}" alt="${
-                    game.name || "Jogo"
-                  }" onerror="this.style.display='none'">`
-                : ""
-            }
-          </div>
-          <div class="loading-spinner"></div>
-          <p>Iniciando jogo...</p>
+    // Template de loading padrão
+    overlay.innerHTML = `
+      <div class="launch-content">
+        <div class="system-logo">
+          <img src="${systemLogo}" alt="${systemName}" onerror="this.style.display='none'">
         </div>
-      `;
-    }
+        <h2>${game.name || game.path || "Jogo sem título"}</h2>
+        <div class="game-image">
+          ${
+            gameImagePath
+              ? `<img src="${gameImagePath}" alt="${
+                  game.name || "Jogo"
+                }" onerror="this.style.display='none'">`
+              : ""
+          }
+        </div>
+        <div class="loading-spinner"></div>
+        <p>Iniciando jogo...</p>
+      </div>
+    `;
 
     // Adicionar o overlay ao DOM
     document.body.appendChild(overlay);
@@ -862,38 +1016,6 @@ export class GameListScreen {
       if (!game || !game.id) {
         console.error("Objeto de jogo inválido:", game);
         return;
-      }
-
-      // Tentar obter detalhes completos do jogo via API local
-      let gameDetails = game;
-
-      if (window.api && window.api.localApi && window.api.localApi.games) {
-        try {
-          console.log("Obtendo detalhes completos do jogo via API local");
-          const systemName = this.currentSystem?.name;
-
-          if (systemName) {
-            const response = await window.api.localApi.games.getById(
-              systemName,
-              game.id
-            );
-
-            if (!response.error && response.game) {
-              console.log(
-                "Detalhes do jogo obtidos via API local:",
-                response.game
-              );
-              gameDetails = response.game;
-            } else if (response.error) {
-              console.error(
-                "Erro ao obter detalhes do jogo via API:",
-                response.error
-              );
-            }
-          }
-        } catch (error) {
-          console.error("Erro ao chamar API para detalhes do jogo:", error);
-        }
       }
 
       // Obter o modal e configurar
@@ -929,15 +1051,15 @@ export class GameListScreen {
 
       // Preencher os elementos com os dados do jogo
       if (title)
-        title.textContent =
-          gameDetails.name || gameDetails.title || "Jogo sem título";
+        title.textContent = game.name || game.title || "Jogo sem título";
 
       if (image) {
         const imagePath =
-          gameDetails.image ||
+          game.image ||
+          game.imagePath ||
           this.app.themeManager.getGameImagePath(
             this.currentSystem.name,
-            gameDetails.id
+            game.id
           );
         image.src = imagePath;
         image.onerror = () => {
@@ -945,52 +1067,51 @@ export class GameListScreen {
         };
       }
 
-      if (developer)
-        developer.textContent = gameDetails.developer || "Desconhecido";
-      if (releaseDate)
-        releaseDate.textContent = gameDetails.releaseDate || "N/A";
-      if (genre) genre.textContent = gameDetails.genre || "N/A";
+      if (developer) developer.textContent = game.developer || "Desconhecido";
+      if (releaseDate) releaseDate.textContent = game.releaseDate || "N/A";
+      if (genre) genre.textContent = game.genre || "N/A";
       if (description)
         description.textContent =
-          gameDetails.description ||
-          gameDetails.desc ||
-          "Sem descrição disponível";
+          game.description || game.desc || "Sem descrição disponível";
 
       // Configurar botão de jogar
       if (playButton) {
         playButton.onclick = async () => {
           modal.classList.remove("active");
-          console.log(`Chamando método launchGame com:`, gameDetails);
-          await this.launchGame(gameDetails);
+          console.log(`Chamando método launchGame com:`, game);
+          await this.launchGame(game);
         };
       }
 
       // Configurar botão de favorito se existir
       if (favoriteButton) {
-        const isFavorite = gameDetails.favorite === true;
+        const isFavorite = game.favorite === true;
         favoriteButton.classList.toggle("active", isFavorite);
         favoriteButton.innerHTML = isFavorite
           ? '<i class="fas fa-heart"></i>'
           : '<i class="far fa-heart"></i>';
 
         favoriteButton.onclick = async () => {
-          const systemName = this.currentSystem.name;
+          const systemName =
+            typeof this.currentSystem === "string"
+              ? this.currentSystem
+              : this.currentSystem.name;
           const newFavoriteStatus = !isFavorite;
 
           console.log(
-            `Atualizando status de favorito: Jogo=${gameDetails.id}, Sistema=${systemName}, Novo status=${newFavoriteStatus}`
+            `Atualizando status de favorito: Jogo=${game.id}, Sistema=${systemName}, Novo status=${newFavoriteStatus}`
           );
 
           const result = await this.updateFavorite(
-            gameDetails.id,
+            game,
             systemName,
             newFavoriteStatus
           );
 
-          if (result.success) {
+          if (result && result.success) {
             console.log("Favorito atualizado com sucesso");
             // Atualizar o estado do botão
-            gameDetails.favorite = newFavoriteStatus;
+            game.favorite = newFavoriteStatus;
             favoriteButton.classList.toggle("active", newFavoriteStatus);
             favoriteButton.innerHTML = newFavoriteStatus
               ? '<i class="fas fa-heart"></i>'
@@ -998,14 +1119,17 @@ export class GameListScreen {
 
             // Atualizar o ícone de favorito no card do jogo
             const gameCard = document.querySelector(
-              `.game-card[data-id="${gameDetails.id}"]`
+              `.game-card[data-id="${game.id}"]`
             );
             const favoriteIcon = gameCard?.querySelector(".favorite-icon");
             if (favoriteIcon) {
               favoriteIcon.classList.toggle("active", newFavoriteStatus);
             }
           } else {
-            console.error("Erro ao atualizar favorito:", result.error);
+            console.error(
+              "Erro ao atualizar favorito:",
+              result?.error || "Erro desconhecido"
+            );
           }
         };
       }
@@ -1034,81 +1158,44 @@ export class GameListScreen {
     }
   }
 
-  // Método para atualizar o status de favorito de um jogo
-  async updateFavorite(gameId, systemName, newStatus) {
+  async updateFavorite(game, systemName, newStatus) {
     try {
       console.log(
-        `Atualizando status de favorito: Jogo=${gameId}, Sistema=${systemName}, Novo status=${newStatus}`
+        `Atualizando status de favorito: Jogo=${
+          typeof game === "string" ? game : game.id
+        }, Sistema=${systemName}, Novo status=${newStatus}`
       );
 
-      // Verificar se a API local está disponível
-      if (window.api && window.api.localApi && window.api.localApi.games) {
-        try {
-          console.log("Usando API local para atualizar favorito");
-
-          const result = await window.api.localApi.games.updateFavorite(
-            systemName,
-            gameId,
-            newStatus
-          );
-
-          if (result.error) {
-            console.error(
-              "Erro na atualização de favorito via API:",
-              result.error
-            );
-            // Fallback para API antiga
-            return this.updateFavoriteWithLegacyApi(
-              gameId,
-              systemName,
-              newStatus
-            );
-          }
-
-          console.log(`Resultado da atualização de favorito:`, result);
-          return result;
-        } catch (error) {
-          console.error(
-            "Erro ao usar API local para atualizar favorito:",
-            error
-          );
-          // Fallback para API antiga
-          return this.updateFavoriteWithLegacyApi(
-            gameId,
-            systemName,
-            newStatus
-          );
-        }
-      } else {
-        console.log("API local não disponível, usando API antiga");
-        return this.updateFavoriteWithLegacyApi(gameId, systemName, newStatus);
+      // Verificar se temos a função updateGameFavorite na API
+      if (window.api && typeof window.api.updateGameFavorite === "function") {
+        const gameId = typeof game === "string" ? game : game.id;
+        const result = await window.api.updateGameFavorite(
+          systemName,
+          gameId,
+          newStatus
+        );
+        return result;
       }
+
+      // Se não tiver função na API, apenas atualizar localmente
+      console.warn(
+        "API updateGameFavorite não disponível, atualizando apenas localmente"
+      );
+
+      if (typeof game !== "string") {
+        game.favorite = newStatus;
+      }
+
+      return { success: true, message: "Favorito atualizado localmente" };
     } catch (error) {
       console.error("Erro ao atualizar favorito:", error);
       return { success: false, error: error.message };
     }
   }
 
-  // Método de fallback para atualizar favoritos com a API antiga
-  async updateFavoriteWithLegacyApi(gameId, systemName, newStatus) {
-    try {
-      if (!window.api || !window.api.updateGameFavorite) {
-        return {
-          success: false,
-          error: "API de atualização de favoritos não disponível",
-        };
-      }
-
-      const result = await window.api.updateGameFavorite(
-        systemName,
-        gameId,
-        newStatus
-      );
-
-      return result;
-    } catch (error) {
-      console.error("Erro ao atualizar favorito com API antiga:", error);
-      return { success: false, error: error.message };
-    }
+  // Método para obter o caminho real da imagem do jogo
+  getGameImagePath(systemName, gameId) {
+    // Retornar caminho padrão que realmente existe
+    return "themes/default/assets/icons/default-game.png";
   }
 }

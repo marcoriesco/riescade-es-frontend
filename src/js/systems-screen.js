@@ -9,12 +9,12 @@ export class SystemsScreen {
     this.loadedSystems = [];
 
     // Verificar se a API está disponível
-    if (!window.api || !window.api.localApi) {
+    if (!window.api) {
       console.error(
-        "API local não está disponível. Verifique se o preload.js está configurado corretamente."
+        "API do Electron não está disponível. Verifique se o preload.js está configurado corretamente."
       );
     } else {
-      console.log("API local detectada:", Object.keys(window.api.localApi));
+      console.log("API detectada:", Object.keys(window.api));
     }
   }
 
@@ -30,56 +30,99 @@ export class SystemsScreen {
     this.showLoading();
 
     try {
-      // Usar a nova API local para obter os sistemas
-      console.log("Obtendo sistemas via API local...");
-      const systems = await window.api.localApi.systems.getAll();
+      // Método primário: usar a API direta para obter sistemas
+      console.log("Tentando carregar sistemas via readSystemConfig API...");
+      let systems = [];
 
-      // Debug logging
-      console.log("Tipo de systems:", typeof systems);
-      console.log("Valor de systems:", systems);
+      if (window.api && typeof window.api.readSystemConfig === "function") {
+        const result = await window.api.readSystemConfig();
+        console.log("Resposta da API readSystemConfig:", result);
 
-      if (systems.error) {
-        console.error("Erro ao obter sistemas:", systems.error);
-        this.showEmptyState(`Erro ao carregar sistemas: ${systems.error}`);
-        return;
+        if (result && !result.error) {
+          // Extrair sistemas do resultado
+          if (result.systemList && result.systemList.system) {
+            systems = Array.isArray(result.systemList.system)
+              ? result.systemList.system
+              : [result.systemList.system];
+            console.log(
+              `${systems.length} sistemas obtidos via readSystemConfig`
+            );
+          }
+        } else if (result && result.error) {
+          console.error("Erro da API readSystemConfig:", result.error);
+        }
       }
 
-      // Ensure systems is an array
-      const systemsArray = Array.isArray(systems)
-        ? systems
-        : systems.systems
-        ? systems.systems
-        : systems.systemList && systems.systemList.system
-        ? Array.isArray(systems.systemList.system)
-          ? systems.systemList.system
-          : [systems.systemList.system]
-        : [];
+      // Se não conseguir via API direta, tentar via API local
+      if (
+        systems.length === 0 &&
+        window.api &&
+        window.api.localApi &&
+        window.api.localApi.systems
+      ) {
+        console.log("Tentando obter sistemas via API local...");
+        try {
+          const result = await window.api.localApi.systems.getAll();
+          console.log("Resposta da API local:", result);
 
-      console.log("Array de sistemas processado:", systemsArray);
+          if (result && !result.error) {
+            if (Array.isArray(result)) {
+              systems = result;
+            } else if (result.systemList && result.systemList.system) {
+              systems = Array.isArray(result.systemList.system)
+                ? result.systemList.system
+                : [result.systemList.system];
+            }
+            console.log(`${systems.length} sistemas obtidos via API local`);
+          } else if (result && result.error) {
+            console.error("Erro da API local:", result.error);
+          }
+        } catch (localApiError) {
+          console.error("Erro ao chamar API local:", localApiError);
+        }
+      }
 
-      if (systemsArray.length === 0) {
+      // Se ainda não conseguir, tentar via ConfigParser
+      if (systems.length === 0) {
+        console.log("Tentando obter sistemas via ConfigParser...");
+        systems = await this.configParser.getSystems();
+        console.log(`${systems.length} sistemas obtidos via ConfigParser`);
+      }
+
+      // Se não encontrar sistemas por nenhum método
+      if (!systems || systems.length === 0) {
+        console.error("Nenhum sistema encontrado por nenhum método");
         this.showEmptyState(
-          "Nenhum sistema encontrado. Verifique suas configurações."
+          "Nenhum sistema encontrado. Verifique suas configurações e arquivo es_systems.cfg."
         );
         return;
       }
 
-      console.log("Sistemas obtidos via API local:", systemsArray);
+      // Debug logging
+      console.log("Total de sistemas encontrados:", systems.length);
+      console.log("Exemplo do primeiro sistema:", systems[0]);
 
-      // Obter a contagem de jogos para cada sistema usando a API local
+      // Obter a contagem de jogos para cada sistema
       const systemsWithCounts = await Promise.all(
-        systemsArray.map(async (system) => {
+        systems.map(async (system) => {
           try {
-            // Obter jogos do sistema usando a API local
-            const games = await window.api.localApi.games.getBySystem(
-              system.name
-            );
-            const gameCount =
-              games && games.gameList && games.gameList.game
-                ? Array.isArray(games.gameList.game)
+            let gameCount = 0;
+
+            // Tentar obter contagem via API direta
+            if (window.api && typeof window.api.readGameList === "function") {
+              const games = await window.api.readGameList(system.name);
+              if (games && games.gameList && games.gameList.game) {
+                gameCount = Array.isArray(games.gameList.game)
                   ? games.gameList.game.length
-                  : 1
-                : 0;
+                  : 1;
+              }
+            }
+            // Se não conseguir, tentar via ConfigParser
+            else {
+              gameCount = await this.configParser.getSystemGameCount(
+                system.name
+              );
+            }
 
             return {
               ...system,
@@ -87,7 +130,7 @@ export class SystemsScreen {
               // Adicionar outros campos necessários
               extensions: system.extension ? system.extension.split(" ") : [],
               logoPath:
-                system.logo || `themes/default/system_logos/${system.name}.png`,
+                system.logo || `themes/default/assets/logos/${system.name}.png`,
               color: system.color || "#1a88ff",
             };
           } catch (error) {
@@ -97,14 +140,14 @@ export class SystemsScreen {
               gameCount: 0,
               extensions: system.extension ? system.extension.split(" ") : [],
               logoPath:
-                system.logo || `themes/default/system_logos/${system.name}.png`,
+                system.logo || `themes/default/assets/logos/${system.name}.png`,
               color: system.color || "#1a88ff",
             };
           }
         })
       );
 
-      console.log("Sistemas com contagem de jogos:", systemsWithCounts);
+      console.log("Sistemas com contagem de jogos:", systemsWithCounts.length);
 
       // Armazenar os sistemas carregados para uso posterior
       this.loadedSystems = systemsWithCounts;
@@ -115,39 +158,8 @@ export class SystemsScreen {
 
       return systemsWithCounts;
     } catch (error) {
-      console.error("Erro ao carregar sistemas via API local:", error);
-
-      // Tentar o método antigo como fallback
-      try {
-        console.log("Tentando fallback para o método antigo...");
-        const systems = await this.configParser.getSystems();
-        if (systems.length === 0) {
-          this.showEmptyState(
-            "Nenhum sistema encontrado. Verifique suas configurações."
-          );
-          return;
-        }
-
-        // Obter a contagem de jogos para cada sistema
-        const systemsWithCounts = await Promise.all(
-          systems.map(async (system) => {
-            const gameCount = await this.configParser.getSystemGameCount(
-              system.name
-            );
-            return {
-              ...system,
-              gameCount: gameCount,
-            };
-          })
-        );
-
-        this.loadedSystems = systemsWithCounts;
-        this.systemsLoaded = true;
-        await this.renderSystemsWithTheme(systemsWithCounts);
-      } catch (fallbackError) {
-        console.error("Erro no fallback:", fallbackError);
-        this.showEmptyState(`Erro ao carregar sistemas: ${error.message}`);
-      }
+      console.error("Erro ao carregar sistemas:", error);
+      this.showEmptyState(`Erro ao carregar sistemas: ${error.message}`);
     }
   }
 
@@ -156,12 +168,12 @@ export class SystemsScreen {
     this.container.innerHTML = `
       <div class="loading">
         <div class="loading-spinner"></div>
-        <p>Carregando sistemas teste...</p>
+        <p>Carregando sistemas...</p>
       </div>
     `;
   }
 
-  // Novo método para renderizar usando o tema
+  // Método para renderizar usando o tema
   async renderSystemsWithTheme(systems) {
     try {
       // Calcular estatísticas totais
@@ -179,7 +191,10 @@ export class SystemsScreen {
         },
       };
 
-      console.log("Dados para renderização:", data);
+      console.log("Dados para renderização:", {
+        totalSystems: systems.length,
+        totalGames: totalGames,
+      });
 
       // Usar o ThemeManager para renderizar o template
       const renderedHtml = await this.app.themeManager.renderSystemsView(data);
@@ -202,12 +217,26 @@ export class SystemsScreen {
   // Adicionar event listeners após renderizar com o template
   addSystemCardEventListeners(systems) {
     // Selecionar todos os cards de sistema no container
-    const systemCards = this.container.querySelectorAll("[data-system-id]");
+    const systemCards = this.container.querySelectorAll(
+      "[data-system-id], .system-card"
+    );
+
+    console.log(
+      `Encontrados ${systemCards.length} cards de sistema para adicionar eventos`
+    );
 
     // Para cada card, adicionar o event listener
     systemCards.forEach((card) => {
-      const systemId = card.getAttribute("data-system-id");
-      const systemName = card.getAttribute("data-system-name");
+      const systemId =
+        card.getAttribute("data-system-id") ||
+        card.getAttribute("data-system-name");
+      const systemName = card.getAttribute("data-system-name") || systemId;
+
+      if (!systemName) {
+        console.warn("Card sem nome de sistema:", card);
+        return;
+      }
+
       const system = systems.find((s) => s.name === systemName);
 
       if (system) {
@@ -215,6 +244,10 @@ export class SystemsScreen {
           console.log("Sistema clicado:", system);
           this.app.selectSystem(system);
         });
+      } else {
+        console.warn(
+          `Sistema não encontrado para o card com ID/Nome: ${systemId}/${systemName}`
+        );
       }
     });
   }
@@ -232,6 +265,7 @@ export class SystemsScreen {
     const card = document.createElement("div");
     card.className = "system-card";
     card.setAttribute("data-system-id", system.name);
+    card.setAttribute("data-system-name", system.name);
 
     // Logo do sistema
     const logo = document.createElement("div");

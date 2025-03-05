@@ -1,51 +1,56 @@
-<!-- Game List Template -->
 <div class="gamelist-container">
-  <!-- Header with system info -->
-  <header class="gamelist-header">
+  <div class="gamelist-header">
     <div class="system-info">
-      <img
-        class="system-logo"
-        src="{{system.logoPath}}"
-        alt="{{system.name}}"
-      />
-      <h1>{{system.name}}</h1>
+      <div class="system-logo">
+        <img src="{{system.logoPath}}" alt="{{system.name}}" />
+      </div>
+      <h2>{{system.fullname}}</h2>
     </div>
-    <div class="game-count">{{system.gameCount}} games</div>
-  </header>
-
-  <!-- Search Bar -->
-  <div class="search-container">
-    <input
-      type="text"
-      id="game-search"
-      class="search-input"
-      placeholder="Pesquisar jogos..."
-    />
-    <button id="clear-search" class="clear-search-btn">×</button>
+    <div class="game-search-container">
+      <input type="text" id="game-search" placeholder="Pesquisar jogos..." />
+      <button id="clear-search" class="clear-search-btn">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <button id="back-to-systems" class="btn-back">Voltar</button>
   </div>
 
-  <!-- Game Grid -->
   <div class="games-grid">
-    <!-- BEGIN games -->
+    {{#hasGames}} {{#games}}
     <div class="game-card" data-game-id="{{id}}" data-game-path="{{path}}">
-      <!-- Game Cover/Screenshot -->
       <div class="game-image">
-        <img src="{{image}}" alt="{{title}}" />
+        <img
+          src="{{image}}"
+          alt="{{name}}"
+          onerror="this.src='assets/icons/default-game.png'"
+        />
       </div>
-
-      <!-- Game Info -->
       <div class="game-info">
-        <h2 class="game-title">{{title}}</h2>
+        <h3 class="game-title">{{name}}</h3>
         <div class="game-metadata">
           <span class="developer">{{developer}}</span>
           <span class="release-date">{{releaseDate}}</span>
-          <span class="genre">{{genre}}</span>
         </div>
-        <p class="game-description">{{description}}</p>
       </div>
-
-      <!-- Media Preview (optional) -->
+      <div class="game-actions">
+        <button class="play-button" title="Jogar">
+          <i class="fas fa-play"></i>
+        </button>
+        <button
+          class="favorite-button {{#favorite}}active{{/favorite}}"
+          title="Favorito"
+        >
+          <i class="fas fa-heart"></i>
+        </button>
+      </div>
     </div>
-    <!-- END games -->
+    {{/games}} {{/hasGames}} {{^hasGames}}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-ghost"></i>
+      </div>
+      <p>Nenhum jogo encontrado para este sistema.</p>
+    </div>
+    {{/hasGames}}
   </div>
 </div>
