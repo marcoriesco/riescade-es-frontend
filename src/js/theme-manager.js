@@ -35,11 +35,21 @@ export class ThemeManager {
     try {
       this.currentTheme = themeName;
 
-      // Check if theme exists in external directory first
-      const externalThemeExists = await window.api.checkExternalTheme(
-        themeName
-      );
-      this.isExternalTheme = externalThemeExists;
+      // Verificar se o tema existe no diretório externo primeiro (se a API estiver disponível)
+      if (window.api && typeof window.api.checkExternalTheme === "function") {
+        try {
+          const externalThemeExists = await window.api.checkExternalTheme(
+            themeName
+          );
+          this.isExternalTheme = externalThemeExists;
+        } catch (error) {
+          console.error("Erro ao verificar tema externo:", error);
+          this.isExternalTheme = false;
+        }
+      } else {
+        // Sem API disponível, assumir tema interno
+        this.isExternalTheme = false;
+      }
 
       // Carregar dados do tema
       await this.loadThemeData();
@@ -49,18 +59,8 @@ export class ThemeManager {
 
       return true;
     } catch (error) {
-      console.error("Error initializing theme manager:", error);
-      // Fallback to default theme
-      this.currentTheme = "default";
-      this.isExternalTheme = false;
-      try {
-        await this.loadThemeData();
-        await this.loadThemeStyles();
-        return true;
-      } catch (fallbackError) {
-        console.error("Critical error loading default theme:", fallbackError);
-        return false;
-      }
+      console.error(`Erro ao inicializar o ThemeManager: ${error.message}`);
+      return false;
     }
   }
 
@@ -87,59 +87,61 @@ export class ThemeManager {
   // Load theme data
   async loadThemeData() {
     try {
-      console.log(
-        `Carregando dados do tema: ${this.currentTheme}, isExternal: ${this.isExternalTheme}`
-      );
+      // Tentar obter configuração do tema via API, se disponível
+      let themeConfig = null;
 
-      // Obter configuração do tema
-      const themeConfig = await window.api.getThemeConfig(
-        this.currentTheme,
-        this.isExternalTheme
-      );
-
-      if (!themeConfig) {
-        console.error(
-          `Configuração do tema não encontrada: ${this.currentTheme}`
-        );
-        throw new Error(
-          `Configuração do tema não encontrada: ${this.currentTheme}`
-        );
+      if (window.api && typeof window.api.getThemeConfig === "function") {
+        try {
+          themeConfig = await window.api.getThemeConfig(
+            this.currentTheme,
+            this.isExternalTheme
+          );
+        } catch (error) {
+          console.error(
+            `Erro ao carregar configuração do tema via API: ${error.message}`
+          );
+        }
       }
 
-      console.log(
-        `Configuração do tema carregada: ${JSON.stringify(themeConfig)}`
-      );
+      // Se não conseguiu via API, usar configuração padrão
+      if (!themeConfig) {
+        themeConfig = {
+          name: this.currentTheme,
+          version: "1.0.0",
+          author: "Sistema",
+          description: "Tema padrão",
+          colors: {
+            primary: "#1a88ff",
+            secondary: "#ff1a66",
+            background: "#121212",
+            surface: "#1e1e1e",
+            text: "#ffffff",
+          },
+        };
+      }
 
-      // Armazenar dados do tema
-      this.themeData = {
-        name: themeConfig.name || this.currentTheme,
-        variables: {
-          primaryColor: themeConfig.variables?.primaryColor || "#ff1a4f",
-          backgroundColor: themeConfig.variables?.backgroundColor || "#121212",
-          textColor: themeConfig.variables?.textColor || "#ffffff",
-          cardColor: themeConfig.variables?.cardColor || "#242424",
-        },
-      };
+      // Armazenar configuração do tema
+      this.themeData = { theme: themeConfig };
 
-      return this.themeData;
+      return true;
     } catch (error) {
-      console.error(
-        `Erro ao carregar dados do tema ${this.currentTheme}:`,
-        error
-      );
+      console.error(`Erro ao carregar dados do tema: ${error.message}`);
 
-      // Usar tema padrão em caso de erro
+      // Usar configuração mínima como fallback
       this.themeData = {
-        name: "default",
-        variables: {
-          primaryColor: "#ff1a4f",
-          backgroundColor: "#121212",
-          textColor: "#ffffff",
-          cardColor: "#242424",
+        theme: {
+          name: this.currentTheme,
+          version: "1.0.0",
+          author: "Sistema (fallback)",
+          colors: {
+            primary: "#1a88ff",
+            background: "#121212",
+            text: "#ffffff",
+          },
         },
       };
 
-      return this.themeData;
+      return false;
     }
   }
 
@@ -147,7 +149,6 @@ export class ThemeManager {
   async loadThemeStyles() {
     try {
       const themeName = this.currentTheme;
-      const isExternal = this.isExternalTheme;
 
       // Remover estilos antigos do tema
       const oldThemeStyles = document.getElementById("theme-styles");
@@ -155,30 +156,19 @@ export class ThemeManager {
         oldThemeStyles.remove();
       }
 
-      // Criar novo elemento de estilo
-      const styleElement = document.createElement("style");
-      styleElement.id = "theme-styles";
+      // Em vez de tentar carregar o CSS via API, criar um elemento link
+      const linkElement = document.createElement("link");
+      linkElement.id = "theme-styles";
+      linkElement.rel = "stylesheet";
+      linkElement.href = `src/themes/${themeName}/css/theme.css`;
 
-      // Caminho para o CSS do tema
-      const cssPath = `${this.getThemePath(themeName)}/css/theme.css`;
+      // Adicionar ao head
+      document.head.appendChild(linkElement);
 
-      try {
-        // Carregar CSS do tema
-        const css = await window.api.readFile(cssPath, isExternal);
-        if (css) {
-          styleElement.textContent = css;
-          document.head.appendChild(styleElement);
-          console.log(`Estilos do tema ${themeName} carregados com sucesso`);
-        } else {
-          console.warn(`CSS do tema ${themeName} não encontrado em ${cssPath}`);
-        }
-      } catch (error) {
-        console.error(`Erro ao carregar CSS do tema ${themeName}:`, error);
-      }
-
+      console.log(`Estilos do tema ${themeName} carregados com sucesso`);
       return true;
     } catch (error) {
-      console.error("Erro ao carregar estilos do tema:", error);
+      console.error(`Erro ao carregar estilos do tema: ${error.message}`);
       return false;
     }
   }
@@ -342,7 +332,7 @@ export class ThemeManager {
     }
   }
 
-  // Render a template with data - without async
+  // Render a template with data (método síncrono)
   renderTemplate(template, data) {
     console.log("ThemeManager.renderTemplate: Iniciando renderização");
 
@@ -351,31 +341,49 @@ export class ThemeManager {
       return "";
     }
 
-    console.log(
-      "ThemeManager.renderTemplate: Dados recebidos:",
-      Object.keys(data)
-    );
-    if (data.games) {
-      console.log(
-        `ThemeManager.renderTemplate: Número de jogos: ${data.games.length}`
-      );
-    }
-
     try {
-      // Process repeating blocks first
-      let processedTemplate = this.processRepeatingBlocks(template, data);
+      // Process conditional blocks first (if statements)
+      let processedTemplate = template;
+
+      // Helper para comparação: greater than (gt)
+      processedTemplate = processedTemplate.replace(
+        /\{\{#if \(gt ([^}]+) ([^}]+)\)\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g,
+        (match, value1, value2, ifContent, elseContent) => {
+          const val1 = this.getNestedValue(data, value1.trim());
+          const val2 = Number(value2.trim());
+          return val1 > val2 ? ifContent : elseContent;
+        }
+      );
+
+      // Helper para simples condicional
+      processedTemplate = processedTemplate.replace(
+        /\{\{#if ([^}]+)\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g,
+        (match, condition, ifContent, elseContent) => {
+          const value = this.getNestedValue(data, condition.trim());
+          return value ? ifContent : elseContent;
+        }
+      );
+
+      // Versão simples do condicional sem else
+      processedTemplate = processedTemplate.replace(
+        /\{\{#if ([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g,
+        (match, condition, content) => {
+          const value = this.getNestedValue(data, condition.trim());
+          return value ? content : "";
+        }
+      );
+
+      // Process repeating blocks next
+      processedTemplate = this.processRepeatingBlocks(processedTemplate, data);
 
       // Replace all interpolation tags with actual data
       const rendered = processedTemplate.replace(
         /\{\{([^}]+)\}\}/g,
         (match, key) => {
-          return this.getNestedValue(data, key.trim());
+          return this.getNestedValue(data, key.trim()) || "";
         }
       );
 
-      console.log(
-        "ThemeManager.renderTemplate: Renderização concluída com sucesso"
-      );
       return rendered;
     } catch (error) {
       console.error(
@@ -545,10 +553,26 @@ export class ThemeManager {
             system.fullname || system.name
           );
           systemHtml = systemHtml.replace(/\{\{logoPath\}\}/g, system.logoPath);
-          systemHtml = systemHtml.replace(
-            /\{\{gameCount\}\}/g,
-            system.gameCount || 0
-          );
+
+          // Fix for conditional rendering
+          const gameCount = system.gameCount || 0;
+          if (gameCount > -1) {
+            // Replace the entire conditional with just the true part
+            systemHtml = systemHtml.replace(
+              /\{\{#if \(gt gameCount -1\)\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g,
+              `<span class="game-count">${gameCount} jogos</span>`
+            );
+          } else {
+            // Replace the entire conditional with just the false part
+            systemHtml = systemHtml.replace(
+              /\{\{#if \(gt gameCount -1\)\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g,
+              `<span class="game-count">? jogos</span>`
+            );
+          }
+
+          // Keep this line for backward compatibility with other templates
+          systemHtml = systemHtml.replace(/\{\{gameCount\}\}/g, gameCount);
+
           systemsHtml += systemHtml;
         });
 
@@ -662,13 +686,13 @@ export class ThemeManager {
     }
   }
 
-  // Aplica propriedades CSS globais baseadas no tema
+  // Aplicar tema global à interface
   applyGlobalTheme() {
-    if (!this.themeData || !this.themeData.theme) return;
+    if (!this.currentTheme) return;
 
-    const theme = this.themeData.theme;
+    const theme = this.currentTheme;
 
-    // Aplicar variáveis CSS do tema
+    // Aplicar cores globais via variáveis CSS
     document.documentElement.style.setProperty(
       "--primary-color",
       theme.primaryColor || "#1a88ff"
@@ -685,23 +709,6 @@ export class ThemeManager {
       "--card-background",
       theme.cardColor || "#1e1e1e"
     );
-
-    // Aplicar plano de fundo global, se disponível
-    if (theme.globalBackground) {
-      const backgroundElement = document.createElement("div");
-      backgroundElement.className = "theme-background";
-      backgroundElement.id = "global-background";
-      backgroundElement.style.backgroundImage = `url(${theme.globalBackground})`;
-
-      // Remover background existente, se houver
-      const existingBackground = document.getElementById("global-background");
-      if (existingBackground) {
-        existingBackground.remove();
-      }
-
-      // Adicionar novo background
-      document.body.appendChild(backgroundElement);
-    }
   }
 
   // Carregar tema para um sistema específico
@@ -748,30 +755,42 @@ export class ThemeManager {
       return false;
     }
 
+    console.log(`Mudando para visualização: ${viewName}`);
+
+    // Fixar viewName para systems se for system
+    const viewId = viewName === "system" ? "systems" : viewName;
+
     // Esconder todas as visualizações
     document.querySelectorAll(".view").forEach((view) => {
       view.classList.add("hidden");
     });
 
     // Mostrar a visualização selecionada
-    const viewElement = document.getElementById(`${viewName}-view`);
+    const viewElement = document.getElementById(`${viewId}-view`);
     if (viewElement) {
+      console.log(`Mostrando visualização: ${viewId}-view`);
       viewElement.classList.remove("hidden");
       viewElement.classList.add("fade-in");
 
       // Aplicar configurações específicas da visualização
       if (this.currentTheme) {
-        this.themeParser.applyViewTheme(
-          this.currentTheme.views[viewName],
-          viewName
-        );
+        if (
+          this.themeParser &&
+          typeof this.themeParser.applyViewTheme === "function"
+        ) {
+          this.themeParser.applyViewTheme(
+            this.currentTheme.views && this.currentTheme.views[viewName],
+            viewName
+          );
+        }
       }
 
       this.currentView = viewName;
       return true;
+    } else {
+      console.error(`Elemento de visualização não encontrado: ${viewId}-view`);
+      return false;
     }
-
-    return false;
   }
 
   // Aplicar tema ao DOM
@@ -865,108 +884,36 @@ export class ThemeManager {
 
   // Aplica tema específico à tela de sistemas
   applySystemsScreenTheme() {
-    if (
-      !this.themeData ||
-      !this.themeData.theme ||
-      !this.themeData.theme.systemsScreen
-    )
-      return;
-
-    const systemsTheme = this.themeData.theme.systemsScreen;
-    const systemsContainer = document.querySelector(".systems-container");
-
-    if (!systemsContainer) {
-      console.warn("Container de sistemas não encontrado no DOM");
-      return;
-    }
-
-    // Aplicar estilo ao container de sistemas
-    if (systemsTheme.backgroundColor) {
-      systemsContainer.style.backgroundColor = systemsTheme.backgroundColor;
-    }
-
-    if (systemsTheme.layout === "grid") {
-      systemsContainer.classList.add("grid-layout");
-      systemsContainer.classList.remove("list-layout");
-    } else if (systemsTheme.layout === "list") {
-      systemsContainer.classList.add("list-layout");
-      systemsContainer.classList.remove("grid-layout");
-    }
-
-    // Aplicar plano de fundo específico, se disponível
-    if (systemsTheme.background) {
-      const backgroundElement = document.createElement("div");
-      backgroundElement.className = "theme-background";
-      backgroundElement.id = "systems-background";
-      backgroundElement.style.backgroundImage = `url(${systemsTheme.background})`;
-
-      // Remover background existente, se houver
-      const existingBackground = document.getElementById("systems-background");
-      if (existingBackground) {
-        existingBackground.remove();
+    try {
+      // Verificar se há uma tela de sistemas para aplicar o tema
+      const systemsContainer = document.querySelector(".systems-container");
+      if (!systemsContainer) {
+        return;
       }
 
-      // Adicionar novo background ao systems-screen
-      const systemsScreen = document.getElementById("systems-screen");
-      if (systemsScreen) {
-        systemsScreen.appendChild(backgroundElement);
-      } else {
-        console.warn("Element systems-screen não encontrado");
-      }
+      // Adicionar classe para indicar que o tema foi aplicado
+      systemsContainer.classList.add("theme-applied");
+    } catch (error) {
+      console.error("Erro ao aplicar tema à tela de sistemas:", error);
     }
   }
 
   // Aplica tema específico à tela de lista de jogos
   applyGameListTheme(systemName) {
-    if (
-      !this.themeData ||
-      !this.themeData.theme ||
-      !this.themeData.theme.gameListScreen
-    )
-      return;
+    try {
+      // Verificar se há um container de lista de jogos para aplicar o tema
+      const gameListContainer = document.querySelector(".gamelist-container");
+      if (!gameListContainer) {
+        return;
+      }
 
-    const gameListTheme = this.themeData.theme.gameListScreen;
-    const gameListContainer = document.querySelector(".gamelist-container");
+      // Adicionar classe para indicar que o tema foi aplicado
+      gameListContainer.classList.add("theme-applied");
 
-    if (!gameListContainer) {
-      console.warn("Container da lista de jogos não encontrado no DOM");
-      return;
-    }
-
-    // Aplicar estilo ao container da lista de jogos
-    if (gameListTheme.backgroundColor) {
-      gameListContainer.style.backgroundColor = gameListTheme.backgroundColor;
-    }
-
-    if (gameListTheme.layout === "grid") {
+      // Aplicar layout de grade por padrão
       gameListContainer.classList.add("grid-layout");
-      gameListContainer.classList.remove("list-layout");
-    } else if (gameListTheme.layout === "list") {
-      gameListContainer.classList.add("list-layout");
-      gameListContainer.classList.remove("grid-layout");
-    }
-
-    // Aplicar plano de fundo específico para o sistema atual, se disponível
-    const systemTheme = this.systemThemeCache[systemName];
-    if (systemTheme && systemTheme.background) {
-      const backgroundElement = document.createElement("div");
-      backgroundElement.className = "theme-background";
-      backgroundElement.id = "gamelist-background";
-      backgroundElement.style.backgroundImage = `url(${systemTheme.background})`;
-
-      // Remover background existente, se houver
-      const existingBackground = document.getElementById("gamelist-background");
-      if (existingBackground) {
-        existingBackground.remove();
-      }
-
-      // Adicionar novo background ao gamelist-screen
-      const gameListScreen = document.getElementById("gamelist-screen");
-      if (gameListScreen) {
-        gameListScreen.appendChild(backgroundElement);
-      } else {
-        console.warn("Element gamelist-screen não encontrado");
-      }
+    } catch (error) {
+      console.error("Erro ao aplicar tema à lista de jogos:", error);
     }
   }
 
@@ -1112,7 +1059,7 @@ export class ThemeManager {
         image:
           game.imagePath ||
           this.getGameImagePath(system.name, game.id) ||
-          "assets/icons/default-game.png",
+          "src/themes/default/assets/icons/default-game.png",
         developer: game.developer || "Desconhecido",
         publisher: game.publisher || "Desconhecido",
         releaseDate: game.releaseDate || "N/A",
@@ -1143,7 +1090,7 @@ export class ThemeManager {
         <div class="game-details-container">
           <div class="game-header">
             <div class="game-image">
-              <img src="{{game.image}}" alt="{{game.title}}" onerror="this.src='assets/icons/default-game.png'">
+              <img src="{{game.image}}" alt="{{game.title}}" onerror="this.src='src/themes/default/assets/icons/default-game.png'">
             </div>
             <div class="game-info">
               <h1 class="game-title">{{game.title}}</h1>
@@ -1190,7 +1137,7 @@ export class ThemeManager {
     // Verificar se temos um ID de jogo válido
     if (!gameId) {
       console.warn("ID de jogo inválido para obter imagem");
-      return "assets/icons/default-game.png";
+      return "src/themes/default/assets/icons/default-game.png";
     }
 
     // Limpar o ID do jogo para uso em caminhos de arquivo
@@ -1207,7 +1154,8 @@ export class ThemeManager {
     const defaultGameImagePath = `${basePath}${defaultExtension}`;
 
     // Caminho para imagem padrão caso não exista
-    const fallbackImagePath = "assets/icons/default-game.png";
+    const fallbackImagePath =
+      "src/themes/default/assets/icons/default-game.png";
 
     console.log(
       `Caminho da imagem para jogo ${gameId} (sistema ${sysName}): ${defaultGameImagePath}`
@@ -1224,29 +1172,7 @@ export class ThemeManager {
    * @param {string} systemName - Nome opcional do sistema para personalizar a imagem
    * @returns {string} - Caminho para a imagem padrão
    */
-  getDefaultGameImage(systemName = null) {
-    console.log(
-      `ThemeManager.getDefaultGameImage: Retornando imagem padrão para jogo, sistema: ${systemName}`
-    );
-
-    // Se temos um tema atual com imagem personalizada para jogos
-    if (
-      this.themeData &&
-      this.themeData.defaultImages &&
-      this.themeData.defaultImages.gameImage
-    ) {
-      return this.themeData.defaultImages.gameImage;
-    }
-
-    // Verificar se há um padrão específico para o sistema
-    if (systemName && this.systemThemeCache[systemName]) {
-      const systemTheme = this.systemThemeCache[systemName];
-      if (systemTheme.defaultImages && systemTheme.defaultImages.gameImage) {
-        return systemTheme.defaultImages.gameImage;
-      }
-    }
-
-    // Caso contrário, usar o padrão geral
+  getDefaultGameImage() {
     return "src/themes/default/assets/icons/default-game.png";
   }
 
@@ -1255,20 +1181,199 @@ export class ThemeManager {
    * @returns {string} - Caminho para o logo padrão
    */
   getDefaultSystemLogo() {
-    console.log(
-      `ThemeManager.getDefaultSystemLogo: Retornando logo padrão para sistema`
-    );
-
-    // Verificar se há um tema atual com logo personalizado
-    if (
-      this.themeData &&
-      this.themeData.defaultImages &&
-      this.themeData.defaultImages.systemLogo
-    ) {
-      return this.themeData.defaultImages.systemLogo;
-    }
-
-    // Caso contrário, usar o logo padrão do app
     return "src/themes/default/assets/icons/default-system.png";
+  }
+
+  async loadTheme(themeName = "default") {
+    try {
+      // Definir nome do tema
+      this.currentTheme = themeName;
+
+      // Verificar se é um tema externo
+      this.isExternalTheme = themeName !== "default";
+
+      // Carregar o tema
+      let theme = null;
+
+      // Tentar carregar via API
+      if (window.api && window.api.localApi && window.api.localApi.themes) {
+        try {
+          const response = await window.api.localApi.themes.getByName(
+            themeName
+          );
+
+          // Log de retorno de API
+          console.log(`Resposta API themes.getByName(${themeName}):`, response);
+
+          if (response && !response.error) {
+            theme = response;
+          }
+        } catch (error) {
+          console.error(`Erro ao carregar tema via API: ${error.message}`);
+        }
+      }
+
+      // Se não conseguiu via API, tentar via carregamento direto
+      if (!theme) {
+        try {
+          // Importar o tema diretamente
+          if (themeName === "default") {
+            const themeModule = await import("../themes/default/js/theme.js");
+            theme = themeModule.default;
+          } else {
+            // Para temas externos, tentar importação dinâmica
+            const themeModule = await import(
+              `../themes/${themeName}/js/theme.js`
+            );
+            theme = themeModule.default;
+          }
+        } catch (error) {
+          console.error(`Erro ao importar tema diretamente: ${error.message}`);
+        }
+      }
+
+      // Se ainda não conseguiu, criar uma instância falsa
+      if (!theme) {
+        console.error(
+          `Não foi possível carregar o tema ${themeName}. Usando fallback.`
+        );
+        theme = {
+          name: themeName,
+          description: "Tema padrão de fallback",
+          version: "1.0.0",
+          author: "Sistema",
+        };
+      }
+
+      // Armazenar a instância do tema
+      this.theme = theme;
+
+      return true;
+    } catch (error) {
+      console.error(`Erro ao carregar tema ${themeName}: ${error.message}`);
+      return false;
+    }
+  }
+
+  async loadThemeTemplates() {
+    try {
+      // Tentar carregar os templates via API
+      if (window.api && window.api.localApi && window.api.localApi.themes) {
+        try {
+          const response = await window.api.localApi.themes.getTemplates(
+            this.currentTheme
+          );
+
+          // Log de retorno de API
+          console.log(
+            `Resposta API themes.getTemplates(${this.currentTheme}):`,
+            response
+          );
+
+          if (response && !response.error) {
+            this.templates = response;
+            return true;
+          }
+        } catch (error) {
+          console.error(`Erro ao carregar templates via API: ${error.message}`);
+        }
+      }
+
+      // Se não conseguiu via API, carregar os templates básicos manualmente
+      this.templates = {
+        systems: null,
+        gamelist: null,
+        gamedetails: null,
+      };
+
+      return true;
+    } catch (error) {
+      console.error(`Erro ao carregar templates: ${error.message}`);
+      return false;
+    }
+  }
+
+  // Método para renderizar template de loading
+  async renderLoadingTemplate(data = {}) {
+    try {
+      const defaultData = {
+        title: "Carregando...",
+        message: "Por favor, aguarde enquanto carregamos os dados.",
+        showProgress: false,
+        progress: 0,
+      };
+
+      // Combinar dados padrão com os fornecidos
+      const templateData = { ...defaultData, ...data };
+
+      // Carregar e renderizar o template
+      return await this.renderTemplateAsync("loading", templateData);
+    } catch (error) {
+      console.error("Erro ao renderizar template de loading:", error);
+
+      // Fallback simples em caso de erro
+      return `
+        <div class="loading-container">
+          <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-message">${data.message || "Carregando..."}</p>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Método para renderizar template de lançamento de jogo
+  async renderLaunchGameTemplate(data = {}) {
+    try {
+      const defaultData = {
+        gameName: "Jogo",
+        systemName: "Sistema",
+        showTip: false,
+        tip: "Dica de jogo",
+        systemLogo: "themes/default/assets/icons/default-system.png",
+        gameImage: "themes/default/assets/icons/default-game.png",
+      };
+
+      // Combinar dados padrão com os fornecidos
+      const templateData = { ...defaultData, ...data };
+
+      // Garantir que os caminhos das imagens sejam válidos
+      if (!templateData.gameImage) {
+        templateData.gameImage = defaultData.gameImage;
+      }
+
+      if (!templateData.systemLogo) {
+        templateData.systemLogo = defaultData.systemLogo;
+      }
+
+      // Remover prefixo 'src/' se presente nos caminhos de imagem
+      if (templateData.gameImage.startsWith("src/")) {
+        templateData.gameImage = templateData.gameImage.substring(4);
+      }
+
+      if (templateData.systemLogo.startsWith("src/")) {
+        templateData.systemLogo = templateData.systemLogo.substring(4);
+      }
+
+      // Carregar e renderizar o template
+      return await this.renderTemplateAsync("launchgame", templateData);
+    } catch (error) {
+      console.error(
+        "Erro ao renderizar template de lançamento de jogo:",
+        error
+      );
+
+      // Fallback simples em caso de erro
+      return `
+        <div class="game-launch-overlay">
+          <div class="launch-content">
+            <h2>Iniciando Jogo</h2>
+            <p class="game-title">${data.gameName || "Jogo"}</p>
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      `;
+    }
   }
 }

@@ -2,6 +2,7 @@ import { SystemsScreen } from "./systems-screen.js";
 import { GameListScreen } from "./gamelist-screen.js";
 import { SettingsScreen } from "./settings-screen.js";
 import { ThemeManager } from "./theme-manager.js";
+import { ConfigParser } from "./config-parser.js";
 
 // No início do arquivo, logo após as importações
 // Verificar e logar o status da API
@@ -63,127 +64,146 @@ document.addEventListener("DOMContentLoaded", function () {
 // Classe principal que gerencia o aplicativo
 class App {
   constructor() {
+    this.systemsScreen = new SystemsScreen(this);
+    this.gameListScreen = new GameListScreen(this);
+    this.settingsScreen = new SettingsScreen(this);
+    this.themeManager = null;
+    this.configParser = new ConfigParser();
+    this.navigation = document.getElementById("navigation");
+    this.currentScreen = "systems";
     this.currentSystem = null;
 
-    // Inicializar gerenciador de temas
-    this.themeManager = new ThemeManager();
-
-    // Inicializar telas
-    this.systemsScreen = new SystemsScreen(this);
-    this.gamelistScreen = new GameListScreen(this);
-    this.settingsScreen = new SettingsScreen(this);
-
-    // Verificar a API novamente
-    if (!window.api || !window.api.localApi) {
-      console.error("App: API local não disponível no construtor");
-    } else {
-      console.log("App: API local disponível no construtor");
+    // Verificar se a API está disponível
+    if (window.api && window.api.localApi) {
+      // API local detectada
     }
 
-    // Configurar navegação
-    this.setupNavigation();
+    this.init();
   }
 
   async init() {
-    console.log("App.init: Inicializando aplicativo...");
-
     try {
-      // Inicializar GameListScreen
-      console.log(
-        "App.init: GameListScreen inicializado?",
-        !!this.gamelistScreen
-      );
-      console.log(
-        "App.init: GameListScreen.loadGames é uma função?",
-        typeof this.gamelistScreen.loadGames === "function"
-      );
-
-      // Inicializar ThemeManager
-      console.log("App.init: ThemeManager inicializado?", !!this.themeManager);
-      console.log(
-        "App.init: ThemeManager.renderGameListView é uma função?",
-        typeof this.themeManager.renderGameListView === "function"
-      );
+      // Inicializar os componentes
+      this.themeManager = new ThemeManager();
 
       // Carregar configurações
-      console.log("App.init: Carregando configurações...");
-      await this.settingsScreen.loadSettings();
-      console.log("App.init: Configurações carregadas com sucesso");
+      await this.loadSettings();
 
-      // Carregar tema
-      console.log("App.init: Inicializando gerenciador de temas...");
-      await this.themeManager.initialize();
-      console.log("App.init: Gerenciador de temas inicializado com sucesso");
+      try {
+        // Inicializar gerenciador de temas
+        await this.themeManager.init();
 
-      // Aplicar tema à tela de sistemas
-      console.log("App.init: Aplicando tema à tela de sistemas...");
-      this.themeManager.applySystemsScreenTheme();
-      console.log("App.init: Tema aplicado à tela de sistemas com sucesso");
+        // Aplicar tema à tela de sistemas
+        this.applySystemsTheme();
+      } catch (themeError) {
+        // Silenciosamente lidar com erros de tema, não impedindo o restante da inicialização
+        console.error("Erro ao inicializar tema:", themeError);
+      }
 
-      // Carregar sistemas
-      console.log("App.init: Carregando sistemas...");
+      // Carregar lista de sistemas
       await this.systemsScreen.loadSystems();
-      console.log("App.init: Sistemas carregados com sucesso");
 
       // Adicionar event listeners
-      console.log("App.init: Adicionando event listeners...");
-      this.addEventListeners();
-      console.log("App.init: Event listeners adicionados com sucesso");
-
-      console.log("App.init: Aplicativo inicializado com sucesso");
+      this.setupEventListeners();
     } catch (error) {
-      console.error("App.init: Erro ao inicializar aplicativo:", error);
+      console.error("Erro ao inicializar o aplicativo:", error);
     }
   }
 
-  setupNavigation() {
+  applySystemsTheme() {
+    this.themeManager.applySystemsScreenTheme();
+  }
+
+  applyGameListTheme(systemName) {
+    this.themeManager.applyGameListTheme(systemName);
+  }
+
+  async selectSystem(system) {
+    try {
+      // Atualizar estado do aplicativo
+      this.currentSystem = system;
+
+      console.log("Selecionando sistema:", system.name);
+
+      // Usar o themeManager para mudar para a visualização da lista de jogos
+      const viewChanged = this.themeManager.changeView("gamelist");
+      if (!viewChanged) {
+        console.error("Falha ao mudar para a visualização da lista de jogos");
+      }
+
+      // Atualizar nome do sistema na interface
+      const systemNameElement = document.getElementById("current-system-name");
+      if (systemNameElement) {
+        systemNameElement.textContent = system.name || "Sistema Desconhecido";
+      }
+
+      // Mostrar tela de carregamento enquanto carregamos os dados do sistema
+      await this.gameListScreen.showLoading(
+        `Carregando sistema ${system.name}...`
+      );
+
+      // Carregar contagem de jogos para o sistema selecionado
+      if (system.gameCount === -1) {
+        await this.systemsScreen.loadSystemGameCount(system.name);
+      }
+
+      // Habilitar item da lista de jogos na navegação
+      const gamelistNavItem = document.querySelector(
+        '#navigation li[data-screen="gamelist"]'
+      );
+      if (gamelistNavItem) {
+        gamelistNavItem.classList.remove("disabled");
+      }
+
+      // Carregar jogos
+      await this.gameListScreen.loadGames(system.name);
+    } catch (error) {
+      console.error("Erro ao selecionar sistema:", error);
+      // Em caso de erro, mostrar mensagem de erro na tela de jogos
+      this.gameListScreen.showEmptyState(
+        `Erro ao carregar sistema: ${error.message}`
+      );
+    }
+  }
+
+  setupEventListeners() {
+    // Configurar eventos de navegação
     const navItems = document.querySelectorAll("#navigation li");
     navItems.forEach((item) => {
       item.addEventListener("click", () => {
         if (item.classList.contains("disabled")) return;
 
-        const screenId = item.getAttribute("data-screen");
-        this.showScreen(screenId);
-
-        // Atualizar nav ativo
-        navItems.forEach((navItem) => navItem.classList.remove("active"));
-        item.classList.add("active");
+        const screenName = item.getAttribute("data-screen");
+        this.showScreen(screenName);
       });
     });
 
-    // Botão voltar da lista de jogos
-    document.getElementById("back-to-systems").addEventListener("click", () => {
-      this.showScreen("systems");
-      this.updateNavigation("systems");
-    });
+    // Event listener para quando um jogo é iniciado
+    if (window.api && window.api.onGameLaunched) {
+      window.api.onGameLaunched((data) => {
+        // Log de retorno da API
+        console.log("API onGameLaunched retorno:", data);
+      });
+    } else {
+      // Fallback silencioso
+    }
 
-    // Botão voltar das configurações
-    document
-      .getElementById("back-from-settings")
-      .addEventListener("click", () => {
+    // Botão voltar da tela de jogos
+    const backButton = document.getElementById("back-to-systems");
+    if (backButton) {
+      backButton.addEventListener("click", () => {
         this.showScreen("systems");
-        this.updateNavigation("systems");
       });
-  }
+    }
 
-  updateNavigation(activeScreen) {
-    const navItems = document.querySelectorAll("#navigation li");
-    navItems.forEach((item) => {
-      if (item.getAttribute("data-screen") === activeScreen) {
-        item.classList.add("active");
-      } else {
-        item.classList.remove("active");
-      }
-
-      // Desativar o item de lista de jogos quando não há sistema selecionado
-      if (item.getAttribute("data-screen") === "gamelist") {
-        if (this.currentSystem) {
-          item.classList.remove("disabled");
-        } else {
-          item.classList.add("disabled");
-        }
-      }
-    });
+    // Botão voltar da tela de configurações
+    const backFromSettingsButton =
+      document.getElementById("back-from-settings");
+    if (backFromSettingsButton) {
+      backFromSettingsButton.addEventListener("click", () => {
+        this.showScreen("systems");
+      });
+    }
   }
 
   showScreen(screenId) {
@@ -210,121 +230,8 @@ class App {
     }
   }
 
-  async selectSystem(system) {
-    console.log("App.selectSystem: Iniciando com sistema:", system);
-    this.currentSystem = system;
-    document.getElementById("current-system-name").textContent = system.name;
-    console.log("App.selectSystem: Nome do sistema atualizado na interface");
-
-    // Carregar tema específico do sistema - passar apenas o nome do sistema
-    console.log(
-      `App.selectSystem: Carregando tema para o sistema ${system.name}`
-    );
-    try {
-      await this.themeManager.loadSystemTheme(system.name);
-      console.log("App.selectSystem: Tema do sistema carregado com sucesso");
-    } catch (error) {
-      console.error(
-        "App.selectSystem: Erro ao carregar tema do sistema:",
-        error
-      );
-    }
-
-    // Ativar navegação para lista de jogos
-    console.log("App.selectSystem: Ativando navegação para lista de jogos");
-    const gamelistNav = document.querySelector(
-      '#navigation li[data-screen="gamelist"]'
-    );
-    if (gamelistNav) {
-      gamelistNav.classList.remove("disabled");
-      console.log("App.selectSystem: Navegação para lista de jogos ativada");
-    } else {
-      console.error(
-        "App.selectSystem: Elemento de navegação para lista de jogos não encontrado"
-      );
-    }
-
-    // Carregar lista de jogos
-    console.log(
-      `App.selectSystem: Iniciando carregamento de jogos para ${system.name}`
-    );
-    try {
-      const result = await this.gamelistScreen.loadGames(system.name);
-      console.log(
-        "App.selectSystem: Resultado do carregamento de jogos:",
-        result
-      );
-    } catch (error) {
-      console.error("App.selectSystem: Erro ao carregar jogos:", error);
-    }
-
-    // Mostrar tela de lista de jogos
-    console.log("App.selectSystem: Exibindo tela de lista de jogos");
-    this.showScreen("gamelist");
-    this.updateNavigation("gamelist");
-    console.log("App.selectSystem: Processo concluído");
-  }
-
-  addEventListeners() {
-    console.log("Configurando event listeners...");
-
-    // Método de fallback para onGameLaunched
-    if (window.api && typeof window.api.onGameLaunched === "function") {
-      window.api.onGameLaunched((event, data) => {
-        console.log("Jogo iniciado:", data);
-      });
-    } else {
-      console.log("API onGameLaunched não está disponível, usando fallback");
-      // Se a função não estiver disponível, podemos monitorar de outra forma
-      // ou simplesmente ignorar esta funcionalidade
-    }
-
-    // Configurar navegação
-    this.setupNavigation();
-
-    // Botão voltar da lista de jogos
-    const backButton = document.getElementById("back-to-systems");
-    if (backButton) {
-      backButton.addEventListener("click", () => {
-        this.showScreen("systems");
-        this.updateNavigation("systems");
-      });
-    }
-
-    // Botão voltar das configurações
-    const backFromSettingsButton =
-      document.getElementById("back-from-settings");
-    if (backFromSettingsButton) {
-      backFromSettingsButton.addEventListener("click", () => {
-        this.showScreen("systems");
-        this.updateNavigation("systems");
-      });
-    }
-
-    console.log("Event listeners configurados com sucesso");
-  }
-
-  // Método para trocar o tema atual
-  async changeTheme(themeName) {
-    const success = await this.themeManager.changeTheme(themeName);
-    if (success) {
-      // Atualizar a visualização da tela atual
-      const activeScreen = document.querySelector(".screen.active");
-      if (activeScreen) {
-        const screenId = activeScreen.id.replace("-screen", "");
-
-        // Forçar a recarga dos sistemas quando o tema é alterado
-        if (screenId === "systems") {
-          this.systemsScreen.loadSystems(true); // Forçar recarga
-        } else {
-          this.showScreen(screenId);
-        }
-      }
-
-      // Forçar uma recarga completa dos estilos
-      await this.themeManager.loadThemeStyles();
-    }
-    return success;
+  async loadSettings() {
+    await this.settingsScreen.loadSettings();
   }
 }
 

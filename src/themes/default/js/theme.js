@@ -1,29 +1,52 @@
 // Default Theme JavaScript
+import SystemsTheme from "./systems.js";
+import GameListTheme from "./gamelist.js";
+import ThemeUtils from "./utils.js";
+
 class DefaultTheme {
   constructor() {
     this.name = "default";
     this.description = "Default theme for RIESCADE";
     this.version = "1.0.0";
     this.author = "RIESCADE Team";
+
+    this.systems = null;
+    this.gameList = null;
+
     this.init();
   }
 
   init() {
-    // Carregar Font Awesome
-    this.loadFontAwesome();
+    // Carregar arquivos CSS
+    this.loadStylesheets();
 
-    // Add event listeners when theme is loaded
-    this.addSystemCardHoverEffects();
-    this.addGameCardHoverEffects();
-    this.setupLazyLoading();
+    // Inicializar componentes do tema
+    this.systems = new SystemsTheme(this);
+    this.gameList = new GameListTheme(this);
+
+    // Configurar carregamento preguiçoso (lazy loading) de imagens
+    ThemeUtils.setupLazyLoading();
+
+    // Adicionar animações personalizadas
+    ThemeUtils.addCustomAnimations();
   }
 
-  loadFontAwesome() {
-    // Carregar CSS do Font Awesome
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "src/themes/default/css/fontawesome.css";
-    document.head.appendChild(link);
+  loadStylesheets() {
+    // Carregar os estilos do tema
+    const cssFiles = [
+      "base.css",
+      "systems.css",
+      "gamelist.css",
+      "settings.css",
+      "fontawesome.css",
+    ];
+
+    cssFiles.forEach((file) => {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = `../css/${file}`;
+      document.head.appendChild(link);
+    });
   }
 
   // Add hover effects to system cards
@@ -97,7 +120,8 @@ class DefaultTheme {
   }
 }
 
-// Initialize theme when script loads
+// Inicializar o tema quando o script for carregado
 window.defaultTheme = new DefaultTheme();
 
-module.exports = DefaultTheme;
+// Exportar a classe do tema
+export default DefaultTheme;

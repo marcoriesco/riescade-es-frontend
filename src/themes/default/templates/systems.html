@@ -2,8 +2,7 @@
   <div class="systems-header">
     <h1>{{app.title}}</h1>
     <div class="systems-stats">
-      <span class="total-games">{{stats.totalGames}} Games</span>
-      <span class="total-systems">{{stats.totalSystems}} Systems</span>
+      <span class="total-systems">{{stats.totalSystems}} Sistemas</span>
     </div>
     <div class="systems-search">
       <input
@@ -31,7 +30,11 @@
       </div>
       <div class="system-name">{{fullname}}</div>
       <div class="system-info">
+        {{#if (gt gameCount -1)}}
         <span class="game-count">{{gameCount}} jogos</span>
+        {{else}}
+        <span class="game-count">? jogos</span>
+        {{/if}}
       </div>
     </div>
     <!-- END systems -->

@@ -10,172 +10,101 @@ export class SystemsScreen {
 
     // Verificar se a API está disponível
     if (!window.api) {
-      console.error(
-        "API do Electron não está disponível. Verifique se o preload.js está configurado corretamente."
-      );
-    } else {
-      console.log("API detectada:", Object.keys(window.api));
+      // API não disponível. Verifique se o preload.js está configurado corretamente.
     }
   }
 
   async loadSystems(forceReload = false) {
-    // Se os sistemas já foram carregados e não estamos forçando um recarregamento, use os dados em cache
-    if (this.systemsLoaded && !forceReload) {
-      console.log("Usando sistemas em cache.");
-      await this.renderSystemsWithTheme(this.loadedSystems);
-      return;
-    }
-
-    // Mostrar indicador de loading
-    this.showLoading();
-
     try {
-      // Método primário: usar a API direta para obter sistemas
-      console.log("Tentando carregar sistemas via readSystemConfig API...");
-      let systems = [];
-
-      if (window.api && typeof window.api.readSystemConfig === "function") {
-        const result = await window.api.readSystemConfig();
-        console.log("Resposta da API readSystemConfig:", result);
-
-        if (result && !result.error) {
-          // Extrair sistemas do resultado
-          if (result.systemList && result.systemList.system) {
-            systems = Array.isArray(result.systemList.system)
-              ? result.systemList.system
-              : [result.systemList.system];
-            console.log(
-              `${systems.length} sistemas obtidos via readSystemConfig`
-            );
-          }
-        } else if (result && result.error) {
-          console.error("Erro da API readSystemConfig:", result.error);
-        }
+      // Se já temos sistemas carregados e não está forçando recarregamento
+      if (this.loadedSystems && this.loadedSystems.length > 0 && !forceReload) {
+        console.log("Usando sistemas já carregados");
+        await this.renderSystemsWithTheme(this.loadedSystems);
+        return this.loadedSystems;
       }
 
-      // Se não conseguir via API direta, tentar via API local
-      if (
-        systems.length === 0 &&
-        window.api &&
-        window.api.localApi &&
-        window.api.localApi.systems
-      ) {
-        console.log("Tentando obter sistemas via API local...");
-        try {
-          const result = await window.api.localApi.systems.getAll();
-          console.log("Resposta da API local:", result);
+      const themeManager = this.app.themeManager;
+      const configParser = this.configParser;
 
-          if (result && !result.error) {
-            if (Array.isArray(result)) {
-              systems = result;
-            } else if (result.systemList && result.systemList.system) {
-              systems = Array.isArray(result.systemList.system)
-                ? result.systemList.system
-                : [result.systemList.system];
-            }
-            console.log(`${systems.length} sistemas obtidos via API local`);
-          } else if (result && result.error) {
-            console.error("Erro da API local:", result.error);
-          }
-        } catch (localApiError) {
-          console.error("Erro ao chamar API local:", localApiError);
-        }
-      }
+      console.log("Carregando sistemas...");
+      await this.showLoading();
 
-      // Se ainda não conseguir, tentar via ConfigParser
-      if (systems.length === 0) {
-        console.log("Tentando obter sistemas via ConfigParser...");
-        systems = await this.configParser.getSystems();
-        console.log(`${systems.length} sistemas obtidos via ConfigParser`);
-      }
+      // Obter lista de sistemas
+      let systems = await configParser.getSystems();
 
-      // Se não encontrar sistemas por nenhum método
-      if (!systems || systems.length === 0) {
-        console.error("Nenhum sistema encontrado por nenhum método");
-        this.showEmptyState(
-          "Nenhum sistema encontrado. Verifique suas configurações e arquivo es_systems.cfg."
-        );
-        return;
-      }
+      // Adicionar campos para processamento e renderização
+      systems = systems.map((system) => ({
+        ...system,
+        id: system.name,
+        gameCount: -1, // Inicialmente -1, será carregado posteriormente
+        logoPath: themeManager.getSystemLogoPath(system.name),
+      }));
 
-      // Debug logging
-      console.log("Total de sistemas encontrados:", systems.length);
-      console.log("Exemplo do primeiro sistema:", systems[0]);
+      console.log(`${systems.length} sistemas carregados`);
+      this.loadedSystems = systems;
 
-      // Obter a contagem de jogos para cada sistema
-      const systemsWithCounts = await Promise.all(
-        systems.map(async (system) => {
-          try {
-            let gameCount = 0;
-
-            // Tentar obter contagem via API direta
-            if (window.api && typeof window.api.readGameList === "function") {
-              const games = await window.api.readGameList(system.name);
-              if (games && games.gameList && games.gameList.game) {
-                gameCount = Array.isArray(games.gameList.game)
-                  ? games.gameList.game.length
-                  : 1;
-              }
-            }
-            // Se não conseguir, tentar via ConfigParser
-            else {
-              gameCount = await this.configParser.getSystemGameCount(
-                system.name
-              );
-            }
-
-            return {
-              ...system,
-              gameCount: gameCount,
-              // Adicionar outros campos necessários
-              extensions: system.extension ? system.extension.split(" ") : [],
-              logoPath:
-                system.logo || `themes/default/assets/logos/${system.name}.png`,
-              color: system.color || "#1a88ff",
-            };
-          } catch (error) {
-            console.error(`Erro ao obter jogos para ${system.name}:`, error);
-            return {
-              ...system,
-              gameCount: 0,
-              extensions: system.extension ? system.extension.split(" ") : [],
-              logoPath:
-                system.logo || `themes/default/assets/logos/${system.name}.png`,
-              color: system.color || "#1a88ff",
-            };
-          }
-        })
+      // Pré-carregar as contagens de jogos para todos os sistemas em paralelo
+      const loadPromises = systems.map((system) =>
+        this.loadSystemGameCount(system.name)
       );
+      await Promise.all(loadPromises);
 
-      console.log("Sistemas com contagem de jogos:", systemsWithCounts.length);
+      // Renderizar os sistemas após carregar as contagens de jogos
+      await this.renderSystemsWithTheme(this.loadedSystems);
 
-      // Armazenar os sistemas carregados para uso posterior
-      this.loadedSystems = systemsWithCounts;
-      this.systemsLoaded = true;
-
-      // Renderizar os sistemas
-      await this.renderSystemsWithTheme(systemsWithCounts);
-
-      return systemsWithCounts;
+      return systems;
     } catch (error) {
       console.error("Erro ao carregar sistemas:", error);
+      this.hideLoading();
       this.showEmptyState(`Erro ao carregar sistemas: ${error.message}`);
+      throw error;
     }
   }
 
   // Método para mostrar o indicador de loading
-  showLoading() {
-    this.container.innerHTML = `
-      <div class="loading">
-        <div class="loading-spinner"></div>
-        <p>Carregando sistemas...</p>
-      </div>
-    `;
+  async showLoading() {
+    try {
+      // Usar o ThemeManager para renderizar o template de loading
+      const loadingHtml = await this.app.themeManager.renderLoadingTemplate({
+        title: "Carregando Sistemas",
+        message:
+          "Por favor, aguarde enquanto carregamos os sistemas disponíveis.",
+        systemLogo: null, // Sem logo específico de sistema, usará o logo padrão
+      });
+
+      // Atualizar o container com o HTML renderizado
+      this.container.innerHTML = loadingHtml;
+    } catch (error) {
+      // Fallback em caso de erro no template
+      this.container.innerHTML = `
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <p>Carregando sistemas...</p>
+        </div>
+      `;
+    }
+  }
+
+  // Método para esconder o indicador de loading
+  hideLoading() {
+    const loadingElement = this.container.querySelector(".loading");
+    if (loadingElement) {
+      loadingElement.remove();
+    }
   }
 
   // Método para renderizar usando o tema
   async renderSystemsWithTheme(systems) {
     try {
+      // Verificar se systems é um array válido
+      if (!systems || !Array.isArray(systems) || systems.length === 0) {
+        // Lista de sistemas inválida ou vazia para renderização
+        this.showEmptyState(
+          "Erro ao renderizar sistemas: lista de sistemas inválida."
+        );
+        return;
+      }
+
       // Calcular estatísticas totais
       let totalGames = 0;
       systems.forEach((system) => {
@@ -191,11 +120,6 @@ export class SystemsScreen {
         },
       };
 
-      console.log("Dados para renderização:", {
-        totalSystems: systems.length,
-        totalGames: totalGames,
-      });
-
       // Usar o ThemeManager para renderizar o template
       const renderedHtml = await this.app.themeManager.renderSystemsView(data);
 
@@ -208,7 +132,7 @@ export class SystemsScreen {
       // Configurar a funcionalidade de pesquisa
       this.setupSearchFunctionality(systems);
     } catch (error) {
-      console.error("Erro ao renderizar sistemas com tema:", error);
+      // Erro ao renderizar sistemas com tema
       // Fallback para o método original em caso de erro
       this.renderSystems(systems);
     }
@@ -216,13 +140,15 @@ export class SystemsScreen {
 
   // Adicionar event listeners após renderizar com o template
   addSystemCardEventListeners(systems) {
+    // Verificar se systems é um array válido
+    if (!systems || !Array.isArray(systems)) {
+      // Lista de sistemas inválida para adicionar eventos
+      return;
+    }
+
     // Selecionar todos os cards de sistema no container
     const systemCards = this.container.querySelectorAll(
       "[data-system-id], .system-card"
-    );
-
-    console.log(
-      `Encontrados ${systemCards.length} cards de sistema para adicionar eventos`
     );
 
     // Para cada card, adicionar o event listener
@@ -233,7 +159,7 @@ export class SystemsScreen {
       const systemName = card.getAttribute("data-system-name") || systemId;
 
       if (!systemName) {
-        console.warn("Card sem nome de sistema:", card);
+        // Card sem nome de sistema
         return;
       }
 
@@ -241,13 +167,10 @@ export class SystemsScreen {
 
       if (system) {
         card.addEventListener("click", () => {
-          console.log("Sistema clicado:", system);
           this.app.selectSystem(system);
         });
       } else {
-        console.warn(
-          `Sistema não encontrado para o card com ID/Nome: ${systemId}/${systemName}`
-        );
+        // Sistema não encontrado para o card
       }
     });
   }
@@ -323,15 +246,8 @@ export class SystemsScreen {
     const clearButton = document.getElementById("clear-search");
 
     if (!searchInput || !clearButton) {
-      console.log("Elementos de pesquisa não encontrados");
       return;
     }
-
-    console.log(
-      "Configurando funcionalidade de pesquisa para",
-      systems.length,
-      "sistemas"
-    );
 
     // Função para filtrar sistemas
     const filterSystems = (query) => {
@@ -339,9 +255,6 @@ export class SystemsScreen {
       const systemCards = document.querySelectorAll(
         ".system-card, [data-system-id]"
       );
-
-      console.log("Filtrando sistemas com query:", normalizedQuery);
-      console.log("Encontrados", systemCards.length, "cards de sistema");
 
       let visibleCount = 0;
 
@@ -395,7 +308,62 @@ export class SystemsScreen {
 
     // Garantir visibilidade do botão de limpeza
     clearButton.style.display = "none";
+  }
 
-    console.log("Funcionalidade de pesquisa configurada com sucesso");
+  // Método para carregar a contagem de jogos para um sistema específico
+  async loadSystemGameCount(systemName) {
+    try {
+      // Encontrar o sistema nos sistemas carregados
+      const systemIndex = this.loadedSystems.findIndex(
+        (system) => system.name === systemName
+      );
+
+      if (systemIndex === -1) {
+        return null; // Sistema não encontrado
+      }
+
+      // Se a contagem já foi carregada, retornar o sistema
+      if (this.loadedSystems[systemIndex].gameCount >= 0) {
+        return this.loadedSystems[systemIndex];
+      }
+
+      let gameCount = 0;
+
+      // Tentar obter contagem via API direta
+      if (window.api && typeof window.api.readGameList === "function") {
+        const games = await window.api.readGameList(systemName);
+
+        // Log de retorno de API
+        console.log(`Resposta API readGameList (${systemName}):`, games);
+
+        if (games && games.gameList && games.gameList.game) {
+          // Fix for game count issue - properly handle empty arrays or non-existent games
+          if (Array.isArray(games.gameList.game)) {
+            gameCount = games.gameList.game.length;
+          } else if (games.gameList.game) {
+            // If there's a single game (object, not array), count as 1
+            gameCount = 1;
+          } else {
+            // No games
+            gameCount = 0;
+          }
+        }
+      }
+      // Se não conseguir, tentar via ConfigParser
+      else {
+        gameCount = await this.configParser.getSystemGameCount(systemName);
+      }
+
+      // Atualizar a contagem no sistema
+      this.loadedSystems[systemIndex].gameCount = gameCount;
+
+      return this.loadedSystems[systemIndex];
+    } catch (error) {
+      console.error(
+        `Erro ao carregar contagem de jogos para o sistema ${systemName}:`,
+        error
+      );
+      return null;
+    }
   }
 }

@@ -96,7 +96,8 @@ export class ConfigParser {
           }
 
           // Resolver caminho da imagem em relação ao caminho das ROMs
-          let resolvedImagePath = "assets/icons/default-game.png";
+          let resolvedImagePath =
+            "src/themes/default/assets/icons/default-game.png";
 
           if (game.image) {
             // Como não temos acesso ao path.isAbsolute no navegador,
@@ -332,23 +333,9 @@ export class ThemeParser {
       viewElement.style.backgroundColor = viewConfig.backgroundColor;
     }
 
-    // Aplicar background específico, se disponível
-    if (viewConfig.background) {
-      const backgroundElement = document.createElement("div");
-      backgroundElement.className = "theme-background";
-      backgroundElement.id = `${viewName}-background`;
-      backgroundElement.style.backgroundImage = `url(${viewConfig.background})`;
-
-      // Remover background existente, se houver
-      const existingBackground = document.getElementById(
-        `${viewName}-background`
-      );
-      if (existingBackground) {
-        existingBackground.remove();
-      }
-
-      // Adicionar novo background
-      viewElement.appendChild(backgroundElement);
+    // Aplicar outras configurações de tema diretamente ao elemento da visualização
+    if (viewConfig.textColor) {
+      viewElement.style.color = viewConfig.textColor;
     }
   }
 
