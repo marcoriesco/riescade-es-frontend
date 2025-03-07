@@ -267,8 +267,6 @@ ipcMain.handle("read-game-list", async (event, systemName) => {
             game.image = path.resolve(romPath, game.image);
           }
         }
-
-        console.log(`Exemplo de jogo processado:`, gameArray[0]);
       }
 
       return games;
@@ -894,6 +892,8 @@ ipcMain.handle("get-settings", async () => {
     if (fs.existsSync(settingsPath)) {
       const settingsData = fs.readFileSync(settingsPath, "utf8");
       const settings = JSON.parse(settingsData);
+
+      console.log("Configurações:", settings);
 
       // Se não houver caminhos definidos, preencher com os padrões
       if (!settings.paths) {

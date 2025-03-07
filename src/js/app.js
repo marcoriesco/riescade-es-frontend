@@ -1007,6 +1007,48 @@ class App {
   async loadSettings() {
     await this.settingsScreen.loadSettings();
   }
+
+  // Método para mudar o tema atual
+  async changeTheme(themeName) {
+    try {
+      console.log(`[App] Alterando tema para: ${themeName}`);
+
+      // Verificar se temos o gerenciador de temas
+      if (!this.themeManager) {
+        console.error("[App] ThemeManager não está disponível");
+        return false;
+      }
+
+      // Chamar o método no themeManager
+      if (typeof this.themeManager.changeTheme === "function") {
+        const success = await this.themeManager.changeTheme(themeName);
+
+        if (success) {
+          console.log(`[App] Tema alterado com sucesso para: ${themeName}`);
+
+          // Atualizar a interface
+          if (this.currentScreen === "systems") {
+            this.themeManager.applySystemsScreenTheme();
+          } else if (this.currentScreen === "gamelist") {
+            this.themeManager.applyGameListTheme(this.currentSystem);
+          }
+
+          return true;
+        } else {
+          console.error(`[App] Falha ao alterar tema para: ${themeName}`);
+          return false;
+        }
+      } else {
+        console.error(
+          "[App] Método changeTheme não encontrado no ThemeManager"
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error(`[App] Erro ao alterar tema: ${error}`);
+      return false;
+    }
+  }
 }
 
 // Iniciar aplicativo quando o DOM estiver pronto

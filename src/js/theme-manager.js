@@ -87,30 +87,76 @@ export class ThemeManager {
   // Load theme data
   async loadThemeData() {
     try {
-      console.log(`Carregando dados do tema: ${this.currentTheme}`);
+      console.log(
+        `[ThemeManager] Carregando dados do tema: ${this.currentTheme}`
+      );
 
-      // Simplificado para usar dados padrão
+      // Definir o caminho do tema
+      const themePath = `src/themes/${this.currentTheme}`;
+
+      // Carregar o theme.json
+      const themeData = await this.fetchThemeJson(themePath);
+
+      if (themeData) {
+        console.log(
+          `[ThemeManager] Dados do tema carregados do theme.json:`,
+          themeData
+        );
+
+        // Estruturar os dados do tema
+        this.themeData = {
+          theme: {
+            name: themeData.name || this.currentTheme,
+            version: themeData.version || "1.0.0",
+            author: themeData.author || "Sistema",
+            description: themeData.description || "Tema",
+            primaryColor: themeData.colors?.primary || "#1a88ff",
+            backgroundColor: themeData.colors?.background || "#121212",
+            textColor: themeData.colors?.text || "#ffffff",
+            accentColor: themeData.colors?.accent || "#ff5722",
+            cardColor: themeData.colors?.card || "#1e1e1e",
+            fontFamily: themeData.fonts?.main || "Roboto, sans-serif",
+            headingFont:
+              themeData.fonts?.headings || "Roboto Condensed, sans-serif",
+          },
+          settings: themeData.settings || {
+            showGameCount: true,
+            useCustomBackground: false,
+          },
+        };
+      } else {
+        console.warn(
+          `[ThemeManager] theme.json não encontrado, usando dados padrão`
+        );
+
+        // Usar valores padrão se não conseguir carregar o JSON
+        this.themeData = {
+          theme: {
+            name: this.currentTheme,
+            version: "1.0.0",
+            author: "Sistema",
+            description: "Tema padrão",
+            primaryColor: "#1a88ff",
+            backgroundColor: "#121212",
+            textColor: "#ffffff",
+            cardColor: "#1e1e1e",
+          },
+        };
+      }
+
+      return this.themeData;
+    } catch (error) {
+      console.error(
+        `[ThemeManager] Erro ao carregar dados do tema: ${error.message}`
+      );
+
+      // Garantir que sempre temos um objeto de dados básico
       this.themeData = {
         theme: {
           name: this.currentTheme,
           version: "1.0.0",
           author: "Sistema",
-          description: "Tema padrão",
-          primaryColor: "#1a88ff",
-          backgroundColor: "#121212",
-          textColor: "#ffffff",
-          cardColor: "#1e1e1e",
-        },
-      };
-
-      return this.themeData;
-    } catch (error) {
-      console.error(`Erro ao carregar dados do tema: ${error.message}`);
-
-      // Garantir que sempre temos um objeto de dados básico
-      this.themeData = {
-        theme: {
-          name: "default",
+          description: "Tema padrão fallback",
           primaryColor: "#1a88ff",
           backgroundColor: "#121212",
           textColor: "#ffffff",
@@ -128,6 +174,8 @@ export class ThemeManager {
       const themeName = this.currentTheme;
       const themePath = `src/themes/${themeName}/css`;
 
+      console.log(`[ThemeManager] Carregando estilos do tema: ${themeName}`);
+
       // Remover estilos antigos do tema
       document.querySelectorAll('link[id^="theme-"]').forEach((link) => {
         link.remove();
@@ -143,23 +191,59 @@ export class ThemeManager {
       ];
 
       // Adicionar cada arquivo CSS ao head
-      cssFiles.forEach((file, index) => {
+      let loadedCount = 0;
+      for (let i = 0; i < cssFiles.length; i++) {
+        const file = cssFiles[i];
         const linkElement = document.createElement("link");
-        linkElement.id = `theme-style-${index}`;
+        linkElement.id = `theme-style-${i}`;
         linkElement.rel = "stylesheet";
         linkElement.href = `${themePath}/${file}`;
-        document.head.appendChild(linkElement);
-      });
 
-      console.log(`Estilos do tema ${themeName} carregados com sucesso`);
+        // Adicionar handler para erros de carregamento
+        linkElement.onerror = () => {
+          console.warn(
+            `[ThemeManager] Erro ao carregar CSS: ${themePath}/${file}`
+          );
+
+          // Se não for o fontawesome (que é opcional), tentar carregar do tema padrão
+          if (file !== "fontawesome.css") {
+            console.log(
+              `[ThemeManager] Tentando carregar do tema padrão: ${file}`
+            );
+            linkElement.href = `src/themes/default/css/${file}`;
+          }
+        };
+
+        // Adicionar handler para carregamento bem-sucedido
+        linkElement.onload = () => {
+          loadedCount++;
+          console.log(
+            `[ThemeManager] CSS carregado (${loadedCount}/${cssFiles.length}): ${linkElement.href}`
+          );
+        };
+
+        document.head.appendChild(linkElement);
+      }
+
+      console.log(`[ThemeManager] Estilos do tema ${themeName} carregados`);
       return true;
     } catch (error) {
-      console.error(`Erro ao carregar estilos do tema: ${error.message}`);
+      console.error(
+        `[ThemeManager] Erro ao carregar estilos do tema: ${error.message}`
+      );
+
+      // Em caso de falha, tentar carregar o tema padrão
+      if (themeName !== "default") {
+        console.warn("[ThemeManager] Tentando carregar estilos do tema padrão");
+        this.currentTheme = "default";
+        return this.loadThemeStyles();
+      }
+
       return false;
     }
   }
 
-  // Load theme's JavaScript files
+  // Load theme's JavaScript files (opcional)
   async loadThemeScripts() {
     try {
       const themeName = this.currentTheme;
@@ -172,29 +256,54 @@ export class ThemeManager {
         existingScript.remove();
       }
 
+      // Verificar se o script existe usando fetch antes de tentar carregar
+      try {
+        const response = await fetch(scriptPath, { method: "HEAD" });
+        if (!response.ok) {
+          console.log(
+            `[ThemeManager] Script não encontrado: ${scriptPath} - isso é normal para temas que usam apenas theme.json`
+          );
+          return true; // Retornar sucesso mesmo sem carregar script
+        }
+      } catch (fetchError) {
+        // Ignorar erro de fetch, o script pode não existir
+        console.log(
+          `[ThemeManager] Script não encontrado via fetch: ${scriptPath}`
+        );
+        return true; // Retornar sucesso mesmo sem carregar script
+      }
+
       // Add new theme script
       const script = document.createElement("script");
       script.id = scriptId;
       script.type = "module";
       script.src = scriptPath;
 
-      console.log(`Carregando script do tema: ${scriptPath}`);
+      console.log(`[ThemeManager] Carregando script do tema: ${scriptPath}`);
 
       // Promise para saber quando o script terminar de carregar
       return new Promise((resolve, reject) => {
         script.onload = () => {
-          console.log(`Script do tema ${themeName} carregado com sucesso`);
+          console.log(
+            `[ThemeManager] Script do tema ${themeName} carregado com sucesso`
+          );
           resolve(true);
         };
         script.onerror = (error) => {
-          console.error(`Erro ao carregar script do tema: ${error}`);
-          reject(error);
+          console.warn(
+            `[ThemeManager] Erro ao carregar script do tema ${themeName}:`,
+            error
+          );
+          // Não rejeitar para não interromper o carregamento do tema
+          resolve(false);
         };
-        document.body.appendChild(script);
+        document.head.appendChild(script);
       });
     } catch (error) {
-      console.error(`Erro ao carregar scripts do tema: ${error.message}`);
-      return false;
+      console.warn(
+        `[ThemeManager] Erro ao carregar scripts do tema: ${error.message}`
+      );
+      return false; // Não falhar o carregamento do tema se os scripts falharem
     }
   }
 
@@ -1020,28 +1129,81 @@ export class ThemeManager {
   // Altera o tema atual
   async changeTheme(themeName) {
     try {
+      console.log(`[ThemeManager] Alterando tema para: ${themeName}`);
+
+      // Verificar se o tema é passado como objeto ou string
       if (typeof themeName === "object") {
-        console.error(
-          "Erro: changeTheme recebeu um objeto em vez de uma string:",
+        console.warn(
+          "[ThemeManager] changeTheme recebeu um objeto em vez de uma string:",
           themeName
         );
-        // Tenta extrair o nome se possível
-        themeName = themeName.name || "default";
+        themeName = themeName.id || themeName.name || "default";
       }
 
-      this.activeTheme = themeName; // Garantir que é uma string
-      this.currentTheme = themeName; // Garantir que é uma string
+      // Validar se o tema existe na lista de temas disponíveis
+      const availableThemes = await this.getAvailableThemes();
+      const themeExists = availableThemes.some(
+        (theme) =>
+          theme.id === themeName ||
+          (typeof theme === "string" && theme === themeName)
+      );
 
-      // Limpar cache
+      if (!themeExists) {
+        console.warn(
+          `[ThemeManager] Tema '${themeName}' não encontrado na lista de temas disponíveis. Usando o padrão.`
+        );
+        themeName = "default";
+      }
+
+      // Atualizar propriedades
+      this.activeTheme = themeName;
+      this.currentTheme = themeName;
+
+      // Limpar cache para garantir que os novos templates sejam carregados
       this.systemThemeCache = {};
       this.templateCache.clear();
 
-      // Reinicializar com o novo tema
-      await this.init(themeName);
+      // Carregar dados do tema
+      await this.loadThemeData();
 
+      // Carregar estilos do tema
+      await this.loadThemeStyles();
+
+      // Aplicar propriedades globais do tema
+      this.applyGlobalTheme();
+
+      // Tentar carregar scripts do tema
+      try {
+        await this.loadThemeScripts();
+      } catch (scriptError) {
+        console.warn(
+          `[ThemeManager] Erro ao carregar scripts do tema ${themeName}:`,
+          scriptError
+        );
+        // Continuamos mesmo se os scripts falharem
+      }
+
+      // Emitir evento de mudança de tema
+      const event = new CustomEvent("theme-changed", {
+        detail: {
+          theme: themeName,
+          previous: this.activeTheme,
+        },
+      });
+      document.dispatchEvent(event);
+
+      console.log(`[ThemeManager] Tema '${themeName}' carregado com sucesso`);
       return true;
     } catch (error) {
-      console.error(`Erro ao mudar para o tema ${themeName}:`, error);
+      console.error(
+        `[ThemeManager] Erro ao mudar para o tema ${themeName}:`,
+        error
+      );
+      // Em caso de erro, tentar voltar para o tema padrão se ainda não estamos tentando usá-lo
+      if (themeName !== "default") {
+        console.warn("[ThemeManager] Tentando carregar o tema padrão...");
+        return this.changeTheme("default");
+      }
       return false;
     }
   }
@@ -1049,17 +1211,304 @@ export class ThemeManager {
   // Get available themes (both internal and external)
   async getAvailableThemes() {
     try {
-      const [internalThemes, externalThemes] = await Promise.all([
-        this.callApi("getInternalThemes"),
-        this.callApi("getExternalThemes"),
-      ]);
+      console.log("[ThemeManager] Buscando temas disponíveis dinamicamente");
 
-      // Combine and deduplicate themes (external themes override internal ones)
-      const allThemes = [...new Set([...internalThemes, ...externalThemes])];
-      return allThemes;
+      // Lista para armazenar todos os temas validados
+      let validThemes = [];
+      const themeBasePath = "src/themes";
+
+      // ====== ABORDAGEM DINÂMICA PARA DESCOBRIR TEMAS ======
+
+      // 1. Verificar se existe um arquivo de índice que o servidor possa gerar
+      try {
+        // Tentar obter um índice de diretórios, se o servidor suportar
+        const indexResponse = await fetch(`${themeBasePath}/`);
+        if (
+          indexResponse.ok &&
+          indexResponse.headers.get("content-type").includes("text/html")
+        ) {
+          // Extrair nomes de diretórios do HTML da página de índice
+          const html = await indexResponse.text();
+
+          // Usar regex para extrair links de diretórios
+          const dirRegex = /<a[^>]+href="([^"]+)\/"/g;
+          let match;
+          const potentialDirs = [];
+
+          while ((match = dirRegex.exec(html)) !== null) {
+            if (
+              match[1] &&
+              !match[1].startsWith(".") &&
+              !match[1].includes("/")
+            ) {
+              potentialDirs.push(match[1]);
+            }
+          }
+
+          console.log(
+            "[ThemeManager] Diretórios potenciais encontrados via índice:",
+            potentialDirs
+          );
+
+          // Verificar cada diretório potencial
+          for (const dir of potentialDirs) {
+            const themePath = `${themeBasePath}/${dir}`;
+            const themeJson = await this.fetchThemeJson(themePath);
+
+            if (themeJson) {
+              validThemes.push({
+                id: dir,
+                name: themeJson.name || dir,
+                description: themeJson.description || "",
+                version: themeJson.version || "1.0.0",
+                author: themeJson.author || "",
+                path: themePath,
+                type: "internal",
+              });
+              console.log(
+                `[ThemeManager] Tema '${dir}' encontrado dinamicamente e validado`
+              );
+            }
+          }
+        }
+      } catch (indexError) {
+        console.log(
+          "[ThemeManager] Não foi possível obter índice de diretórios:",
+          indexError
+        );
+      }
+
+      // 2. Se o método acima não encontrou temas, tentar descoberta iterativa
+      if (validThemes.length === 0) {
+        console.log("[ThemeManager] Usando descoberta iterativa de temas");
+
+        // Abordagem 1: Verificar se theme-list.json existe como referência
+        try {
+          const response = await fetch(`${themeBasePath}/theme-list.json`);
+          if (response.ok) {
+            const themeList = await response.json();
+            console.log(
+              "[ThemeManager] Temas listados em theme-list.json:",
+              themeList
+            );
+
+            // Verificar cada tema da lista
+            for (const dir of themeList) {
+              const themePath = `${themeBasePath}/${dir}`;
+              const themeJson = await this.fetchThemeJson(themePath);
+
+              if (themeJson) {
+                validThemes.push({
+                  id: dir,
+                  name: themeJson.name || dir,
+                  description: themeJson.description || "",
+                  version: themeJson.version || "1.0.0",
+                  author: themeJson.author || "",
+                  path: themePath,
+                  type: "internal",
+                });
+                console.log(
+                  `[ThemeManager] Tema '${dir}' validado via theme-list.json`
+                );
+              }
+            }
+          }
+        } catch (listError) {
+          console.log(
+            "[ThemeManager] Não foi possível usar theme-list.json:",
+            listError
+          );
+        }
+      }
+
+      // 3. Se ainda não temos temas, fazer uma varredura ampla para descobrir temas
+      if (
+        validThemes.length === 0 ||
+        (validThemes.length === 1 && validThemes[0].id === "default")
+      ) {
+        console.log(
+          "[ThemeManager] Realizando varredura ampla para encontrar temas"
+        );
+
+        // Uma abordagem é tentar nomes de pastas comuns e verificar cada uma
+        // mas também incluir variações alfabéticas para encontrar pastas personalizadas
+        const commonNames = [
+          // Nomes de temas comuns
+          "default",
+          "dark",
+          "light",
+          "platform",
+          "retro",
+          "modern",
+          "arcade",
+          "classic",
+          "minimal",
+          "neon",
+          "vintage",
+          "custom",
+          "material",
+
+          // Algumas cores comuns que podem ser nomes de temas
+          "blue",
+          "red",
+          "green",
+          "yellow",
+          "purple",
+          "orange",
+          "black",
+          "white",
+
+          // Estilos de consoles populares
+          "nes",
+          "snes",
+          "genesis",
+          "playstation",
+          "xbox",
+          "gamecube",
+          "n64",
+          "dreamcast",
+          "atari",
+          "gameboy",
+          "wiiu",
+          "switch",
+          "ps5",
+          "ps4",
+
+          // Outros nomes potenciais
+          "theme1",
+          "theme2",
+          "theme3",
+          "mytheme",
+          "special",
+          "holiday",
+          "clean",
+        ];
+
+        // Adicionar checagens alfabéticas para capturar temas com nomes não previstos
+        for (let i = 97; i <= 122; i++) {
+          // códigos ASCII para 'a' até 'z'
+          const letter = String.fromCharCode(i);
+          // Adicionando algumas combinações básicas como 'a-theme', 'b-theme', etc.
+          commonNames.push(letter);
+          commonNames.push(`${letter}-theme`);
+          commonNames.push(`theme-${letter}`);
+        }
+
+        // Busca assíncrona de todos os diretórios potenciais
+        const themePromises = commonNames.map(async (dir) => {
+          try {
+            const themePath = `${themeBasePath}/${dir}`;
+            const themeJson = await this.fetchThemeJson(themePath);
+
+            if (themeJson) {
+              return {
+                id: dir,
+                name: themeJson.name || dir,
+                description: themeJson.description || "",
+                version: themeJson.version || "1.0.0",
+                author: themeJson.author || "",
+                path: themePath,
+                type: "internal",
+              };
+            }
+          } catch (e) {
+            // Silenciosamente ignorar se a pasta não existe
+            return null;
+          }
+          return null;
+        });
+
+        // Esperar que todas as promessas sejam resolvidas e filtrar os nulos
+        const discoveredThemes = (await Promise.all(themePromises)).filter(
+          (theme) => theme !== null
+        );
+        console.log(
+          `[ThemeManager] Descobertos ${discoveredThemes.length} temas via varredura ampla`
+        );
+
+        // Adicionar à lista de temas validados (evitar duplicatas)
+        for (const theme of discoveredThemes) {
+          if (!validThemes.some((t) => t.id === theme.id)) {
+            validThemes.push(theme);
+          }
+        }
+      }
+
+      // Verificar temas externos (se a API estiver disponível)
+      if (window.api && typeof window.api.getExternalThemes === "function") {
+        try {
+          const externalThemes = await window.api.getExternalThemes();
+          if (Array.isArray(externalThemes) && externalThemes.length > 0) {
+            validThemes = [...validThemes, ...externalThemes];
+          }
+        } catch (error) {
+          console.warn("[ThemeManager] Erro ao obter temas externos:", error);
+        }
+      }
+
+      // Garantir que pelo menos o tema padrão esteja disponível
+      if (
+        validThemes.length === 0 ||
+        !validThemes.some((t) => t.id === "default")
+      ) {
+        validThemes.push({
+          id: "default",
+          name: "Default",
+          description: "Default theme for RIESCADE",
+          version: "1.0.0",
+          author: "RIESCADE Team",
+          path: "src/themes/default",
+          type: "internal",
+        });
+      }
+
+      // Remover duplicatas (pode acontecer nos métodos de descoberta)
+      const uniqueThemes = [];
+      const seenIds = new Set();
+
+      for (const theme of validThemes) {
+        if (!seenIds.has(theme.id)) {
+          seenIds.add(theme.id);
+          uniqueThemes.push(theme);
+        }
+      }
+
+      console.log(
+        `[ThemeManager] Total de ${uniqueThemes.length} temas únicos encontrados:`,
+        uniqueThemes.map((t) => t.id).join(", ")
+      );
+
+      return uniqueThemes;
     } catch (error) {
-      console.error("Error getting available themes:", error);
-      return ["default"];
+      console.error("[ThemeManager] Erro ao obter temas disponíveis:", error);
+      return [
+        {
+          id: "default",
+          name: "Default",
+          description: "Default theme for RIESCADE",
+          version: "1.0.0",
+          author: "RIESCADE Team",
+          path: "src/themes/default",
+          type: "internal",
+        },
+      ];
+    }
+  }
+
+  // Método simplificado para carregar theme.json usando fetch
+  async fetchThemeJson(themePath) {
+    try {
+      const response = await fetch(`${themePath}/theme.json`);
+      if (response.ok) {
+        return await response.json();
+      }
+      return null;
+    } catch (error) {
+      console.warn(
+        `[ThemeManager] Erro ao carregar theme.json de ${themePath}:`,
+        error
+      );
+      return null;
     }
   }
 
@@ -1226,39 +1675,49 @@ export class ThemeManager {
           );
 
           // Log de retorno de API
-          console.log(`Resposta API themes.getByName(${themeName}):`, response);
+          console.log(
+            `[ThemeManager] Resposta API themes.getByName(${themeName}):`,
+            response
+          );
 
           if (response && !response.error) {
             theme = response;
           }
         } catch (error) {
-          console.error(`Erro ao carregar tema via API: ${error.message}`);
+          console.error(
+            `[ThemeManager] Erro ao carregar tema via API: ${error.message}`
+          );
         }
       }
 
-      // Se não conseguiu via API, tentar via carregamento direto
+      // Se não conseguiu via API, tentar carregar o theme.json diretamente
       if (!theme) {
         try {
-          // Importar o tema diretamente
-          if (themeName === "default") {
-            const themeModule = await import("../themes/default/js/theme.js");
-            theme = themeModule.default;
+          // Definir caminho do tema
+          const themePath = `src/themes/${themeName}`;
+
+          // Tentar carregar o theme.json
+          const themeData = await this.fetchThemeJson(themePath);
+
+          if (themeData) {
+            theme = themeData;
+            console.log(`[ThemeManager] Tema carregado do theme.json:`, theme);
           } else {
-            // Para temas externos, tentar importação dinâmica
-            const themeModule = await import(
-              `../themes/${themeName}/js/theme.js`
+            console.warn(
+              `[ThemeManager] theme.json não encontrado para ${themeName}`
             );
-            theme = themeModule.default;
           }
         } catch (error) {
-          console.error(`Erro ao importar tema diretamente: ${error.message}`);
+          console.error(
+            `[ThemeManager] Erro ao carregar theme.json: ${error.message}`
+          );
         }
       }
 
       // Se ainda não conseguiu, criar uma instância falsa
       if (!theme) {
-        console.error(
-          `Não foi possível carregar o tema ${themeName}. Usando fallback.`
+        console.warn(
+          `[ThemeManager] Não foi possível carregar o tema ${themeName}. Usando fallback.`
         );
         theme = {
           name: themeName,
@@ -1273,7 +1732,9 @@ export class ThemeManager {
 
       return true;
     } catch (error) {
-      console.error(`Erro ao carregar tema ${themeName}: ${error.message}`);
+      console.error(
+        `[ThemeManager] Erro ao carregar tema ${themeName}: ${error.message}`
+      );
       return false;
     }
   }

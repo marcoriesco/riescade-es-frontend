@@ -1,0 +1,9 @@
+{
+  "paths": {
+    "roms": "Y:\\images\\RIESCADE\\roms",
+    "emulationstation": "Y:\\images\\RIESCADE\\emulationstation",
+    "emulators": "Y:\\images\\RIESCADE\\emulators"
+  },
+  "fullscreen": false,
+  "theme": "platform"
+}

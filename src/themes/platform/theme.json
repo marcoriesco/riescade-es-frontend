@@ -1,0 +1,21 @@
+{
+  "name": "Platform Theme",
+  "description": "A gaming platform inspired theme with vibrant colors",
+  "version": "1.0.0",
+  "author": "RIESCADE Team",
+  "thumbnail": "thumbnail.jpg",
+  "colors": {
+    "primary": "#e84118",
+    "background": "#2f3640",
+    "text": "#f5f6fa",
+    "accent": "#00a8ff"
+  },
+  "fonts": {
+    "main": "Roboto, sans-serif",
+    "headings": "Press Start 2P, cursive"
+  },
+  "settings": {
+    "showGameCount": true,
+    "useCustomBackground": true
+  }
+}

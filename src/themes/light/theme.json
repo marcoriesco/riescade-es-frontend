@@ -1,0 +1,21 @@
+{
+  "name": "Light Theme",
+  "description": "Light and bright theme for RIESCADE",
+  "version": "1.0.0",
+  "author": "RIESCADE Team",
+  "thumbnail": "thumbnail.jpg",
+  "colors": {
+    "primary": "#2196f3",
+    "background": "#f5f5f5",
+    "text": "#333333",
+    "accent": "#ff5722"
+  },
+  "fonts": {
+    "main": "Roboto, sans-serif",
+    "headings": "Roboto Condensed, sans-serif"
+  },
+  "settings": {
+    "showGameCount": true,
+    "useCustomBackground": false
+  }
+}

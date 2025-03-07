@@ -617,25 +617,182 @@ export class SettingsScreen {
       selector.innerHTML = "";
 
       // Obter temas disponíveis
-      const themes = await this.app.themeManager.getAvailableThemes();
+      let themes = [];
+
+      // Tentar obter via ThemeManager
+      if (
+        this.app &&
+        this.app.themeManager &&
+        typeof this.app.themeManager.getAvailableThemes === "function"
+      ) {
+        themes = await this.app.themeManager.getAvailableThemes();
+        console.log("[SettingsScreen] Temas obtidos:", themes);
+      } else {
+        // Tema padrão como fallback
+        themes = [
+          {
+            id: "default",
+            name: "Default",
+            description: "Default theme for RIESCADE",
+            author: "RIESCADE Team",
+          },
+        ];
+        console.log("[SettingsScreen] Usando tema padrão como fallback");
+      }
 
       // Criar opções para cada tema
       themes.forEach((theme) => {
         const option = document.createElement("option");
-        option.value = theme;
-        option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+
+        // Verificar se o tema é um objeto ou uma string
+        if (typeof theme === "object" && theme !== null) {
+          // Usar ID como valor e nome como texto
+          option.value = theme.id;
+
+          // Criar texto com mais informações
+          let optionText = theme.name || theme.id;
+
+          // Adicionar autor se disponível
+          if (theme.author) {
+            optionText += ` (${theme.author})`;
+          }
+
+          // Adicionar indicador se for tema externo
+          if (theme.type === "external") {
+            optionText += " [Externo]";
+          }
+
+          option.textContent = optionText;
+
+          // Adicionar descrição como tooltip
+          if (theme.description) {
+            option.title = theme.description;
+          }
+
+          // Adicionar atributos data para uso futuro
+          option.dataset.type = theme.type || "internal";
+          if (theme.version) option.dataset.version = theme.version;
+        } else {
+          // Se for string, usar diretamente
+          option.value = theme;
+          option.textContent = theme.charAt(0).toUpperCase() + theme.slice(1);
+        }
+
         selector.appendChild(option);
       });
 
       // Selecionar tema atual
-      selector.value = this.app.themeManager.activeTheme;
+      if (this.app && this.app.themeManager) {
+        const currentTheme = this.app.themeManager.currentTheme;
+        if (currentTheme) {
+          selector.value = currentTheme;
+          console.log("[SettingsScreen] Tema atual selecionado:", currentTheme);
+        }
+      }
+
+      // Adicionar event listener para mudança de tema
+      selector.addEventListener("change", () => {
+        const selectedTheme = selector.value;
+        console.log("[SettingsScreen] Tema selecionado:", selectedTheme);
+        this.changeTheme(selectedTheme);
+      });
+
+      return themes.length > 0;
     } catch (error) {
-      console.error("Erro ao popular seletor de temas:", error);
+      console.error(
+        "[SettingsScreen] Erro ao popular seletor de temas:",
+        error
+      );
+
+      // Adicionar pelo menos o tema padrão em caso de erro
+      const option = document.createElement("option");
+      option.value = "default";
+      option.textContent = "Default";
+      selector.appendChild(option);
+
+      return false;
     }
   }
 
   async changeTheme(themeName) {
-    await this.app.changeTheme(themeName);
+    try {
+      console.log(`[SettingsScreen] Alterando tema para: ${themeName}`);
+
+      // Verificar se temos acesso ao ThemeManager
+      if (!this.app || !this.app.themeManager) {
+        console.error("[SettingsScreen] ThemeManager não disponível");
+        return false;
+      }
+
+      // Verificar se o método changeTheme existe no ThemeManager
+      if (typeof this.app.themeManager.changeTheme === "function") {
+        // Usar o método no ThemeManager para alterar o tema
+        const success = await this.app.themeManager.changeTheme(themeName);
+
+        if (success) {
+          console.log(
+            `[SettingsScreen] Tema alterado com sucesso para: ${themeName}`
+          );
+
+          // Atualizar a interface de acordo com o tema atual
+          if (this.app.currentScreen === "systems") {
+            this.app.themeManager.applySystemsScreenTheme();
+          } else if (this.app.currentScreen === "gamelist") {
+            this.app.themeManager.applyGameListTheme(this.app.currentSystem);
+          }
+
+          return true;
+        } else {
+          console.error(
+            `[SettingsScreen] Falha ao alterar o tema para: ${themeName}`
+          );
+          return false;
+        }
+      } else {
+        console.warn(
+          "[SettingsScreen] Método changeTheme não encontrado no ThemeManager, tentando alternativa"
+        );
+
+        // Tentar método alternativo se o changeTheme não estiver disponível
+        if (
+          this.app.themeManager.init &&
+          typeof this.app.themeManager.init === "function"
+        ) {
+          const success = await this.app.themeManager.init(themeName);
+
+          if (success) {
+            console.log(
+              `[SettingsScreen] Tema inicializado com sucesso: ${themeName}`
+            );
+
+            // Atualizar a interface
+            if (this.app.currentScreen === "systems") {
+              this.app.themeManager.applySystemsScreenTheme();
+            } else if (this.app.currentScreen === "gamelist") {
+              this.app.themeManager.applyGameListTheme(this.app.currentSystem);
+            }
+
+            return true;
+          } else {
+            console.error(
+              `[SettingsScreen] Falha ao inicializar o tema: ${themeName}`
+            );
+            return false;
+          }
+        }
+      }
+
+      console.error(
+        "[SettingsScreen] Nenhum método disponível para alterar o tema"
+      );
+      return false;
+    } catch (error) {
+      console.error(
+        `[SettingsScreen] Erro ao alterar tema para ${themeName}:`,
+        error
+      );
+      return false;
+    }
   }
 
   async browseDirectory(dirType) {
@@ -678,7 +835,28 @@ export class SettingsScreen {
 
         // Aplicar configurações
         if (settings.theme) {
-          await this.app.changeTheme(settings.theme);
+          try {
+            // Primeiro tentar o método do App (que acabamos de adicionar)
+            if (typeof this.app.changeTheme === "function") {
+              await this.app.changeTheme(settings.theme);
+            }
+            // Se falhar, tentar diretamente no themeManager
+            else if (
+              this.app.themeManager &&
+              typeof this.app.themeManager.changeTheme === "function"
+            ) {
+              await this.app.themeManager.changeTheme(settings.theme);
+            } else {
+              console.warn(
+                "[SettingsScreen] Não foi possível aplicar o tema salvo, nenhum método changeTheme disponível"
+              );
+            }
+          } catch (themeError) {
+            console.error(
+              "[SettingsScreen] Erro ao aplicar o tema:",
+              themeError
+            );
+          }
         }
       } else {
         alert(`Erro ao salvar configurações: ${result.error}`);

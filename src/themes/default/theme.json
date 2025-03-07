@@ -1,0 +1,21 @@
+{
+  "name": "Default",
+  "description": "Default theme for RIESCADE",
+  "version": "1.0.0",
+  "author": "RIESCADE",
+  "thumbnail": "thumbnail.jpg",
+  "colors": {
+    "primary": "#1a88ff",
+    "background": "#121212",
+    "text": "#ffffff",
+    "accent": "#ff5722"
+  },
+  "fonts": {
+    "main": "Roboto, sans-serif",
+    "headings": "Roboto Condensed, sans-serif"
+  },
+  "settings": {
+    "showGameCount": true,
+    "useCustomBackground": false
+  }
+}

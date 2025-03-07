@@ -318,4 +318,32 @@ contextBridge.exposeInMainWorld("api", {
       },
     },
   },
+
+  // Funções para gerenciamento de temas
+  fileExists: async (filePath) => {
+    try {
+      return await ipcRenderer.invoke("file-exists", filePath);
+    } catch (error) {
+      console.error("Erro ao verificar existência de arquivo:", error);
+      return false;
+    }
+  },
+
+  readJsonFile: async (filePath) => {
+    try {
+      return await ipcRenderer.invoke("read-json-file", filePath);
+    } catch (error) {
+      console.error("Erro ao ler arquivo JSON:", error);
+      return null;
+    }
+  },
+
+  listDirectories: async (dirPath) => {
+    try {
+      return await ipcRenderer.invoke("list-directories", dirPath);
+    } catch (error) {
+      console.error("Erro ao listar diretórios:", error);
+      return [];
+    }
+  },
 });
