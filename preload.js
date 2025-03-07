@@ -5,7 +5,7 @@ const { contextBridge, ipcRenderer } = require("electron");
 console.log("Preload script está sendo executado");
 
 // Corrigir erro de "dragEvent is not defined"
-window.dragEvent = null;
+window.DragEvent = null;
 
 // Funcionalidades da API expostas ao processo de renderização
 contextBridge.exposeInMainWorld("api", {
@@ -319,10 +319,3 @@ contextBridge.exposeInMainWorld("api", {
     },
   },
 });
-
-// Log para confirmar que a API foi exposta
-console.log("API exposta ao processo de renderização");
-console.log(
-  "Métodos API disponíveis:",
-  Object.keys(window.api || {}).join(", ")
-);

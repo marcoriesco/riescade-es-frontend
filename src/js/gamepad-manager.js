@@ -38,7 +38,7 @@ export class GamepadManager {
     this.buttonCallbacks = {};
 
     // Threshold para considerar movimento do stick
-    this.stickThreshold = 0.5;
+    this.stickThreshold = 0.3;
 
     // Informações sobre o último input
     this.lastInput = {
@@ -49,7 +49,7 @@ export class GamepadManager {
     };
 
     // Controle de debounce para evitar múltiplos eventos
-    this.debounceTime = 200; // ms
+    this.debounceTime = 50; // Aumentado para 300ms
     this.lastEventTime = {
       dup: 0,
       ddown: 0,
@@ -61,8 +61,16 @@ export class GamepadManager {
       rightstick_y: 0,
     };
 
+    // Controle de estado para evitar eventos repetidos
+    this.buttonState = {
+      dup: false,
+      ddown: false,
+      dleft: false,
+      dright: false,
+    };
+
     // Intervalo de polling (ms)
-    this.pollingInterval = 50;
+    this.pollingInterval = 16;
     this.pollingTimer = null;
 
     // Registrar handlers de eventos de conexão
@@ -129,6 +137,67 @@ export class GamepadManager {
     console.log(
       `[GamepadManager] Polling iniciado (intervalo: ${this.pollingInterval}ms)`
     );
+
+    // Adicionar um log periódico para debug
+    setInterval(() => {
+      if (this.connected) {
+        this.logGamepadState();
+      }
+    }, 5000); // A cada 5 segundos
+  }
+
+  /**
+   * Registra o estado atual do gamepad para debug
+   */
+  logGamepadState() {
+    const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+    let gamepad = null;
+
+    for (let i = 0; i < gamepads.length; i++) {
+      if (gamepads[i]) {
+        gamepad = gamepads[i];
+        break;
+      }
+    }
+
+    if (!gamepad) return;
+
+    console.log("=== GAMEPAD DEBUG INFO ===");
+    console.log(`ID: ${gamepad.id}`);
+    console.log(`Botões: ${gamepad.buttons.length}`);
+    console.log(`Eixos: ${gamepad.axes.length}`);
+
+    // Log dos botões do D-PAD
+    if (gamepad.buttons.length > 15) {
+      console.log("D-PAD:");
+      console.log(`  UP (12): ${gamepad.buttons[12].value}`);
+      console.log(`  DOWN (13): ${gamepad.buttons[13].value}`);
+      console.log(`  LEFT (14): ${gamepad.buttons[14].value}`);
+      console.log(`  RIGHT (15): ${gamepad.buttons[15].value}`);
+    } else {
+      console.log(
+        `D-PAD não encontrado nos botões padrão (total: ${gamepad.buttons.length})`
+      );
+    }
+
+    // Log dos eixos analógicos
+    if (gamepad.axes.length > 3) {
+      console.log("Sticks:");
+      console.log(`  LEFT X (0): ${gamepad.axes[0]}`);
+      console.log(`  LEFT Y (1): ${gamepad.axes[1]}`);
+      console.log(`  RIGHT X (2): ${gamepad.axes[2]}`);
+      console.log(`  RIGHT Y (3): ${gamepad.axes[3]}`);
+    }
+
+    // Verificar se há eixos adicionais que podem ser o D-PAD
+    if (gamepad.axes.length > 8) {
+      console.log("Eixos adicionais (possível D-PAD):");
+      for (let i = 8; i < Math.min(gamepad.axes.length, 12); i++) {
+        console.log(`  Eixo ${i}: ${gamepad.axes[i]}`);
+      }
+    }
+
+    console.log("=========================");
   }
 
   /**
@@ -170,10 +239,17 @@ export class GamepadManager {
       return;
     }
 
+    // Marcar como conectado se não estava antes
+    if (!this.connected) {
+      this.connected = true;
+      this.activeGamepad = gamepad;
+      this.dispatchCustomEvent("gamepadconnected", { gamepad });
+    }
+
     // Salvar estado anterior para detecção de mudanças
     const prevButtons = { ...this.buttons };
 
-    // Atualizar estado dos botões
+    // Atualizar estado dos botões principais
     this.buttons.a = gamepad.buttons[0].value;
     this.buttons.b = gamepad.buttons[1].value;
     this.buttons.x = gamepad.buttons[2].value;
@@ -187,33 +263,22 @@ export class GamepadManager {
     this.buttons.ls = gamepad.buttons[10].value;
     this.buttons.rs = gamepad.buttons[11].value;
 
-    // Atualizar estado do D-PAD - verificar se os botões existem
-    if (gamepad.buttons.length > 12) {
+    // Atualizar D-PAD - Mapeamento padrão (botões 12-15)
+    if (gamepad.buttons.length > 15) {
       this.buttons.dup = gamepad.buttons[12].value;
-      if (gamepad.buttons.length > 13)
-        this.buttons.ddown = gamepad.buttons[13].value;
-      if (gamepad.buttons.length > 14)
-        this.buttons.dleft = gamepad.buttons[14].value;
-      if (gamepad.buttons.length > 15)
-        this.buttons.dright = gamepad.buttons[15].value;
-    } else {
-      // Alguns controles usam o hat (0) para o D-PAD
-      if (gamepad.axes.length > 8 && typeof gamepad.axes[9] !== "undefined") {
-        // Hat horizontal (9) e vertical (10)
-        if (gamepad.axes[9] < -0.5) this.buttons.dleft = 1;
-        else if (gamepad.axes[9] > 0.5) this.buttons.dright = 1;
-        else {
-          this.buttons.dleft = 0;
-          this.buttons.dright = 0;
-        }
+      this.buttons.ddown = gamepad.buttons[13].value;
+      this.buttons.dleft = gamepad.buttons[14].value;
+      this.buttons.dright = gamepad.buttons[15].value;
 
-        if (gamepad.axes[10] < -0.5) this.buttons.dup = 1;
-        else if (gamepad.axes[10] > 0.5) this.buttons.ddown = 1;
-        else {
-          this.buttons.dup = 0;
-          this.buttons.ddown = 0;
-        }
-      }
+      // Log do estado do D-PAD
+      if (this.buttons.dup > 0.5)
+        console.log("[GamepadManager] D-PAD UP pressed");
+      if (this.buttons.ddown > 0.5)
+        console.log("[GamepadManager] D-PAD DOWN pressed");
+      if (this.buttons.dleft > 0.5)
+        console.log("[GamepadManager] D-PAD LEFT pressed");
+      if (this.buttons.dright > 0.5)
+        console.log("[GamepadManager] D-PAD RIGHT pressed");
     }
 
     // Atualizar estado dos sticks analógicos
@@ -224,24 +289,25 @@ export class GamepadManager {
 
     // Detectar mudanças e chamar callbacks
     const now = Date.now();
-
-    // Lista de botões para verificar
     const buttonKeys = Object.keys(this.buttons);
 
     for (const button of buttonKeys) {
       // Se o valor mudou significativamente...
       if (Math.abs(this.buttons[button] - prevButtons[button]) > 0.1) {
-        // Verificar se é um botão ou stick analógico
         const isAnalogStick = button.includes("stick");
-        const isDPad = button.startsWith("d");
 
-        // Verificar debounce para D-PAD e sticks
+        // Verificar debounce para sticks
         if (
-          (isAnalogStick || isDPad) &&
+          isAnalogStick &&
           now - this.lastEventTime[button] < this.debounceTime
         ) {
-          continue; // Pular este evento (debounce)
+          continue;
         }
+
+        // Log de mudança de estado
+        console.log(
+          `[GamepadManager] Button ${button} changed: ${this.buttons[button]}`
+        );
 
         // Atualizar último input
         this.lastInput = {
@@ -256,8 +322,7 @@ export class GamepadManager {
           !isAnalogStick ||
           Math.abs(this.buttons[button]) > this.stickThreshold
         ) {
-          // Atualizar timestamp para debounce
-          if (isAnalogStick || isDPad) {
+          if (isAnalogStick) {
             this.lastEventTime[button] = now;
           }
 

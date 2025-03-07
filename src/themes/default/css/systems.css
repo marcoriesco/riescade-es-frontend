@@ -39,6 +39,10 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
+.system-card.active {
+  outline: 5px solid var(--primary-color);
+}
+
 .system-card::before {
   content: "";
   position: absolute;

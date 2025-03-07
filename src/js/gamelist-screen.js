@@ -69,8 +69,8 @@ export class GameListScreen {
 
       // Ordenar jogos por nome
       this.games.sort((a, b) => {
-        const nameA = a.name || "";
-        const nameB = b.name || "";
+        const nameA = a && a.name ? String(a.name) : "";
+        const nameB = b && b.name ? String(b.name) : "";
         return nameA.localeCompare(nameB);
       });
 
@@ -912,8 +912,8 @@ export class GameListScreen {
           <h2 style="margin-bottom: 15px; font-size: 2em; color: #1a88ff;">Iniciando Jogo</h2>
           <p style="margin-bottom: 20px; font-size: 1.2em; color: #ccc;">${game.name}</p>
           <div style="width: 60px; height: 60px; border: 5px solid rgba(255, 255, 255, 0.1); border-radius: 50%; border-top-color: #1a88ff; animation: spin 1s linear infinite; margin: 20px auto;"></div>
-        </div>
-      `;
+      </div>
+    `;
 
       document.body.appendChild(overlay);
 

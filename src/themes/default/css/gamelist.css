@@ -29,6 +29,10 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
+.game-card.active {
+  outline: 5px solid var(--primary-color);
+}
+
 .game-image {
   width: 100%;
   height: 150px;

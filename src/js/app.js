@@ -71,22 +71,13 @@ class App {
     this.themeManager = null;
     this.configParser = new ConfigParser();
     this.gamepadManager = new GamepadManager();
-    this.navigation = document.getElementById("navigation");
     this.currentScreen = "systems";
     this.currentSystem = null;
-
-    // Verificar se a API está disponível
-    if (window.api && window.api.localApi) {
-      // API local detectada
-    }
-
-    this.init();
   }
 
   async init() {
     try {
       // Inicializar o gerenciador de temas (antes de qualquer outra coisa)
-      console.log("Inicializando gerenciador de temas...");
       this.themeManager = new ThemeManager();
       const themeInitialized = await this.themeManager.initialize();
 
@@ -132,6 +123,10 @@ class App {
       // Configurar navegação por gamepad
       console.log("Configurando navegação por gamepad...");
       this.setupGamepadNavigation();
+
+      // Configurar navegação por teclado
+      console.log("Configurando navegação por teclado...");
+      this.setupKeyboardNavigation();
 
       console.log("Aplicativo inicializado com sucesso");
       return true;
@@ -187,12 +182,11 @@ class App {
       // Mudar para a tela de games
       this.showScreen("gamelist");
 
-      // Se estiver usando gamepad, selecionar o primeiro jogo
-      if (document.body.classList.contains("gamepad-active")) {
-        setTimeout(() => {
-          this.selectFirstElementInCurrentScreen();
-        }, 300); // Tempo maior para garantir que os jogos estejam carregados
-      }
+      // CORREÇÃO: Sempre selecionar o primeiro jogo, não apenas quando usar gamepad
+      setTimeout(() => {
+        console.log("[App] Selecionando primeiro jogo na lista");
+        this.selectFirstElementInCurrentScreen();
+      }, 300); // Tempo maior para garantir que os jogos estejam carregados
     } catch (error) {
       console.error("[App] Erro ao selecionar sistema:", error);
       // Em caso de erro, mostrar mensagem de erro na tela de jogos
@@ -203,17 +197,6 @@ class App {
   }
 
   setupEventListeners() {
-    // Configurar eventos de navegação
-    const navItems = document.querySelectorAll("#navigation li");
-    navItems.forEach((item) => {
-      item.addEventListener("click", () => {
-        if (item.classList.contains("disabled")) return;
-
-        const screenName = item.getAttribute("data-screen");
-        this.showScreen(screenName);
-      });
-    });
-
     // Event listener para quando um jogo é iniciado
     if (window.api && window.api.onGameLaunched) {
       window.api.onGameLaunched((data) => {
@@ -263,6 +246,52 @@ class App {
           }
         }
       }
+
+      // Tecla Esc para voltar
+      if (e.keyCode === 27) {
+        console.log("[App] Tecla Esc pressionada");
+
+        // Se o modal estiver aberto, fechá-lo
+        if (this.settingsScreen && this.settingsScreen.modalOpen) {
+          this.settingsScreen.closeSettingsModal();
+          return false;
+        }
+
+        // Se estiver na tela de jogos, voltar para sistemas
+        if (this.currentScreen === "gamelist") {
+          this.showScreen("systems");
+          return false;
+        }
+
+        // Se estamos na tela de detalhes do jogo, voltar para a lista de jogos
+        if (this.currentScreen === "gamedetails" && this.gameListScreen) {
+          console.log("[App] Voltando para a lista de jogos");
+          this.showScreen("gamelist");
+          return false;
+        }
+
+        // Se estamos em qualquer outra tela, verificar se há um modal aberto
+        const modalElements = document.querySelectorAll(
+          '.modal, .dialog, [role="dialog"]'
+        );
+        for (const modal of modalElements) {
+          if (
+            modal.style.display !== "none" &&
+            modal.style.visibility !== "hidden"
+          ) {
+            console.log("[App] Fechando modal genérico");
+
+            // Tentar fechar o modal
+            if (typeof modal.close === "function") {
+              modal.close();
+            } else {
+              modal.style.display = "none";
+            }
+
+            return false;
+          }
+        }
+      }
     });
 
     // Verificar se os estilos estão carregados
@@ -305,230 +334,222 @@ class App {
     // Configurar indicador de gamepad
     this.setupGamepadIndicator();
 
-    // Prevenir o comportamento padrão de scroll com as teclas direcionais
-    // e implementar navegação com teclado
-    window.addEventListener(
-      "keydown",
-      (e) => {
-        // Teclas direcionais (cima, baixo, esquerda, direita)
-        if ([37, 38, 39, 40].includes(e.keyCode)) {
-          e.preventDefault();
-
-          // Mapear teclas para direções
-          let direction = "";
-          switch (e.keyCode) {
-            case 38:
-              direction = "up";
-              break; // Seta para cima
-            case 40:
-              direction = "down";
-              break; // Seta para baixo
-            case 37:
-              direction = "left";
-              break; // Seta para esquerda
-            case 39:
-              direction = "right";
-              break; // Seta para direita
-          }
-
-          console.log(`[App] Tecla direcional pressionada: ${direction}`);
-
-          // Usar a mesma função de navegação do gamepad
-          if (direction) {
-            this.navigateWithGamepad(direction);
-          }
-
-          return false;
-        }
-
-        // Tecla Enter para selecionar
-        if (e.keyCode === 13) {
-          console.log("[App] Tecla Enter pressionada");
-          this.selectWithGamepad();
-          return false;
-        }
-
-        // Tecla Esc para voltar
-        if (e.keyCode === 27) {
-          console.log("[App] Tecla Esc pressionada");
-
-          // Se o modal estiver aberto, fechá-lo
-          if (this.settingsScreen && this.settingsScreen.modalOpen) {
-            this.settingsScreen.closeSettingsModal();
-            return false;
-          }
-
-          // Se estiver na tela de jogos, voltar para sistemas
-          if (this.currentScreen === "gamelist") {
-            this.showScreen("systems");
-            return false;
-          }
-        }
-      },
-      { passive: false }
-    );
-
-    // Quando um gamepad é conectado
-    document.addEventListener("gamepad:gamepadconnected", (event) => {
-      console.log("[App] Gamepad conectado:", event.detail.gamepad.id);
-      // Adicionar classe para estilo específico de gamepad
-      document.body.classList.add("gamepad-active");
-    });
-
-    // Quando um gamepad é desconectado
-    document.addEventListener("gamepad:gamepaddisconnected", () => {
-      console.log("[App] Gamepad desconectado");
-      // Remover classe de estilo específico de gamepad
-      document.body.classList.remove("gamepad-active");
-    });
-
-    // Botão Start para abrir menu de configurações (adicionar mais logging)
-    this.gamepadManager.onButtonPress("start", (value) => {
-      console.log(`[App] Botão START com valor: ${value}`);
+    // D-pad para navegação com logs de debug
+    this.gamepadManager.onButtonPress("dup", (value) => {
+      console.log("[App] D-PAD UP Event - Value:", value);
       if (value > 0.5) {
-        // Botão pressionado
-        console.log("[App] Botão START pressionado no gamepad");
-        // Verificar se a instância de SettingsScreen existe
-        if (this.settingsScreen && this.settingsScreen.toggleSettingsModal) {
-          console.log("[App] Abrindo menu de configurações via gamepad");
-          this.settingsScreen.toggleSettingsModal();
+        console.log("[App] D-PAD UP pressionado");
 
-          // Vibrar o controle para feedback (se suportado)
-          this.gamepadManager.vibrate(100, 0.3, 0.3);
-        } else {
-          console.error(
-            "[App] Erro: settingsScreen não encontrado ou toggleSettingsModal não é uma função"
-          );
-          console.log("[App] settingsScreen existe?", !!this.settingsScreen);
-          if (this.settingsScreen) {
-            console.log(
-              "[App] toggleSettingsModal existe?",
-              typeof this.settingsScreen.toggleSettingsModal === "function"
+        // Verificar primeiro se o modal de configurações está aberto
+        if (this.settingsScreen && this.settingsScreen.modalOpen) {
+          // Obter lista de itens do menu
+          const menuItems = document.querySelectorAll(".settings-menu-item");
+          if (menuItems.length > 0) {
+            // Encontrar o item atual
+            const currentItem = Array.from(menuItems).findIndex((item) =>
+              item.classList.contains("active")
             );
+
+            // Calcular próximo item (para cima)
+            const nextIndex =
+              currentItem > 0 ? currentItem - 1 : menuItems.length - 1;
+
+            // Atualizar seleção
+            menuItems.forEach((item) => {
+              item.classList.remove("active");
+              item.setAttribute("aria-selected", "false");
+            });
+
+            menuItems[nextIndex].classList.add("active");
+            menuItems[nextIndex].setAttribute("aria-selected", "true");
+            menuItems[nextIndex].focus();
           }
+        } else {
+          // Navegação normal
+          this.navigateWithGamepad("up");
+        }
+      }
+    });
+
+    this.gamepadManager.onButtonPress("ddown", (value) => {
+      console.log("[App] D-PAD DOWN Event - Value:", value);
+      if (value > 0.5) {
+        console.log("[App] D-PAD DOWN pressionado");
+
+        // Verificar primeiro se o modal de configurações está aberto
+        if (this.settingsScreen && this.settingsScreen.modalOpen) {
+          // Obter lista de itens do menu
+          const menuItems = document.querySelectorAll(".settings-menu-item");
+          if (menuItems.length > 0) {
+            // Encontrar o item atual
+            const currentItem = Array.from(menuItems).findIndex((item) =>
+              item.classList.contains("active")
+            );
+
+            // Calcular próximo item (para baixo)
+            const nextIndex =
+              currentItem < menuItems.length - 1 ? currentItem + 1 : 0;
+
+            // Atualizar seleção
+            menuItems.forEach((item) => {
+              item.classList.remove("active");
+              item.setAttribute("aria-selected", "false");
+            });
+
+            menuItems[nextIndex].classList.add("active");
+            menuItems[nextIndex].setAttribute("aria-selected", "true");
+            menuItems[nextIndex].focus();
+          }
+        } else {
+          // Navegação normal
+          this.navigateWithGamepad("down");
+        }
+      }
+    });
+
+    this.gamepadManager.onButtonPress("dleft", (value) => {
+      console.log("[App] D-PAD LEFT Event - Value:", value);
+      if (value > 0.5) {
+        console.log("[App] D-PAD LEFT pressionado");
+        // Verificar se o modal está aberto (não navegar para esquerda no modal)
+        if (!(this.settingsScreen && this.settingsScreen.modalOpen)) {
+          this.navigateWithGamepad("left");
+        }
+      }
+    });
+
+    this.gamepadManager.onButtonPress("dright", (value) => {
+      console.log("[App] D-PAD RIGHT Event - Value:", value);
+      if (value > 0.5) {
+        console.log("[App] D-PAD RIGHT pressionado");
+        // Verificar se o modal está aberto (não navegar para direita no modal)
+        if (!(this.settingsScreen && this.settingsScreen.modalOpen)) {
+          this.navigateWithGamepad("right");
+        }
+      }
+    });
+
+    // Botão A para selecionar
+    this.gamepadManager.onButtonPress("a", (value) => {
+      console.log("[App] Botão A Event - Value:", value);
+      if (value > 0.5) {
+        console.log("[App] Botão A pressionado");
+
+        // Verificar se o modal de configurações está aberto
+        if (this.settingsScreen && this.settingsScreen.modalOpen) {
+          // Selecionar item de menu
+          const selectedItem = document.querySelector(
+            ".settings-menu-item.active"
+          );
+          if (selectedItem) {
+            const action = selectedItem.getAttribute("data-action");
+            if (action) {
+              this.settingsScreen.handleMenuAction(action);
+            }
+          }
+        } else {
+          // Seleção normal
+          this.selectWithGamepad();
         }
       }
     });
 
     // Botão B para voltar
     this.gamepadManager.onButtonPress("b", (value) => {
+      console.log("[App] Botão B Event - Value:", value);
       if (value > 0.5) {
-        // Botão pressionado
-        console.log("[App] Botão B pressionado no gamepad (voltar)");
+        console.log("[App] Botão B pressionado");
+        this.handleBackButton();
+      }
+    });
 
-        // Se estamos no modal de configurações, fechá-lo
-        if (this.settingsScreen && this.settingsScreen.modalOpen) {
-          console.log("[App] Fechando modal de configurações");
-          this.settingsScreen.closeSettingsModal();
-          // Vibrar o controle para feedback
-          this.gamepadManager.vibrate(80, 0.2, 0.2);
-          return;
-        }
-
-        // Se estamos na tela de jogos, voltar para a tela de sistemas
-        if (this.currentScreen === "gamelist") {
-          console.log("[App] Voltando para a tela de sistemas");
-          this.showScreen("systems");
-
-          // Vibrar o controle para feedback (se suportado)
-          this.gamepadManager.vibrate(100, 0.2, 0.2);
+    // Botão START para configurações
+    this.gamepadManager.onButtonPress("start", (value) => {
+      console.log("[App] Botão START Event - Value:", value);
+      if (value > 0.5) {
+        console.log("[App] Botão START pressionado");
+        if (this.settingsScreen) {
+          this.settingsScreen.toggleSettingsModal();
         }
       }
     });
 
-    // D-pad para navegação - com prevenção de comportamento padrão
-    this.gamepadManager.onButtonPress("dup", (value) => {
-      if (value > 0.5) {
-        console.log("[App] D-PAD UP pressionado");
-        // Prevenir scroll
-        event && event.preventDefault && event.preventDefault();
-        this.navigateWithGamepad("up");
-        return false;
-      }
-    });
-
-    this.gamepadManager.onButtonPress("ddown", (value) => {
-      if (value > 0.5) {
-        console.log("[App] D-PAD DOWN pressionado");
-        // Prevenir scroll
-        event && event.preventDefault && event.preventDefault();
-        this.navigateWithGamepad("down");
-        return false;
-      }
-    });
-
-    this.gamepadManager.onButtonPress("dleft", (value) => {
-      if (value > 0.5) {
-        console.log("[App] D-PAD LEFT pressionado");
-        // Prevenir scroll
-        event && event.preventDefault && event.preventDefault();
-        this.navigateWithGamepad("left");
-        return false;
-      }
-    });
-
-    this.gamepadManager.onButtonPress("dright", (value) => {
-      if (value > 0.5) {
-        console.log("[App] D-PAD RIGHT pressionado");
-        // Prevenir scroll
-        event && event.preventDefault && event.preventDefault();
-        this.navigateWithGamepad("right");
-        return false;
-      }
-    });
-
-    // Botão A para selecionar
-    this.gamepadManager.onButtonPress("a", (value) => {
-      if (value > 0.5) {
-        console.log("[App] Botão A pressionado");
-        this.selectWithGamepad();
-      }
-    });
-
-    // Sticks analógicos para navegação - com prevenção de comportamento padrão
-    document.addEventListener(
-      "gamepad:gamepadinput",
-      (event) => {
-        // Verificar se é o botão start
-        if (event.detail.button === "start" && event.detail.isPressed) {
-          console.log(
-            "[App] START detectado via evento. Tentando abrir modal..."
-          );
-          if (this.settingsScreen && this.settingsScreen.toggleSettingsModal) {
-            this.settingsScreen.toggleSettingsModal();
-          }
-        }
-
-        // Verificar se é um eixo do stick e valor significativo
+    // Sticks analógicos para navegação - apenas quando o modal não está aberto
+    document.addEventListener("gamepad:gamepadinput", (event) => {
+      // Verificar se o modal está aberto
+      if (this.settingsScreen && this.settingsScreen.modalOpen) {
+        // Se o modal está aberto, tratar eventos apenas para sticks
         if (event.detail.isAxis && Math.abs(event.detail.value) > 0.5) {
           const { button, value } = event.detail;
 
-          // Prevenir comportamento padrão
-          event && event.preventDefault && event.preventDefault();
-
+          // Apenas tratar o stick vertical para navegação no modal
           if (button === "leftstick_y") {
-            if (value < -0.5) {
-              console.log("[App] Stick analógico para cima");
-              this.navigateWithGamepad("up");
-            } else if (value > 0.5) {
-              console.log("[App] Stick analógico para baixo");
-              this.navigateWithGamepad("down");
-            }
-          } else if (button === "leftstick_x") {
-            if (value < -0.5) {
-              console.log("[App] Stick analógico para esquerda");
-              this.navigateWithGamepad("left");
-            } else if (value > 0.5) {
-              console.log("[App] Stick analógico para direita");
-              this.navigateWithGamepad("right");
+            const menuItems = document.querySelectorAll(".settings-menu-item");
+            if (menuItems.length > 0) {
+              const currentItem = Array.from(menuItems).findIndex((item) =>
+                item.classList.contains("active")
+              );
+
+              let nextIndex = currentItem;
+
+              if (value < -0.5) {
+                // Para cima
+                nextIndex =
+                  currentItem > 0 ? currentItem - 1 : menuItems.length - 1;
+              } else if (value > 0.5) {
+                // Para baixo
+                nextIndex =
+                  currentItem < menuItems.length - 1 ? currentItem + 1 : 0;
+              }
+
+              // Atualizar seleção
+              menuItems.forEach((item) => {
+                item.classList.remove("active");
+                item.setAttribute("aria-selected", "false");
+              });
+
+              menuItems[nextIndex].classList.add("active");
+              menuItems[nextIndex].setAttribute("aria-selected", "true");
+              menuItems[nextIndex].focus();
             }
           }
-
-          return false;
         }
-      },
-      { passive: false }
-    );
+        return;
+      }
+
+      // Código original para quando o modal NÃO está aberto
+      if (event.detail.button === "start" && event.detail.isPressed) {
+        console.log(
+          "[App] START detectado via evento. Tentando abrir modal..."
+        );
+        if (this.settingsScreen && this.settingsScreen.toggleSettingsModal) {
+          this.settingsScreen.toggleSettingsModal();
+        }
+      }
+
+      // Verificar se é um eixo do stick e valor significativo
+      if (event.detail.isAxis && Math.abs(event.detail.value) > 0.5) {
+        const { button, value } = event.detail;
+
+        if (button === "leftstick_y") {
+          if (value < -0.5) {
+            console.log("[App] Stick analógico para cima");
+            this.navigateWithGamepad("up");
+          } else if (value > 0.5) {
+            console.log("[App] Stick analógico para baixo");
+            this.navigateWithGamepad("down");
+          }
+        } else if (button === "leftstick_x") {
+          if (value < -0.5) {
+            console.log("[App] Stick analógico para esquerda");
+            this.navigateWithGamepad("left");
+          } else if (value > 0.5) {
+            console.log("[App] Stick analógico para direita");
+            this.navigateWithGamepad("right");
+          }
+        }
+      }
+    });
 
     // Seleção inicial: selecionar o primeiro elemento da tela atual
     this.selectFirstElementInCurrentScreen();
@@ -614,393 +635,338 @@ class App {
     }
   }
 
-  navigateWithGamepad(direction) {
-    console.log(`[App] Navegando via gamepad: ${direction}`);
+  selectWithGamepad() {
+    console.log("[App] Processando seleção com gamepad");
 
-    // Verificar se o modal de settings está aberto
+    try {
+      // CORREÇÃO: buscar por .active em vez de .selected
+      const selectedElement = document.querySelector(".active");
+      if (!selectedElement) {
+        console.log("[App] Nenhum elemento selecionado encontrado");
+        return;
+      }
+
+      if (this.currentScreen === "systems") {
+        // Obter o nome do sistema do atributo data-system-name
+        const systemName = selectedElement.dataset.systemName;
+        if (systemName) {
+          console.log("[App] Selecionando sistema:", systemName);
+
+          // Encontrar o objeto do sistema e selecioná-lo
+          const system = this.systemsScreen.loadedSystems.find(
+            (s) => s.name === systemName
+          );
+
+          if (system) {
+            this.selectSystem(system);
+          } else {
+            console.error("[App] Sistema não encontrado:", systemName);
+          }
+        } else {
+          console.error(
+            "[App] Nome do sistema não encontrado no elemento selecionado"
+          );
+        }
+      } else if (this.currentScreen === "gamelist") {
+        // CORREÇÃO: Log detalhado para debug
+        console.log(
+          "[App] Elemento selecionado na lista de jogos:",
+          selectedElement
+        );
+
+        // CORREÇÃO: Tentar obter o ID do jogo de diferentes atributos
+        const gameId =
+          selectedElement.dataset.gameId ||
+          selectedElement.getAttribute("data-game-id");
+
+        console.log("[App] Game ID encontrado:", gameId);
+
+        if (gameId && this.gameListScreen) {
+          console.log("[App] Tentando lançar jogo com ID:", gameId);
+          // Mostrar todos os jogos disponíveis para debug
+          console.log(
+            "[App] Jogos disponíveis:",
+            this.gameListScreen.games.map((g) => ({ id: g.id, name: g.name }))
+          );
+
+          // Tentar encontrar o jogo por ID ou caminho
+          const game = this.gameListScreen.games.find(
+            (g) =>
+              g.id === gameId ||
+              g.path === gameId ||
+              (typeof g.id === "string" && g.id.trim() === gameId.trim())
+          );
+
+          if (game) {
+            console.log("[App] Jogo encontrado, lançando:", game.name);
+            // CORREÇÃO: Lançar o jogo diretamente pelo gameListScreen
+            this.gameListScreen.launchGame(game);
+          } else {
+            console.error("[App] Jogo não encontrado para ID:", gameId);
+            console.log("[App] Lista de jogos disponíveis:");
+            this.gameListScreen.games.forEach((g) => {
+              console.log(`ID: ${g.id}, Nome: ${g.name}, Caminho: ${g.path}`);
+            });
+
+            // CORREÇÃO ALTERNATIVA: Se não encontrar pelo ID, tentar pelo índice
+            const index = Array.from(
+              document.querySelectorAll(".game-card")
+            ).indexOf(selectedElement);
+
+            if (index !== -1 && this.gameListScreen.games[index]) {
+              console.log("[App] Lançando jogo pelo índice:", index);
+              this.gameListScreen.launchGame(this.gameListScreen.games[index]);
+            }
+          }
+        } else {
+          console.error(
+            "[App] Falha ao obter gameId ou gameListScreen não inicializado"
+          );
+        }
+      } else if (this.settingsScreen && this.settingsScreen.modalOpen) {
+        // Lógica para menu de configurações
+        const menuItem =
+          selectedElement.dataset.action || selectedElement.dataset.settingId;
+        if (menuItem) {
+          console.log("[App] Selecionando configuração:", menuItem);
+          this.settingsScreen.handleMenuAction(menuItem);
+        }
+      }
+    } catch (error) {
+      console.error("[App] Erro ao processar seleção com gamepad:", error);
+    }
+  }
+
+  // Correção para o método navigateWithGamepad para incluir navegação no modal de configurações
+  navigateWithGamepad(direction) {
+    console.log("[App] Navegando com gamepad:", direction);
+
+    // CORREÇÃO: Verificar primeiro se o modal de configurações está aberto
     if (this.settingsScreen && this.settingsScreen.modalOpen) {
-      console.log("[App] Navegando no modal de settings");
-      this.navigateSettingsModal(direction);
+      let elements = document.querySelectorAll(".settings-menu-item");
+
+      // Converter NodeList para Array
+      elements = Array.from(elements);
+      if (elements.length === 0) return;
+
+      // Encontrar o elemento atualmente selecionado
+      let currentElement = elements.find((el) =>
+        el.classList.contains("active")
+      );
+
+      if (!currentElement) {
+        currentElement = elements[0];
+        currentElement.classList.add("active");
+        currentElement.setAttribute("aria-selected", "true");
+        return;
+      }
+
+      // Encontrar o índice atual
+      const currentIndex = elements.indexOf(currentElement);
+      let nextIndex = currentIndex;
+
+      // Navegação simples para cima e para baixo em menu vertical
+      if (direction === "up") {
+        nextIndex = currentIndex - 1;
+        if (nextIndex < 0) {
+          nextIndex = elements.length - 1;
+        }
+      } else if (direction === "down") {
+        nextIndex = currentIndex + 1;
+        if (nextIndex >= elements.length) {
+          nextIndex = 0;
+        }
+      }
+
+      // Atualizar seleção
+      currentElement.classList.remove("active");
+      currentElement.setAttribute("aria-selected", "false");
+
+      elements[nextIndex].classList.add("active");
+      elements[nextIndex].setAttribute("aria-selected", "true");
+      elements[nextIndex].scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+
+      return; // Sair da função para não navegar na tela de fundo
+    }
+
+    // Código original para outros casos...
+    let elements;
+    if (this.currentScreen === "systems") {
+      elements = document.querySelectorAll(".system-card");
+    } else if (this.currentScreen === "gamelist") {
+      elements = document.querySelectorAll(".game-card");
+    } else {
       return;
     }
 
-    // Determinar qual elemento está com foco ou está ativo
-    const focusedElement = document.activeElement;
-    const activeElement = document.querySelector(
-      ".system-card.active, .game-card.active"
+    // Converter NodeList para Array
+    elements = Array.from(elements);
+    if (elements.length === 0) return;
+
+    // Encontrar o elemento atualmente selecionado
+    let currentElement = elements.find(
+      (el) =>
+        el.classList.contains("selected") || el.classList.contains("active")
     );
-    let targetElement = null;
 
-    // Se estamos na tela de sistemas
-    if (this.currentScreen === "systems") {
-      console.log("[App] Navegando na tela de sistemas");
-      // Obter todos os cards de sistema
-      const systemCards = document.querySelectorAll(".system-card");
-      console.log(`[App] Encontrados ${systemCards.length} cards de sistema`);
-
-      if (systemCards.length === 0) return;
-
-      // Se nenhum card está com foco ou ativo, selecionar o primeiro
-      let currentElement = activeElement || focusedElement;
-      let currentIndex = -1;
-
-      if (
-        !currentElement ||
-        !currentElement.classList.contains("system-card")
-      ) {
-        console.log(
-          "[App] Nenhum sistema selecionado, selecionando o primeiro"
-        );
-        targetElement = systemCards[0];
-      } else {
-        // Obter o índice do elemento com foco
-        currentIndex = Array.from(systemCards).indexOf(currentElement);
-        console.log(`[App] Sistema atual: ${currentIndex}`);
-
-        // Calcular o próximo índice baseado na direção
-        let nextIndex = currentIndex;
-
-        // Suponha que temos uma grade de sistemas com 4 colunas (ajuste conforme necessário)
-        const columns = Math.min(4, systemCards.length);
-        const rows = Math.ceil(systemCards.length / columns);
-
-        // Converter índice linear para linha/coluna
-        const currentRow = Math.floor(currentIndex / columns);
-        const currentCol = currentIndex % columns;
-
-        console.log(
-          `[App] Posição atual: linha ${currentRow}, coluna ${currentCol}`
-        );
-        console.log(`[App] Grade: ${rows} linhas x ${columns} colunas`);
-
-        switch (direction) {
-          case "up":
-            if (currentRow > 0) {
-              nextIndex = (currentRow - 1) * columns + currentCol;
-              console.log(`[App] Movendo para cima: novo índice ${nextIndex}`);
-            }
-            break;
-          case "down":
-            if (currentRow < rows - 1) {
-              nextIndex = Math.min(
-                (currentRow + 1) * columns + currentCol,
-                systemCards.length - 1
-              );
-              console.log(`[App] Movendo para baixo: novo índice ${nextIndex}`);
-            }
-            break;
-          case "left":
-            if (currentCol > 0) {
-              nextIndex = currentIndex - 1;
-              console.log(
-                `[App] Movendo para esquerda: novo índice ${nextIndex}`
-              );
-            }
-            break;
-          case "right":
-            if (
-              currentCol < columns - 1 &&
-              currentIndex < systemCards.length - 1
-            ) {
-              nextIndex = currentIndex + 1;
-              console.log(
-                `[App] Movendo para direita: novo índice ${nextIndex}`
-              );
-            }
-            break;
-        }
-
-        // Verificar se o índice é válido
-        if (
-          nextIndex >= 0 &&
-          nextIndex < systemCards.length &&
-          nextIndex !== currentIndex
-        ) {
-          targetElement = systemCards[nextIndex];
-        } else {
-          console.log(`[App] Movimento inválido ou borda alcançada`);
-        }
-      }
-    }
-    // Se estamos na tela de jogos
-    else if (this.currentScreen === "gamelist") {
-      console.log("[App] Navegando na lista de jogos");
-      const gameCards = document.querySelectorAll(".game-card");
-      console.log(`[App] Encontrados ${gameCards.length} jogos`);
-
-      if (gameCards.length === 0) return;
-
-      // Se nenhum card está com foco ou ativo, selecionar o primeiro
-      let currentElement = activeElement || focusedElement;
-
-      if (!currentElement || !currentElement.classList.contains("game-card")) {
-        console.log("[App] Nenhum jogo selecionado, selecionando o primeiro");
-        targetElement = gameCards[0];
-      } else {
-        // Navegação simples (cima/baixo)
-        const currentIndex = Array.from(gameCards).indexOf(currentElement);
-        console.log(`[App] Jogo atual: ${currentIndex}`);
-        let nextIndex = currentIndex;
-
-        switch (direction) {
-          case "up":
-            nextIndex = Math.max(0, currentIndex - 1);
-            console.log(`[App] Movendo para cima: novo índice ${nextIndex}`);
-            break;
-          case "down":
-            nextIndex = Math.min(gameCards.length - 1, currentIndex + 1);
-            console.log(`[App] Movendo para baixo: novo índice ${nextIndex}`);
-            break;
-        }
-
-        // Verificar se o índice é válido
-        if (
-          nextIndex >= 0 &&
-          nextIndex < gameCards.length &&
-          nextIndex !== currentIndex
-        ) {
-          targetElement = gameCards[nextIndex];
-        }
-      }
+    if (!currentElement) {
+      currentElement = elements[0];
+      // CORREÇÃO: padronizar para a classe active
+      currentElement.classList.add("active");
+      currentElement.setAttribute("aria-selected", "true");
+      return;
     }
 
-    // Se encontramos um elemento para focar
-    if (targetElement) {
-      console.log(
-        `[App] Elemento alvo encontrado: ${targetElement.textContent.trim()}`
-      );
+    // Calcular o número de colunas na grid
+    const containerWidth = elements[0].parentElement.offsetWidth;
+    const elementWidth = elements[0].offsetWidth;
+    const gap = 16; // Espaço entre elementos (ajuste conforme necessário)
+    const columnsCount = Math.floor(
+      (containerWidth + gap) / (elementWidth + gap)
+    );
+    console.log("[App] Número de colunas detectado:", columnsCount);
 
-      // Remover classe active de todos os elementos do tipo atual
-      let elements;
-      if (this.currentScreen === "systems") {
-        elements = document.querySelectorAll(".system-card");
-      } else if (this.currentScreen === "gamelist") {
-        elements = document.querySelectorAll(".game-card");
-      }
+    // Encontrar o índice atual
+    const currentIndex = elements.indexOf(currentElement);
+    let nextIndex = currentIndex;
 
-      if (elements) {
-        elements.forEach((item) => {
-          item.classList.remove("active");
-          item.setAttribute("aria-selected", "false");
-        });
-      }
-
-      // Adicionar classe active ao elemento selecionado
-      targetElement.classList.add("active");
-      targetElement.setAttribute("aria-selected", "true");
-
-      // Focar o elemento
-      targetElement.focus();
-
-      // Rolar até o elemento se necessário
-      targetElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-
-      // Vibrar o controle para feedback (se suportado)
-      if (this.gamepadManager) {
-        this.gamepadManager.vibrate(50, 0.1, 0.1);
-      }
-
-      // Atualizar último elemento selecionado
-      this.lastSelectedElement = targetElement;
-
-      return true;
-    } else {
-      console.log("[App] Nenhum elemento alvo encontrado");
-      return false;
+    // Calcular próximo índice baseado na direção
+    switch (direction) {
+      case "up":
+        nextIndex = currentIndex - columnsCount;
+        break;
+      case "down":
+        nextIndex = currentIndex + columnsCount;
+        break;
+      case "left":
+        nextIndex = currentIndex - 1;
+        if (currentIndex % columnsCount === 0) {
+          nextIndex = currentIndex + (columnsCount - 1);
+        }
+        break;
+      case "right":
+        nextIndex = currentIndex + 1;
+        if (nextIndex % columnsCount === 0) {
+          nextIndex = currentIndex - (columnsCount - 1);
+        }
+        break;
     }
-  }
 
-  // Método específico para navegar no modal de settings
-  navigateSettingsModal(direction) {
-    console.log(`[App] Navegando no modal de settings: ${direction}`);
-
-    // Obter itens do menu
-    const menuItems = document.querySelectorAll(".settings-menu-item");
-    console.log(`[App] Encontrados ${menuItems.length} itens de menu`);
-
-    if (menuItems.length === 0) return false;
-
-    // Determinar qual item está ativo ou com foco
-    const focusedElement = document.activeElement;
-    const activeElement = document.querySelector(".settings-menu-item.active");
-    const currentElement = activeElement || focusedElement;
-
-    let targetElement = null;
-
-    // Se nenhum item está com foco ou ativo, selecionar o primeiro
-    if (
-      !currentElement ||
-      !currentElement.classList.contains("settings-menu-item")
-    ) {
-      console.log("[App] Nenhum item selecionado, selecionando o primeiro");
-      targetElement = menuItems[0];
-    } else {
-      // Navegação simples (cima/baixo)
-      const currentIndex = Array.from(menuItems).indexOf(currentElement);
-      console.log(`[App] Item atual: ${currentIndex}`);
-      let nextIndex = currentIndex;
-
+    // Verificar limites e ajustar se necessário
+    if (nextIndex < 0) {
       if (direction === "up") {
-        nextIndex = Math.max(0, currentIndex - 1);
-        console.log(`[App] Movendo para cima: novo índice ${nextIndex}`);
-      } else if (direction === "down") {
-        nextIndex = Math.min(menuItems.length - 1, currentIndex + 1);
-        console.log(`[App] Movendo para baixo: novo índice ${nextIndex}`);
+        // Ir para a última linha
+        const lastRowStart =
+          Math.floor((elements.length - 1) / columnsCount) * columnsCount;
+        nextIndex = Math.min(
+          lastRowStart + (currentIndex % columnsCount),
+          elements.length - 1
+        );
+      } else {
+        nextIndex = elements.length - 1;
       }
-
-      // Verificar se o índice é válido
-      if (
-        nextIndex >= 0 &&
-        nextIndex < menuItems.length &&
-        nextIndex !== currentIndex
-      ) {
-        targetElement = menuItems[nextIndex];
+    } else if (nextIndex >= elements.length) {
+      if (direction === "down") {
+        // Ir para a primeira linha na mesma coluna
+        nextIndex = currentIndex % columnsCount;
+      } else {
+        nextIndex = 0;
       }
     }
 
-    // Se encontramos um elemento para focar
-    if (targetElement) {
-      console.log(
-        `[App] Item de menu alvo encontrado: ${targetElement.textContent.trim()}`
-      );
+    // Atualizar seleção
+    currentElement.classList.remove("selected");
+    currentElement.classList.remove("active");
+    currentElement.setAttribute("aria-selected", "false");
 
-      // Remover classe active de todos os itens
-      menuItems.forEach((item) => {
-        item.classList.remove("active");
-        item.setAttribute("aria-selected", "false");
-      });
-
-      // Adicionar classe active ao item selecionado
-      targetElement.classList.add("active");
-      targetElement.setAttribute("aria-selected", "true");
-
-      // Focar o elemento
-      targetElement.focus();
-
-      // Vibrar o controle para feedback (se suportado)
-      if (this.gamepadManager) {
-        this.gamepadManager.vibrate(50, 0.1, 0.1);
-      }
-
-      return true;
-    }
-
-    return false;
+    elements[nextIndex].classList.add("active");
+    elements[nextIndex].setAttribute("aria-selected", "true");
+    elements[nextIndex].scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
   }
 
-  /**
-   * Seleciona o elemento atual com o gamepad
-   */
-  selectWithGamepad() {
-    console.log("[App] Selecionando com gamepad");
+  // Adicionar suporte para navegação por teclado
+  setupKeyboardNavigation() {
+    console.log("[App] Configurando navegação por teclado");
 
-    // Determinar qual elemento está com foco ou ativo
-    const focusedElement = document.activeElement;
-    const activeElement = document.querySelector(
-      ".system-card.active, .game-card.active, .settings-menu-item.active"
-    );
-    const targetElement = activeElement || focusedElement;
+    document.addEventListener("keydown", (e) => {
+      console.log("[App] Tecla pressionada:", e.key, e.keyCode);
 
-    // Se não encontramos nenhum elemento para selecionar
-    if (!targetElement) {
-      console.warn("[App] Nenhum elemento selecionado para ação");
-      return false;
-    }
-
-    console.log(
-      `[App] Elemento para seleção: ${
-        targetElement.tagName
-      } - ${targetElement.textContent.trim()}`
-    );
-
-    // Vibrar o controle para feedback (se suportado)
-    if (this.gamepadManager) {
-      this.gamepadManager.vibrate(100, 0.3, 0.3);
-    }
-
-    // Se for um cartão de sistema
-    if (targetElement.classList.contains("system-card")) {
-      const systemId = targetElement.getAttribute("data-system-id");
-
-      if (systemId) {
-        // Encontrar o sistema pelo ID
-        const system = this.systemsScreen.loadedSystems.find(
-          (s) => s.id === systemId || s.name === systemId
-        );
-
-        if (system) {
-          console.log(`[App] Selecionando sistema via gamepad: ${system.name}`);
-          this.selectSystem(system);
-          return true;
-        } else {
-          console.warn(`[App] Sistema não encontrado para ID: ${systemId}`);
-        }
-      } else {
-        console.warn("[App] Card de sistema não tem data-system-id");
+      // Navegação com teclas de seta
+      if (e.key === "ArrowUp") {
+        console.log("[App] Tecla SETA PARA CIMA pressionada");
+        this.navigateWithGamepad("up");
+        e.preventDefault();
+      } else if (e.key === "ArrowDown") {
+        console.log("[App] Tecla SETA PARA BAIXO pressionada");
+        this.navigateWithGamepad("down");
+        e.preventDefault();
+      } else if (e.key === "ArrowLeft") {
+        console.log("[App] Tecla SETA PARA ESQUERDA pressionada");
+        this.navigateWithGamepad("left");
+        e.preventDefault();
+      } else if (e.key === "ArrowRight") {
+        console.log("[App] Tecla SETA PARA DIREITA pressionada");
+        this.navigateWithGamepad("right");
+        e.preventDefault();
       }
-    }
-    // Se for um cartão de jogo
-    else if (targetElement.classList.contains("game-card")) {
-      const gameId = targetElement.getAttribute("data-game-id");
 
-      if (gameId) {
-        console.log(`[App] Selecionando jogo via gamepad: ${gameId}`);
-
-        if (
-          this.gameListScreen &&
-          typeof this.gameListScreen.selectGame === "function"
-        ) {
-          this.gameListScreen.selectGame(gameId);
-          return true;
-        } else {
-          console.warn(
-            "[App] gameListScreen ou método selectGame não encontrado"
-          );
-        }
-      } else {
-        console.warn("[App] Card de jogo não tem data-game-id");
+      // Enter para selecionar
+      else if (e.key === "Enter") {
+        console.log("[App] Tecla ENTER pressionada");
+        this.selectWithGamepad();
+        e.preventDefault();
       }
-    }
-    // Se for um item de menu de configurações
-    else if (targetElement.classList.contains("settings-menu-item")) {
-      const action = targetElement.getAttribute("data-action");
 
-      if (action) {
-        console.log(`[App] Selecionando ação via gamepad: ${action}`);
-
-        if (
-          this.settingsScreen &&
-          typeof this.settingsScreen.handleMenuAction === "function"
-        ) {
-          this.settingsScreen.handleMenuAction(action);
-          return true;
-        } else {
-          console.warn(
-            "[App] settingsScreen ou método handleMenuAction não encontrado"
-          );
-        }
-      } else {
-        console.warn("[App] Item de menu não tem data-action");
+      // ESC para voltar - adicionado
+      else if (e.key === "Escape" || e.keyCode === 27) {
+        console.log("[App] Tecla ESC pressionada");
+        this.handleBackButton();
+        e.preventDefault();
       }
-    }
-    // Se for um botão ou outro controle focável
-    else if (
-      targetElement.tagName === "BUTTON" ||
-      targetElement.tagName === "SELECT" ||
-      targetElement.tagName === "INPUT"
-    ) {
-      console.log(
-        `[App] Clicando em elemento via gamepad: ${targetElement.tagName}`
-      );
-      targetElement.click();
-      return true;
+    });
+  }
+
+  handleBackButton() {
+    console.log("[App] Processando botão voltar");
+
+    // Se o modal de configurações estiver aberto, fechá-lo
+    if (this.settingsScreen && this.settingsScreen.modalOpen) {
+      console.log("[App] Fechando modal de configurações");
+      this.settingsScreen.closeSettingsModal();
+      return;
     }
 
-    console.warn("[App] Nenhuma ação executada pelo gamepad");
-    return false;
+    // Se estiver na lista de jogos, voltar para sistemas
+    if (this.currentScreen === "gamelist") {
+      console.log("[App] Voltando da lista de jogos para sistemas");
+      // CORREÇÃO: Chamar diretamente o método showScreen e aplicar o tema correto
+      this.themeManager.changeView("system");
+      this.showScreen("systems");
+
+      // CORREÇÃO: Selecionar o primeiro elemento após um pequeno delay
+      setTimeout(() => {
+        this.selectFirstElementInCurrentScreen();
+      }, 100);
+      return;
+    }
+
+    // Se estiver nos detalhes do jogo, voltar para a lista
+    if (this.currentScreen === "gamedetails") {
+      console.log("[App] Voltando dos detalhes para a lista de jogos");
+      this.showScreen("gamelist");
+
+      // CORREÇÃO: Selecionar o primeiro elemento após um pequeno delay
+      setTimeout(() => {
+        this.selectFirstElementInCurrentScreen();
+      }, 100);
+      return;
+    }
   }
 
   showScreen(screenId) {
@@ -1029,17 +995,6 @@ class App {
       }
     }
 
-    // Atualizar a navegação - destacar o item de menu atual
-    const navItems = document.querySelectorAll("#navigation li");
-    navItems.forEach((item) => {
-      const itemScreenId = item.getAttribute("data-screen");
-      if (itemScreenId === screenId) {
-        item.classList.add("active");
-      } else {
-        item.classList.remove("active");
-      }
-    });
-
     // Se estamos usando gamepad, selecionar o primeiro elemento na nova tela
     if (document.body.classList.contains("gamepad-active")) {
       // Dar tempo para a tela carregar
@@ -1057,13 +1012,6 @@ class App {
 // Iniciar aplicativo quando o DOM estiver pronto
 document.addEventListener("DOMContentLoaded", () => {
   const app = new App();
+  window.app = app;
   app.init();
 });
-
-// No final do arquivo app.js, após a classe App
-const app = new App();
-
-// Expor a instância do app globalmente para facilitar o acesso direto
-window.app = app;
-
-console.log("App exposto globalmente como window.app");

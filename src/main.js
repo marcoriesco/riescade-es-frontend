@@ -23,7 +23,7 @@ async function ensureThemesDirectory() {
 
 // Register custom protocol for external themes
 function registerThemeProtocol() {
-  protocol.registerFileProtocol("riescade", (request, callback) => {
+  protocol.handle("riescade", (request, callback) => {
     const url = request.url.substr(11); // Remove 'riescade://'
     console.log(`Riescade protocol request: ${url}`);
 
@@ -253,5 +253,4 @@ app.whenReady().then(() => {
   registerThemeProtocol();
   setupThemeHandlers();
   createWindow();
-  // ... rest of the existing code ...
 });

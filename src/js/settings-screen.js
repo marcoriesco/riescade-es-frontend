@@ -91,6 +91,18 @@ export class SettingsScreen {
       } else {
         console.log("[SettingsScreen] Abrindo modal...");
         this.openSettingsModal();
+
+        // CORREÇÃO: Adicionar listener específico para ESC quando o modal está aberto
+        const escHandler = (e) => {
+          if (e.key === "Escape" || e.keyCode === 27) {
+            console.log("[SettingsScreen] ESC pressionado no modal");
+            this.closeSettingsModal();
+            // Remover este listener após fechar o modal
+            document.removeEventListener("keydown", escHandler);
+          }
+        };
+
+        document.addEventListener("keydown", escHandler);
       }
 
       console.log("[SettingsScreen] Novo estado do modal:", this.modalOpen);
@@ -135,18 +147,18 @@ export class SettingsScreen {
         modalElement.style.alignItems = "center";
         modalElement.style.zIndex = "9999";
 
-        // Estrutura do modal - atualizada para se parecer com a imagem
+        // Estrutura do modal - atualizada para se parecer com a imagem e adicionar data-setting-id
         modalElement.innerHTML = `
           <div class="settings-menu-content" style="background-color: #f2f2f2; width: 60%; max-width: 700px; padding: 20px;">
             <h2 class="settings-menu-title">MAIN MENU</h2>
             <ul class="settings-menu-list">
-              <li class="settings-menu-item" data-action="scraper" tabindex="0">SCRAPER <span class="arrow">›</span></li>
-              <li class="settings-menu-item" data-action="sound" tabindex="0">SOUND SETTINGS <span class="arrow">›</span></li>
-              <li class="settings-menu-item" data-action="ui" tabindex="0">UI SETTINGS <span class="arrow">›</span></li>
-              <li class="settings-menu-item" data-action="collection" tabindex="0">GAME COLLECTION SETTINGS <span class="arrow">›</span></li>
-              <li class="settings-menu-item" data-action="other" tabindex="0">OTHER SETTINGS <span class="arrow">›</span></li>
-              <li class="settings-menu-item" data-action="input" tabindex="0">CONFIGURE INPUT <span class="arrow">›</span></li>
-              <li class="settings-menu-item" data-action="quit" tabindex="0">QUIT <span class="arrow">›</span></li>
+              <li class="settings-menu-item" data-action="scraper" data-setting-id="scraper" tabindex="0">SCRAPER <span class="arrow">›</span></li>
+              <li class="settings-menu-item" data-action="sound" data-setting-id="sound" tabindex="0">SOUND SETTINGS <span class="arrow">›</span></li>
+              <li class="settings-menu-item" data-action="ui" data-setting-id="ui" tabindex="0">UI SETTINGS <span class="arrow">›</span></li>
+              <li class="settings-menu-item" data-action="collection" data-setting-id="collection" tabindex="0">GAME COLLECTION SETTINGS <span class="arrow">›</span></li>
+              <li class="settings-menu-item" data-action="other" data-setting-id="other" tabindex="0">OTHER SETTINGS <span class="arrow">›</span></li>
+              <li class="settings-menu-item" data-action="input" data-setting-id="input" tabindex="0">CONFIGURE INPUT <span class="arrow">›</span></li>
+              <li class="settings-menu-item" data-action="quit" data-setting-id="quit" tabindex="0">QUIT <span class="arrow">›</span></li>
             </ul>
             <div class="settings-menu-footer">
               <span class="version-info">EMULATIONSTATION V2.6.4RP</span>
@@ -211,6 +223,7 @@ export class SettingsScreen {
       console.log("[SettingsScreen] Focando primeiro item");
       firstItem.focus();
       firstItem.classList.add("active");
+      firstItem.setAttribute("aria-selected", "true");
     }
 
     console.log(
@@ -301,8 +314,11 @@ export class SettingsScreen {
   }
 
   navigateMenu(menuItems, currentIndex, direction) {
-    // Remover classe ativa do item atual
-    menuItems.forEach((item) => item.classList.remove("active"));
+    // Remover classe ativa e aria-selected de todos os itens
+    menuItems.forEach((item) => {
+      item.classList.remove("active");
+      item.setAttribute("aria-selected", "false");
+    });
 
     // Calcular novo índice
     const nextIndex = Math.max(
@@ -313,8 +329,11 @@ export class SettingsScreen {
     // Adicionar classe ativa e focar no novo item
     if (menuItems[nextIndex]) {
       menuItems[nextIndex].classList.add("active");
+      menuItems[nextIndex].setAttribute("aria-selected", "true");
       menuItems[nextIndex].focus();
     }
+
+    return nextIndex;
   }
 
   // Fechar o modal
@@ -704,80 +723,5 @@ export class SettingsScreen {
     } catch (error) {
       console.error("Erro ao carregar configurações:", error);
     }
-  }
-
-  // Método auxiliar para testes - chamar diretamente esta função no console do browser
-  // Como: app.settingsScreen.testModal()
-  testModal() {
-    console.log("[SettingsScreen] Método de teste chamado");
-
-    // Verificar a existência de CSS
-    const styleSheets = document.styleSheets;
-    let settingsCssFound = false;
-
-    console.log("[SettingsScreen.test] Verificando folhas de estilo:");
-    for (let i = 0; i < styleSheets.length; i++) {
-      try {
-        const href = styleSheets[i].href || "";
-        console.log(`[SettingsScreen.test] StyleSheet ${i}: ${href}`);
-        if (href.includes("settings.css")) {
-          settingsCssFound = true;
-          console.log("[SettingsScreen.test] CSS de settings encontrado!");
-        }
-      } catch (e) {
-        console.log(`[SettingsScreen.test] Erro ao acessar stylesheet ${i}`);
-      }
-    }
-
-    if (!settingsCssFound) {
-      console.warn(
-        "[SettingsScreen.test] CSS de settings não encontrado! Adicionando..."
-      );
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "src/css/settings.css";
-      document.head.appendChild(link);
-    }
-
-    // Criar um modal diretamente
-    console.log("[SettingsScreen.test] Criando modal de teste");
-    const testModal = document.createElement("div");
-    testModal.id = "test-settings-modal";
-    testModal.style.position = "fixed";
-    testModal.style.top = "0";
-    testModal.style.left = "0";
-    testModal.style.width = "100%";
-    testModal.style.height = "100%";
-    testModal.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
-    testModal.style.display = "flex";
-    testModal.style.justifyContent = "center";
-    testModal.style.alignItems = "center";
-    testModal.style.zIndex = "10000";
-
-    testModal.innerHTML = `
-      <div style="background-color: #f2f2f2; width: 60%; max-width: 700px; color: #555; padding: 20px;">
-        <h2 style="color: #555; text-align: center; font-size: 24px;">MODAL DE TESTE</h2>
-        <p style="text-align: center;">Se você está vendo este modal, o problema não é com o CSS.</p>
-        <div style="text-align: center; margin-top: 20px;">
-          <button id="close-test-modal" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">Fechar</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(testModal);
-
-    // Adicionar evento para fechar
-    const closeButton = document.getElementById("close-test-modal");
-    if (closeButton) {
-      closeButton.addEventListener("click", () => {
-        testModal.remove();
-      });
-    }
-
-    // Também testar o modal normal
-    console.log("[SettingsScreen.test] Tentando abrir o modal normal");
-    this.openSettingsModal();
-
-    return "Modal de teste criado. Verifique a tela.";
   }
 }
