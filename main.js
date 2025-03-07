@@ -893,8 +893,6 @@ ipcMain.handle("get-settings", async () => {
       const settingsData = fs.readFileSync(settingsPath, "utf8");
       const settings = JSON.parse(settingsData);
 
-      console.log("Configurações:", settings);
-
       // Se não houver caminhos definidos, preencher com os padrões
       if (!settings.paths) {
         settings.paths = {
@@ -1193,6 +1191,13 @@ ipcMain.handle(
     }
   }
 );
+
+// Handler para recarregar o aplicativo
+ipcMain.handle("reload-app", () => {
+  if (mainWindow) {
+    mainWindow.reload();
+  }
+});
 
 // Exportar os caminhos para que outros módulos possam acessá-los
 module.exports = { PATHS };

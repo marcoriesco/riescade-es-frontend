@@ -382,9 +382,6 @@ export class SystemsScreen {
       if (window.api && typeof window.api.readGameList === "function") {
         const games = await window.api.readGameList(systemName);
 
-        // Log de retorno de API
-        console.log(`Resposta API readGameList (${systemName}):`, games);
-
         if (games && games.gameList && games.gameList.game) {
           // Fix for game count issue - properly handle empty arrays or non-existent games
           if (Array.isArray(games.gameList.game)) {

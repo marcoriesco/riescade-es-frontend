@@ -41,7 +41,7 @@ console.log("=== FIM DA VERIFICAÇÃO DA API ===");
 
 // Corrigir erro de "dragEvent is not defined"
 if (typeof dragEvent === "undefined") {
-  window.dragEvent = null;
+  window.DragEvent = null;
 }
 
 // Verificar se a API local está disponível
@@ -77,9 +77,15 @@ class App {
 
   async init() {
     try {
-      // Inicializar o gerenciador de temas (antes de qualquer outra coisa)
+      // Carregar configurações primeiro
+      console.log("Carregando configurações...");
+      const settings = await window.api.getSettings();
+
+      // Inicializar o gerenciador de temas com o tema das configurações
       this.themeManager = new ThemeManager();
-      const themeInitialized = await this.themeManager.initialize();
+      const themeInitialized = await this.themeManager.init(
+        settings?.theme || "default"
+      );
 
       if (!themeInitialized) {
         console.warn(
@@ -102,10 +108,6 @@ class App {
           console.log(`Folha de estilo ${i}: [erro ao acessar href]`);
         }
       }
-
-      // Carregar configurações
-      console.log("Carregando configurações...");
-      await this.loadSettings();
 
       // Carregar lista de sistemas (apenas uma vez)
       console.log("Carregando lista de sistemas...");

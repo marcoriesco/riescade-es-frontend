@@ -718,15 +718,36 @@ export class SettingsScreen {
     try {
       console.log(`[SettingsScreen] Alterando tema para: ${themeName}`);
 
-      // Verificar se temos acesso ao ThemeManager
+      // Salvar a configuração do tema
+      const currentSettings = await window.api.getSettings();
+      const settings = {
+        ...currentSettings,
+        theme: themeName,
+      };
+
+      const saveResult = await window.api.saveSettings(settings);
+      if (!saveResult.success) {
+        console.error("[SettingsScreen] Falha ao salvar configuração do tema");
+        return false;
+      }
+
+      // Recarregar o aplicativo para aplicar o novo tema
+      if (window.api.reloadApp) {
+        await window.api.reloadApp();
+        return true;
+      }
+
+      console.warn(
+        "[SettingsScreen] reloadApp não disponível, tentando alteração direta do tema"
+      );
+
+      // Fallback: tentar mudar o tema diretamente se não puder recarregar
       if (!this.app || !this.app.themeManager) {
         console.error("[SettingsScreen] ThemeManager não disponível");
         return false;
       }
 
-      // Verificar se o método changeTheme existe no ThemeManager
       if (typeof this.app.themeManager.changeTheme === "function") {
-        // Usar o método no ThemeManager para alterar o tema
         const success = await this.app.themeManager.changeTheme(themeName);
 
         if (success) {
@@ -742,43 +763,6 @@ export class SettingsScreen {
           }
 
           return true;
-        } else {
-          console.error(
-            `[SettingsScreen] Falha ao alterar o tema para: ${themeName}`
-          );
-          return false;
-        }
-      } else {
-        console.warn(
-          "[SettingsScreen] Método changeTheme não encontrado no ThemeManager, tentando alternativa"
-        );
-
-        // Tentar método alternativo se o changeTheme não estiver disponível
-        if (
-          this.app.themeManager.init &&
-          typeof this.app.themeManager.init === "function"
-        ) {
-          const success = await this.app.themeManager.init(themeName);
-
-          if (success) {
-            console.log(
-              `[SettingsScreen] Tema inicializado com sucesso: ${themeName}`
-            );
-
-            // Atualizar a interface
-            if (this.app.currentScreen === "systems") {
-              this.app.themeManager.applySystemsScreenTheme();
-            } else if (this.app.currentScreen === "gamelist") {
-              this.app.themeManager.applyGameListTheme(this.app.currentSystem);
-            }
-
-            return true;
-          } else {
-            console.error(
-              `[SettingsScreen] Falha ao inicializar o tema: ${themeName}`
-            );
-            return false;
-          }
         }
       }
 

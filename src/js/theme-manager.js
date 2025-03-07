@@ -187,6 +187,7 @@ export class ThemeManager {
         "theme.css",
         "systems.css",
         "gamelist.css",
+        "settings.css",
         "fontawesome.css",
       ];
 

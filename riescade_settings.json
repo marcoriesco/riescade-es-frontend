@@ -4,6 +4,6 @@
     "emulationstation": "Y:\\images\\RIESCADE\\emulationstation",
     "emulators": "Y:\\images\\RIESCADE\\emulators"
   },
-  "fullscreen": false,
+  "fullscreen": true,
   "theme": "platform"
 }
