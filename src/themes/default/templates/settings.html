@@ -1,0 +1,73 @@
+<!-- Template para tela de configurações -->
+<div class="settings-modal">
+  <div class="settings-modal-content">
+    <div class="settings-header">
+      <h2>Configurações</h2>
+      <button id="close-settings" class="close-button">&times;</button>
+    </div>
+
+    <div class="settings-body">
+      <!-- Seção de Tema -->
+      <div class="settings-section">
+        <h3>Tema</h3>
+        <div class="setting-item">
+          <label for="theme-selector">Selecionar Tema:</label>
+          <select id="theme-selector" class="theme-selector">
+            <option value="default">Padrão</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Seção de Diretórios -->
+      <div class="settings-section">
+        <h3>Diretórios</h3>
+        <div class="setting-item">
+          <label for="roms-dir">Diretório de ROMs:</label>
+          <div class="directory-input">
+            <input type="text" id="roms-dir" readonly />
+            <button id="browse-roms-dir" class="browse-button">Procurar</button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <label for="emulators-dir">Diretório de Emuladores:</label>
+          <div class="directory-input">
+            <input type="text" id="emulators-dir" readonly />
+            <button id="browse-emulators-dir" class="browse-button">
+              Procurar
+            </button>
+          </div>
+        </div>
+
+        <div class="setting-item">
+          <label for="emulationstation-dir"
+            >Diretório do EmulationStation:</label
+          >
+          <div class="directory-input">
+            <input type="text" id="emulationstation-dir" readonly />
+            <button id="browse-emulationstation-dir" class="browse-button">
+              Procurar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção de Interface -->
+      <div class="settings-section">
+        <h3>Interface</h3>
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="fullscreen-mode" />
+            Modo Tela Cheia
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-footer">
+      <button id="save-settings" class="save-button">
+        Salvar Configurações
+      </button>
+    </div>
+  </div>
+</div>

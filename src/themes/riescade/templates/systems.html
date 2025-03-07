@@ -1,0 +1,42 @@
+<div class="systems-container">
+  <div class="systems-header">
+    <h1>{{app.title}}</h1>
+    <div class="systems-stats">
+      <span class="total-systems">{{stats.totalSystems}} Sistemas</span>
+    </div>
+    <div class="systems-search">
+      <input
+        type="text"
+        id="system-search"
+        placeholder="Pesquisar sistemas..."
+      />
+      <button id="clear-search"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+
+  <div class="systems-grid">
+    <!-- BEGIN systems -->
+    <div
+      class="system-card"
+      data-system-id="{{id}}"
+      data-system-name="{{name}}"
+    >
+      <div class="system-logo">
+        <img
+          src="{{logoPath}}"
+          alt="{{name}}"
+          onerror="this.style.display='none'; this.parentNode.textContent='{{fullname}}'"
+        />
+      </div>
+      <div class="system-name">{{fullname}}</div>
+      <div class="system-info">
+        {{#if (gt gameCount -1)}}
+        <span class="game-count">{{gameCount}} jogos</span>
+        {{else}}
+        <span class="game-count">? jogos</span>
+        {{/if}}
+      </div>
+    </div>
+    <!-- END systems -->
+  </div>
+</div>

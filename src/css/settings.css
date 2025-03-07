@@ -1,0 +1,311 @@
+/* Estilos para o modal de configurações */
+.settings-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.settings-modal-content {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos do modal de menu (estilo do EmulationStation) */
+.settings-menu-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  display: none !important;
+  justify-content: center !important;
+  align-items: center !important;
+  z-index: 9999 !important;
+  /* Impedir scroll da página de fundo */
+  overflow: hidden !important;
+}
+
+/* Quando o modal está aberto, impedir scroll no body */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.settings-menu-modal[style*="display: flex"] {
+  display: flex !important;
+}
+
+.settings-menu-content {
+  background-color: #f2f2f2 !important;
+  width: 60% !important;
+  max-width: 700px !important;
+  color: #555 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  /* Garantir que o modal não seja maior que a tela */
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+.settings-menu-title {
+  background-color: #f2f2f2 !important;
+  color: #555 !important;
+  text-align: center !important;
+  padding: 20px 0 !important;
+  margin: 0 !important;
+  font-size: 36px !important;
+  font-weight: normal !important;
+  letter-spacing: 2px !important;
+  /* Manter o título visível durante o scroll */
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1 !important;
+}
+
+.settings-menu-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  /* Permitir scroll apenas na lista */
+  overflow-y: auto !important;
+  max-height: 70vh !important;
+}
+
+.settings-menu-item {
+  padding: 15px 30px !important;
+  border-bottom: 1px solid #ddd !important;
+  cursor: pointer !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  font-size: 20px !important;
+  color: #555 !important;
+}
+
+.settings-menu-item:hover,
+.settings-menu-item:focus,
+.settings-menu-item.active {
+  background-color: #e0e0e0 !important;
+  outline: 2px solid #007bff !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.arrow {
+  font-size: 24px !important;
+  color: #999 !important;
+  font-weight: bold !important;
+}
+
+.settings-menu-footer {
+  padding: 15px !important;
+  text-align: center !important;
+  color: #555 !important;
+  background-color: #f2f2f2 !important;
+  /* Manter o rodapé visível durante o scroll */
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 1 !important;
+}
+
+.version-info {
+  font-size: 14px !important;
+  color: #777 !important;
+  letter-spacing: 1px !important;
+}
+
+/* Estilos originais do modal de configurações */
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.settings-header h2 {
+  margin: 0;
+  color: #fff;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.close-button:hover {
+  color: #ddd;
+}
+
+.settings-body {
+  padding: 20px;
+}
+
+.settings-section {
+  margin-bottom: 30px;
+}
+
+.settings-section h3 {
+  color: #fff;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #3a3a3a;
+  padding-bottom: 8px;
+}
+
+.setting-item {
+  margin-bottom: 20px;
+}
+
+.setting-item label {
+  display: block;
+  margin-bottom: 8px;
+  color: #ddd;
+}
+
+.directory-input {
+  display: flex;
+  gap: 10px;
+}
+
+.directory-input input[type="text"] {
+  flex: 1;
+  padding: 8px;
+  background-color: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.browse-button,
+.save-button {
+  padding: 8px 16px;
+  background-color: #4a4a4a;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.browse-button:hover,
+.save-button:hover {
+  background-color: #5a5a5a;
+}
+
+.theme-selector {
+  width: 100%;
+  padding: 8px;
+  background-color: #1a1a1a;
+  border: 1px solid #3a3a3a;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.settings-footer {
+  padding: 20px;
+  border-top: 1px solid #3a3a3a;
+  text-align: right;
+}
+
+.save-button {
+  background-color: #007bff;
+  padding: 10px 20px;
+}
+
+.save-button:hover {
+  background-color: #0056b3;
+}
+
+/* Estilos para a página de configurações dentro do modal */
+.settings-page-content {
+  background-color: #f2f2f2;
+  width: 60%;
+  max-width: 700px;
+  max-height: 95vh;
+  overflow-y: auto;
+  color: #555;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  position: relative;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.settings-page-header {
+  background-color: #f2f2f2;
+  color: #555;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+}
+
+.settings-page-header h2 {
+  flex-grow: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 24px;
+  font-weight: normal;
+  letter-spacing: 1px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+}
+
+.back-button:hover {
+  background-color: #e0e0e0;
+}
+
+.settings-page-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.settings-page-footer {
+  padding: 15px 20px;
+  text-align: right;
+  border-top: 1px solid #ddd;
+  background-color: #f2f2f2;
+}

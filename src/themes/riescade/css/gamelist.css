@@ -1,0 +1,217 @@
+/* Default Theme - Game List Screen CSS */
+
+/* Games grid layout */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.gamelist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  transition: transform var(--transition-speed);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-card.active {
+  outline: 5px solid var(--primary-color);
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.game-image {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+}
+
+.game-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-speed);
+}
+
+.game-card:hover .game-image img {
+  transform: scale(1.05);
+}
+
+.game-info {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.game-title {
+  font-size: 1em;
+  font-weight: bold;
+  margin-bottom: var(--spacing-sm);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.game-metadata {
+  display: flex;
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.game-description {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+  height: 60px;
+}
+
+/* Game details */
+.game-details {
+  padding: var(--spacing-md);
+}
+
+.game-header {
+  display: flex;
+  margin-bottom: var(--spacing-lg);
+}
+
+.game-image-container {
+  flex: 0 0 40%;
+  margin-right: var(--spacing-lg);
+}
+
+.game-detail-image {
+  width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.game-info-header {
+  flex: 1;
+}
+
+.game-description-container {
+  margin-bottom: var(--spacing-lg);
+}
+
+.game-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  padding-top: 0;
+}
+
+.play-button {
+  background-color: var(--success-color);
+  padding: var(--spacing-sm) var(--spacing-lg);
+}
+
+.play-button:hover {
+  background-color: #3d8b40;
+}
+
+.favorite-button {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.favorite-button:hover {
+  background-color: var(--hover-color);
+}
+
+.favorite-button.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Game launching overlay */
+.game-launch-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.game-launch-overlay.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.launch-content {
+  text-align: center;
+  padding: var(--spacing-xl);
+  max-width: 80%;
+  animation: fadeInScale 0.5s ease-in-out;
+}
+
+.launch-content h2 {
+  margin-bottom: var(--spacing-md);
+  font-size: 2em;
+  color: var(--primary-color);
+}
+
+.launch-content p {
+  margin-bottom: var(--spacing-lg);
+  font-size: 1.2em;
+  color: var(--text-secondary);
+}
+
+.launch-content .system-logo {
+  margin-bottom: var(--spacing-lg);
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.launch-content .system-logo img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.launch-content .game-image {
+  margin: 0 auto var(--spacing-lg);
+  max-width: 400px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.launch-content .game-image img {
+  max-height: 100%;
+  max-width: 100%;
+  border-radius: var(--border-radius);
+}

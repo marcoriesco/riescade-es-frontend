@@ -1,0 +1,89 @@
+/* Default Theme - Systems Screen CSS */
+
+/* System screen specific styles */
+.systems-container {
+  padding: var(--spacing-md);
+}
+
+.systems-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 25px;
+}
+
+.systems-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.system-card {
+  background-color: var(--card-background);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: transform var(--transition-speed),
+    box-shadow var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.system-card.active {
+  outline: 5px solid var(--primary-color);
+}
+
+.system-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.system-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background-color: var(--primary-color);
+}
+
+.system-logo {
+  height: 80px;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.system-logo img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.system-name {
+  font-weight: bold;
+  margin-bottom: var(--spacing-sm);
+  text-align: center;
+}
+
+.system-stats {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.systems-search {
+  position: relative;
+  margin-bottom: var(--spacing-md);
+}
+
+.systems-search input {
+  padding-right: 40px;
+}

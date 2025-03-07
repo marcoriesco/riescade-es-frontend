@@ -1,0 +1,35 @@
+<!-- Template para lançamento de jogos -->
+<div class="game-launch-overlay">
+  <div class="launch-content">
+    <div class="system-logo">
+      <img
+        src="{{systemLogo}}"
+        alt="{{systemName}}"
+        onerror="this.onerror=null;this.src='src/themes/default/assets/icons/default-system.png';"
+      />
+    </div>
+
+    <h2>Iniciando Jogo</h2>
+
+    <p class="game-title">{{gameName}}</p>
+
+    <div class="game-image">
+      <img
+        src="{{gameImage}}"
+        alt="{{gameName}}"
+        onerror="this.onerror=null;this.src='src/themes/default/assets/icons/default-game.png';"
+      />
+    </div>
+
+    <div class="loading-spinner"></div>
+
+    <p class="launch-message">Carregando, por favor aguarde...</p>
+
+    {{#if showTip}}
+    <div class="launch-tip">
+      <h3>Dica:</h3>
+      <p>{{tip}}</p>
+    </div>
+    {{/if}}
+  </div>
+</div>

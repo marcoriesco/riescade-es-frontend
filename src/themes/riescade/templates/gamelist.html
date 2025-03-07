@@ -1,0 +1,59 @@
+<div class="gamelist-container">
+  <div class="gamelist-header">
+    <div class="system-info">
+      <div class="system-logo">
+        <img
+          src="{{system.logoPath}}"
+          alt="{{system.name}}"
+          onerror="this.onerror=null; this.src='themes/default/assets/icons/default-system.png'; console.log('Error loading system logo:', this.alt);"
+        />
+      </div>
+      <h2>{{system.fullname}}</h2>
+    </div>
+    <div class="game-search-container">
+      <input type="text" id="game-search" placeholder="Pesquisar jogos..." />
+      <button id="clear-search" class="clear-search-btn">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="games-grid">
+    {{#hasGames}} {{#games}}
+    <div class="game-card" data-game-id="{{id}}" data-game-path="{{path}}">
+      <div class="game-image">
+        <img
+          src="{{image}}"
+          alt="{{name}}"
+          onerror="this.src='src/themes/default/assets/icons/default-game.png'"
+        />
+      </div>
+      <div class="game-info">
+        <h3 class="game-title">{{name}}</h3>
+        <div class="game-metadata">
+          <span class="developer">{{developer}}</span>
+          <span class="release-date">{{releaseDate}}</span>
+        </div>
+      </div>
+      <div class="game-actions">
+        <button class="play-button" title="Jogar">
+          <i class="fas fa-play"></i>
+        </button>
+        <button
+          class="favorite-button {{#favorite}}active{{/favorite}}"
+          title="Favorito"
+        >
+          <i class="fas fa-heart"></i>
+        </button>
+      </div>
+    </div>
+    {{/games}} {{/hasGames}} {{^hasGames}}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fas fa-ghost"></i>
+      </div>
+      <p>Nenhum jogo encontrado para este sistema.</p>
+    </div>
+    {{/hasGames}}
+  </div>
+</div>

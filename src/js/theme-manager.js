@@ -968,8 +968,6 @@ export class ThemeManager {
         ? systemName.name
         : systemName;
 
-    console.log(`Gerando caminho do logo para o sistema: ${sysName}`);
-
     // Se temos um caminho já cacheado para o sistema, usá-lo
     if (
       this.systemThemeCache[sysName] &&
@@ -992,7 +990,6 @@ export class ThemeManager {
 
     // Caminho para o logo do sistema - atualizado para nova estrutura
     const logoPath = `src/themes/${themeName}/assets/logos/${sysName}.png`;
-    console.log(`Logo path: ${logoPath}`);
 
     // Retornar o caminho, o tratamento de erro será feito no próprio img com onerror
     return logoPath;

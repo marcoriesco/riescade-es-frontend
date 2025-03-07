@@ -1,55 +1,79 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EmulationStation Frontend</title>
-    <link rel="stylesheet" href="src/css/main.css" />
-    <link rel="stylesheet" href="src/css/settings.css" />
-  </head>
-  <body>
-    <div id="app">
-      <!-- Área de navegação -->
-      <nav id="navigation" class="hidden">
-        <ul>
-          <li data-screen="systems" class="active">Sistemas</li>
-          <li data-screen="gamelist" class="disabled">Lista de Jogos</li>
-          <li data-screen="settings">Configurações</li>
-        </ul>
-      </nav>
+  <!-- Telas do aplicativo -->
+  <div id="screens">
+    <!-- ... existing code ... -->
+  </div>
+</div>
 
-      <!-- Telas do aplicativo -->
-      <div id="screens">
-        <!-- Tela de sistemas -->
-        <section id="systems-screen" class="screen active">
-          <div class="systems-container"></div>
-        </section>
+<!-- Indicador de gamepad conectado -->
+<div id="gamepad-indicator" class="gamepad-connected-indicator">
+  <span id="gamepad-name">Gamepad conectado</span>
+</div>
 
-        <!-- Tela de lista de jogos -->
-        <section id="gamelist-screen" class="screen">
-          <div class="header">
-            <button id="back-to-systems">Voltar</button>
-            <h1 id="current-system-name"></h1>
-          </div>
-          <div class="gamelist-container"></div>
-        </section>
+<script type="module" src="src/js/app.js"></script>
 
-        <!-- Tela de configurações -->
-        <section id="settings-screen" class="screen">
-          <div class="header">
-            <button id="back-from-settings">Voltar</button>
-            <h1>Configurações</h1>
-          </div>
-          <div class="settings-container">
-            <div class="settings-section">
-              <h2>Diretórios</h2>
-              <!-- Configurações de diretórios serão adicionadas aqui -->
+<!-- Script de atalho direto -->
+<script>
+  // Garantir que a tecla ESPAÇO abra o modal de configurações
+  document.addEventListener('keydown', function(e) {
+    // Código 32 é o espaço
+    if (e.keyCode === 32 || e.key === ' ') {
+      console.log('[Atalho] Tecla espaço pressionada');
+      
+      // Tentar acessar a instância do app
+      if (window.app && window.app.settingsScreen && window.app.settingsScreen.toggleSettingsModal) {
+        console.log('[Atalho] Chamando toggleSettingsModal via atalho direto');
+        window.app.settingsScreen.toggleSettingsModal();
+      } else {
+        console.error('[Atalho] Não foi possível acessar o app ou settingsScreen');
+        
+        // Alternativa: tentar criar e mostrar o modal diretamente
+        let modalElement = document.getElementById('settings-menu-modal');
+        if (!modalElement) {
+          modalElement = document.createElement('div');
+          modalElement.id = 'settings-menu-modal';
+          modalElement.style.position = 'fixed';
+          modalElement.style.top = '0';
+          modalElement.style.left = '0';
+          modalElement.style.width = '100%';
+          modalElement.style.height = '100%';
+          modalElement.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+          modalElement.style.display = 'flex';
+          modalElement.style.justifyContent = 'center';
+          modalElement.style.alignItems = 'center';
+          modalElement.style.zIndex = '9999';
+          
+          modalElement.innerHTML = `
+            <div style="background-color: #f2f2f2; width: 60%; max-width: 700px; padding: 20px;">
+              <h2 style="text-align: center; font-size: 24px;">MENU DE CONFIGURAÇÕES</h2>
+              <p style="text-align: center;">O modal foi criado diretamente pelo atalho.</p>
+              <div style="text-align: center; margin-top: 20px;">
+                <button id="close-fallback-modal" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; cursor: pointer;">Fechar</button>
+              </div>
             </div>
-          </div>
-        </section>
-      </div>
-    </div>
-
-    <script type="module" src="src/js/app.js"></script>
-  </body>
-</html>
+          `;
+          
+          document.body.appendChild(modalElement);
+          
+          // Adicionar evento para fechar o modal
+          const closeButton = document.getElementById('close-fallback-modal');
+          if (closeButton) {
+            closeButton.addEventListener('click', function() {
+              modalElement.remove();
+            });
+          }
+          
+          // Fechar ao clicar fora
+          modalElement.addEventListener('click', function(evt) {
+            if (evt.target === modalElement) {
+              modalElement.remove();
+            }
+          });
+        } else {
+          modalElement.style.display = modalElement.style.display === 'flex' ? 'none' : 'flex';
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html> 
