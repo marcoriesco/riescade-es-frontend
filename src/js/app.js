@@ -83,30 +83,55 @@ class App {
 
   async init() {
     try {
-      // Inicializar os componentes
+      // Inicializar o gerenciador de temas (antes de qualquer outra coisa)
+      console.log("Inicializando gerenciador de temas...");
       this.themeManager = new ThemeManager();
+      const themeInitialized = await this.themeManager.initialize();
 
-      // Carregar configurações
-      await this.loadSettings();
-
-      try {
-        // Inicializar gerenciador de temas
-        await this.themeManager.init();
-
-        // Aplicar tema à tela de sistemas
-        this.applySystemsTheme();
-      } catch (themeError) {
-        // Silenciosamente lidar com erros de tema, não impedindo o restante da inicialização
-        console.error("Erro ao inicializar tema:", themeError);
+      if (!themeInitialized) {
+        console.warn(
+          "Falha na inicialização completa do tema, continuando com funcionalidade limitada"
+        );
+      } else {
+        console.log("Gerenciador de temas inicializado com sucesso");
       }
 
-      // Carregar lista de sistemas
+      // Add console logging to track initialization flow
+      console.log("Iniciando carregamento do aplicativo...");
+
+      // Verificação para confirmar carregamento dos estilos
+      const styleSheets = document.styleSheets;
+      console.log(`Folhas de estilo carregadas: ${styleSheets.length}`);
+      for (let i = 0; i < styleSheets.length; i++) {
+        try {
+          console.log(`Folha de estilo ${i}: ${styleSheets[i].href}`);
+        } catch (e) {
+          console.log(`Folha de estilo ${i}: [erro ao acessar href]`);
+        }
+      }
+
+      // Carregar configurações
+      console.log("Carregando configurações...");
+      await this.loadSettings();
+
+      // Carregar lista de sistemas (apenas uma vez)
+      console.log("Carregando lista de sistemas...");
       await this.systemsScreen.loadSystems();
 
-      // Adicionar event listeners
+      // Configurar listener para eventos de atualização (se implementado)
+      if (typeof this.setupUpdateListener === "function") {
+        this.setupUpdateListener();
+      }
+
+      // Registrar eventos
+      console.log("Registrando eventos...");
       this.setupEventListeners();
+
+      console.log("Aplicativo inicializado com sucesso");
+      return true;
     } catch (error) {
       console.error("Erro ao inicializar o aplicativo:", error);
+      return false;
     }
   }
 

@@ -17,9 +17,6 @@ class DefaultTheme {
   }
 
   init() {
-    // Carregar arquivos CSS
-    this.loadStylesheets();
-
     // Inicializar componentes do tema
     this.systems = new SystemsTheme(this);
     this.gameList = new GameListTheme(this);
@@ -29,24 +26,6 @@ class DefaultTheme {
 
     // Adicionar animações personalizadas
     ThemeUtils.addCustomAnimations();
-  }
-
-  loadStylesheets() {
-    // Carregar os estilos do tema
-    const cssFiles = [
-      "base.css",
-      "systems.css",
-      "gamelist.css",
-      "settings.css",
-      "fontawesome.css",
-    ];
-
-    cssFiles.forEach((file) => {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = `../css/${file}`;
-      document.head.appendChild(link);
-    });
   }
 
   // Add hover effects to system cards

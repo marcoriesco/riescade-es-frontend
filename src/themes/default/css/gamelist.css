@@ -8,6 +8,12 @@
   padding: var(--spacing-md);
 }
 
+.gamelist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .game-card {
   background-color: var(--card-background);
   border-radius: var(--border-radius);
@@ -48,11 +54,11 @@
 }
 
 .game-title {
+  font-size: 1em;
   font-weight: bold;
   margin-bottom: var(--spacing-sm);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .game-metadata {
@@ -68,6 +74,7 @@
   font-size: 0.9em;
   color: var(--text-secondary);
   display: -webkit-box;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -108,7 +115,8 @@
 .game-actions {
   display: flex;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  padding-top: 0;
 }
 
 .play-button {

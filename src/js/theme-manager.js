@@ -87,61 +87,38 @@ export class ThemeManager {
   // Load theme data
   async loadThemeData() {
     try {
-      // Tentar obter configuração do tema via API, se disponível
-      let themeConfig = null;
+      console.log(`Carregando dados do tema: ${this.currentTheme}`);
 
-      if (window.api && typeof window.api.getThemeConfig === "function") {
-        try {
-          themeConfig = await window.api.getThemeConfig(
-            this.currentTheme,
-            this.isExternalTheme
-          );
-        } catch (error) {
-          console.error(
-            `Erro ao carregar configuração do tema via API: ${error.message}`
-          );
-        }
-      }
-
-      // Se não conseguiu via API, usar configuração padrão
-      if (!themeConfig) {
-        themeConfig = {
-          name: this.currentTheme,
-          version: "1.0.0",
-          author: "Sistema",
-          description: "Tema padrão",
-          colors: {
-            primary: "#1a88ff",
-            secondary: "#ff1a66",
-            background: "#121212",
-            surface: "#1e1e1e",
-            text: "#ffffff",
-          },
-        };
-      }
-
-      // Armazenar configuração do tema
-      this.themeData = { theme: themeConfig };
-
-      return true;
-    } catch (error) {
-      console.error(`Erro ao carregar dados do tema: ${error.message}`);
-
-      // Usar configuração mínima como fallback
+      // Simplificado para usar dados padrão
       this.themeData = {
         theme: {
           name: this.currentTheme,
           version: "1.0.0",
-          author: "Sistema (fallback)",
-          colors: {
-            primary: "#1a88ff",
-            background: "#121212",
-            text: "#ffffff",
-          },
+          author: "Sistema",
+          description: "Tema padrão",
+          primaryColor: "#1a88ff",
+          backgroundColor: "#121212",
+          textColor: "#ffffff",
+          cardColor: "#1e1e1e",
         },
       };
 
-      return false;
+      return this.themeData;
+    } catch (error) {
+      console.error(`Erro ao carregar dados do tema: ${error.message}`);
+
+      // Garantir que sempre temos um objeto de dados básico
+      this.themeData = {
+        theme: {
+          name: "default",
+          primaryColor: "#1a88ff",
+          backgroundColor: "#121212",
+          textColor: "#ffffff",
+          cardColor: "#1e1e1e",
+        },
+      };
+
+      return this.themeData;
     }
   }
 
@@ -149,21 +126,30 @@ export class ThemeManager {
   async loadThemeStyles() {
     try {
       const themeName = this.currentTheme;
+      const themePath = `src/themes/${themeName}/css`;
 
       // Remover estilos antigos do tema
-      const oldThemeStyles = document.getElementById("theme-styles");
-      if (oldThemeStyles) {
-        oldThemeStyles.remove();
-      }
+      document.querySelectorAll('link[id^="theme-"]').forEach((link) => {
+        link.remove();
+      });
 
-      // Em vez de tentar carregar o CSS via API, criar um elemento link
-      const linkElement = document.createElement("link");
-      linkElement.id = "theme-styles";
-      linkElement.rel = "stylesheet";
-      linkElement.href = `src/themes/${themeName}/css/theme.css`;
+      // Carregar os estilos CSS necessários
+      const cssFiles = [
+        "base.css",
+        "theme.css",
+        "systems.css",
+        "gamelist.css",
+        "fontawesome.css",
+      ];
 
-      // Adicionar ao head
-      document.head.appendChild(linkElement);
+      // Adicionar cada arquivo CSS ao head
+      cssFiles.forEach((file, index) => {
+        const linkElement = document.createElement("link");
+        linkElement.id = `theme-style-${index}`;
+        linkElement.rel = "stylesheet";
+        linkElement.href = `${themePath}/${file}`;
+        document.head.appendChild(linkElement);
+      });
 
       console.log(`Estilos do tema ${themeName} carregados com sucesso`);
       return true;
@@ -175,20 +161,41 @@ export class ThemeManager {
 
   // Load theme's JavaScript files
   async loadThemeScripts() {
-    const themePath = this.getThemePath(this.currentTheme);
-    const scriptId = "theme-script";
+    try {
+      const themeName = this.currentTheme;
+      const scriptPath = `src/themes/${themeName}/js/theme.js`;
+      const scriptId = "theme-script";
 
-    // Remove existing theme script if it exists
-    const existingScript = document.getElementById(scriptId);
-    if (existingScript) {
-      existingScript.remove();
+      // Remove existing theme script if it exists
+      const existingScript = document.getElementById(scriptId);
+      if (existingScript) {
+        existingScript.remove();
+      }
+
+      // Add new theme script
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.type = "module";
+      script.src = scriptPath;
+
+      console.log(`Carregando script do tema: ${scriptPath}`);
+
+      // Promise para saber quando o script terminar de carregar
+      return new Promise((resolve, reject) => {
+        script.onload = () => {
+          console.log(`Script do tema ${themeName} carregado com sucesso`);
+          resolve(true);
+        };
+        script.onerror = (error) => {
+          console.error(`Erro ao carregar script do tema: ${error}`);
+          reject(error);
+        };
+        document.body.appendChild(script);
+      });
+    } catch (error) {
+      console.error(`Erro ao carregar scripts do tema: ${error.message}`);
+      return false;
     }
-
-    // Add new theme script
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = `${themePath}/js/theme.js`;
-    document.body.appendChild(script);
   }
 
   // Load and cache a template
@@ -198,137 +205,99 @@ export class ThemeManager {
         `ThemeManager: Iniciando carregamento do template "${templateName}"`
       );
       console.log(`ThemeManager: Tema atual: ${this.currentTheme}`);
-      console.log(`ThemeManager: isExternalTheme: ${this.isExternalTheme}`);
 
-      // Verificar se já temos este template em cache
+      // Verificar se já temos esse template em cache
       if (this.templateCache.has(templateName)) {
         console.log(
-          `ThemeManager: Template "${templateName}" encontrado em cache`
+          `ThemeManager: Template "${templateName}" encontrado em cache.`
         );
         return this.templateCache.get(templateName);
       }
 
-      // Tentar carregar o template do tema atual primeiro
-      let templatePath;
-      let templateHtml;
+      // Construir o caminho para o template
+      const themeName = this.currentTheme || "default";
+      const templatePath = `src/themes/${themeName}/templates/${templateName}.html`;
 
-      // Caminho para o tema atual
-      if (this.currentTheme) {
+      console.log(`ThemeManager: Caminho do template: ${templatePath}`);
+
+      // Carregar o template
+      try {
+        // Usar fetch para carregar o template
+        const response = await fetch(templatePath);
+
+        if (!response.ok) {
+          throw new Error(
+            `Falha ao carregar o template (${response.status} ${response.statusText})`
+          );
+        }
+
+        const templateHtml = await response.text();
+        this.templateCache.set(templateName, templateHtml);
+
         console.log(
-          `ThemeManager: Tentando carregar template do tema: ${this.currentTheme}`
+          `ThemeManager: Template "${templateName}" carregado e armazenado em cache.`
         );
-
-        // Verificar se é um tema externo
-        if (this.isExternalTheme) {
-          templatePath = `themes/${this.currentTheme}/templates/${templateName}.html`;
-          console.log(
-            `ThemeManager: Tentando caminho externo: ${templatePath}`
-          );
-
-          // Usar API para ler arquivo externo
-          templateHtml = await window.api.readFile(templatePath, true);
-          console.log(
-            `ThemeManager: Resultado da leitura externa: ${!!templateHtml}`
-          );
-        } else {
-          // Tema interno (src/themes)
-          templatePath = `src/themes/${this.currentTheme}/templates/${templateName}.html`;
-          console.log(
-            `ThemeManager: Tentando caminho interno: ${templatePath}`
-          );
-
-          // Verificar se window.api.readFile existe
-          if (typeof window.api.readFile === "function") {
-            templateHtml = await window.api.readFile(templatePath, false);
-            console.log(
-              `ThemeManager: Resultado da leitura interna: ${!!templateHtml}`
-            );
-          } else {
-            console.error(
-              `ThemeManager: window.api.readFile não é uma função!`
-            );
-            templateHtml = null;
-          }
-        }
-      }
-
-      // Se não encontrou no tema atual ou não há tema atual, tentar no tema padrão
-      if (!templateHtml) {
-        templatePath = `src/themes/default/templates/${templateName}.html`;
-        console.log(`ThemeManager: Tentando caminho padrão: ${templatePath}`);
-
-        if (typeof window.api.readFile === "function") {
-          templateHtml = await window.api.readFile(templatePath, false);
-          console.log(
-            `ThemeManager: Resultado da leitura do caminho padrão: ${!!templateHtml}`
-          );
-        } else {
-          console.error(`ThemeManager: window.api.readFile não é uma função!`);
-          templateHtml = null;
-        }
-      }
-
-      // Se ainda não encontrou, tentar no diretório raiz de templates
-      if (!templateHtml) {
-        templatePath = `src/templates/${templateName}.html`;
-        console.log(`ThemeManager: Tentando diretório raiz: ${templatePath}`);
-
-        if (typeof window.api.readFile === "function") {
-          templateHtml = await window.api.readFile(templatePath, false);
-          console.log(
-            `ThemeManager: Resultado da leitura do diretório raiz: ${!!templateHtml}`
-          );
-        } else {
-          console.error(`ThemeManager: window.api.readFile não é uma função!`);
-          templateHtml = null;
-        }
-      }
-
-      // Se não encontrou o template em nenhum lugar
-      if (!templateHtml) {
+        return templateHtml;
+      } catch (fetchError) {
         console.error(
-          `ThemeManager: Template "${templateName}" não encontrado em nenhum lugar após tentar todos os caminhos`
+          `ThemeManager: Erro ao carregar template via fetch: ${fetchError.message}`
         );
-        return null;
+        throw fetchError;
       }
-
-      console.log(
-        `ThemeManager: Template "${templateName}" carregado com sucesso de ${templatePath}`
-      );
-
-      // Armazenar no cache
-      this.templateCache.set(templateName, templateHtml);
-
-      return templateHtml;
     } catch (error) {
       console.error(
-        `ThemeManager: Erro ao carregar template "${templateName}":`,
-        error
+        `ThemeManager: Erro ao carregar template "${templateName}": ${error.message}`
       );
       return null;
     }
   }
 
-  // Render a template with data - with async (original method)
+  // Render a template asynchronously
   async renderTemplateAsync(templateName, data) {
-    console.log(`Renderizando template assíncrono: ${templateName}`);
-
-    const template = await this.loadTemplate(templateName);
-    if (!template) {
-      console.error(
-        `Failed to render template ${templateName}: Template not found`
-      );
-      throw new Error(`Failed to render template ${templateName}`);
-    }
-
     try {
-      console.log(`Template carregado com sucesso: ${templateName}`);
+      console.log(
+        `ThemeManager: Iniciando renderização assíncrona do template "${templateName}"`
+      );
 
-      // Use o renderTemplate síncrono após carregar o template
-      return this.renderTemplate(template, data);
+      // Carregar o template se ainda não estiver em cache
+      const template = await this.loadTemplate(templateName);
+      if (!template) {
+        throw new Error(`Template "${templateName}" não encontrado`);
+      }
+
+      // Adicionar helpers ao contexto de dados
+      const enhancedData = {
+        ...data,
+        app: {
+          title: "RIESCADE",
+          ...(data.app || {}),
+        },
+      };
+
+      // Usar o Mustache para renderizar o template
+      console.log(
+        `ThemeManager: Renderizando template "${templateName}" com Mustache`
+      );
+
+      try {
+        // Registrar helpers para o Mustache
+        Mustache.Formatters = Mustache.Formatters || {};
+        Mustache.Formatters.gt = function (value1, value2) {
+          return value1 > value2;
+        };
+
+        const rendered = Mustache.render(template, enhancedData);
+        return rendered;
+      } catch (mustacheError) {
+        console.error(`Erro na renderização Mustache:`, mustacheError);
+
+        // Fallback para renderização simples
+        console.log(`ThemeManager: Fallback para renderização simples`);
+        return this.renderTemplate(template, enhancedData);
+      }
     } catch (error) {
-      console.error(`Error rendering template ${templateName}:`, error);
-      throw new Error(`Error rendering template: ${error.message}`);
+      console.error(`Erro ao renderizar template "${templateName}":`, error);
+      throw error;
     }
   }
 
@@ -451,23 +420,24 @@ export class ThemeManager {
 
   async renderSystemsView(data) {
     try {
-      if (!data || !data.systems) {
+      // Verificar se os dados são válidos
+      if (!data || !data.systems || !Array.isArray(data.systems)) {
         console.error("Invalid data for systems view:", data);
         throw new Error("Invalid data for systems view");
       }
 
       console.log("Renderizando systems view com tema:", this.currentTheme);
-      console.log("Número de sistemas a renderizar:", data.systems.length);
 
-      // Carregar o template
-      const template = await this.loadTemplate("systems");
+      // Carregar o template de sistemas
+      let template = await this.loadTemplate("systems");
+      console.log("Template carregado:", template ? "sim" : "não");
+
+      // Se o template não for encontrado, usar um template fallback
       if (!template) {
-        console.error("Template 'systems' não encontrado");
+        console.warn("Template systems não encontrado, usando fallback");
 
         // FALLBACK: Se não encontrar o template, gerar HTML diretamente
-        let html = `
-          <div class="systems-grid">
-        `;
+        let html = `<div class="systems-grid">`;
 
         // Gerar HTML para cada sistema
         data.systems.forEach((system) => {
@@ -521,6 +491,20 @@ export class ThemeManager {
         totalSystems: templateData.systems.length,
         firstSystem: templateData.systems[0]?.name,
       });
+
+      // Check if template starts with systems-container div and remove it to prevent nesting
+      if (template.trim().startsWith('<div class="systems-container">')) {
+        console.log(
+          "Removendo div systems-container do template para evitar duplicação"
+        );
+        // Extract the content inside the systems-container div
+        const containerContentMatch = template.match(
+          /<div class="systems-container">([\s\S]*?)<\/div>\s*$/
+        );
+        if (containerContentMatch && containerContentMatch[1]) {
+          template = containerContentMatch[1];
+        }
+      }
 
       // Renderizar manualmente - mais confiável que usar Mustache em alguns casos
       let html = template;
@@ -613,6 +597,35 @@ export class ThemeManager {
   // Render the game list view
   async renderGameListView(system, games) {
     console.log("ThemeManager: Iniciando renderização da lista de jogos");
+
+    // Validate the system object
+    if (!system) {
+      console.error("ThemeManager: Sistema inválido (null ou undefined)");
+      return null;
+    }
+
+    if (typeof system === "string") {
+      console.warn(
+        "ThemeManager: Sistema passado como string, convertendo para objeto"
+      );
+      system = {
+        name: system,
+        fullname: system,
+        id: system,
+        logoPath: this.getSystemLogoPath(system),
+      };
+    }
+
+    // Ensure required properties
+    if (!system.logoPath) {
+      console.warn("ThemeManager: Sistema sem logoPath, adicionando");
+      system.logoPath = this.getSystemLogoPath(system.name);
+    }
+
+    if (!system.fullname) {
+      system.fullname = system.name;
+    }
+
     console.log("ThemeManager: Sistema:", system);
     console.log("ThemeManager: Número de jogos:", games ? games.length : 0);
 
@@ -641,6 +654,8 @@ export class ThemeManager {
 
       console.log("ThemeManager: Dados preparados para renderização:", {
         systemName: system.name,
+        systemFullname: system.fullname,
+        systemLogoPath: system.logoPath,
         gamesCount: games ? games.length : 0,
         currentTheme: this.currentTheme,
       });
@@ -659,26 +674,37 @@ export class ThemeManager {
   // Inicializar o gerenciador de temas
   async initialize() {
     try {
-      // Definir o tema como default
-      this.currentTheme = "default";
+      console.log("Iniciando inicialização do gerenciador de temas...");
 
-      // Carregar tema padrão
-      const defaultThemeData = await this.themeParser.getThemeData();
+      // Configurar valores iniciais
+      this.currentTheme = "default"; // Tema padrão
+      this.templateCache = new Map(); // Cache de templates
+      this.systemThemeCache = {}; // Cache de temas por sistema
 
-      // Armazenar dados do tema
-      this.themeData = defaultThemeData;
+      console.log("Valores iniciais configurados. Carregando tema padrão...");
+
+      // Carregar dados do tema
+      await this.loadThemeData();
+      console.log("Dados do tema carregados");
 
       // Carregar estilos do tema
       await this.loadThemeStyles();
+      console.log("Estilos do tema carregados");
 
       // Aplica propriedades CSS globais do tema
       this.applyGlobalTheme();
+      console.log("Propriedades globais do tema aplicadas");
 
       // Carregar scripts do tema
-      await this.loadThemeScripts();
+      try {
+        await this.loadThemeScripts();
+        console.log("Scripts do tema carregados");
+      } catch (scriptError) {
+        console.warn("Erro ao carregar scripts do tema:", scriptError);
+        // Continuamos mesmo se os scripts falharem
+      }
 
       console.log("Tema padrão carregado com sucesso");
-
       return true;
     } catch (error) {
       console.error("Erro ao inicializar gerenciador de temas:", error);
@@ -1331,8 +1357,8 @@ export class ThemeManager {
         systemName: "Sistema",
         showTip: false,
         tip: "Dica de jogo",
-        systemLogo: "themes/default/assets/icons/default-system.png",
-        gameImage: "themes/default/assets/icons/default-game.png",
+        systemLogo: "src/themes/default/assets/icons/default-system.png",
+        gameImage: "src/themes/default/assets/icons/default-game.png",
       };
 
       // Combinar dados padrão com os fornecidos

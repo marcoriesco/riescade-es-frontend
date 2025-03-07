@@ -29,8 +29,13 @@ export class SystemsScreen {
       console.log("Carregando sistemas...");
       await this.showLoading();
 
+      // Atualizar progresso
+      this.updateLoadingProgress(20, "Lendo configuração de sistemas...");
+
       // Obter lista de sistemas
       let systems = await configParser.getSystems();
+
+      this.updateLoadingProgress(40, "Processando sistemas...");
 
       // Adicionar campos para processamento e renderização
       systems = systems.map((system) => ({
@@ -43,14 +48,25 @@ export class SystemsScreen {
       console.log(`${systems.length} sistemas carregados`);
       this.loadedSystems = systems;
 
+      this.updateLoadingProgress(60, "Carregando contagem de jogos...");
+
       // Pré-carregar as contagens de jogos para todos os sistemas em paralelo
       const loadPromises = systems.map((system) =>
         this.loadSystemGameCount(system.name)
       );
       await Promise.all(loadPromises);
 
+      this.updateLoadingProgress(80, "Renderizando interface...");
+
       // Renderizar os sistemas após carregar as contagens de jogos
       await this.renderSystemsWithTheme(this.loadedSystems);
+
+      this.updateLoadingProgress(100, "Concluído!");
+
+      // Pequeno delay para mostrar o 100% antes de esconder o loading
+      setTimeout(() => {
+        this.hideLoading();
+      }, 500);
 
       return systems;
     } catch (error) {
@@ -70,10 +86,33 @@ export class SystemsScreen {
         message:
           "Por favor, aguarde enquanto carregamos os sistemas disponíveis.",
         systemLogo: null, // Sem logo específico de sistema, usará o logo padrão
+        showProgress: true,
+        progress: 0,
       });
 
       // Atualizar o container com o HTML renderizado
       this.container.innerHTML = loadingHtml;
+
+      // Iniciar animação de progresso automático
+      this._loadingProgressInterval = setInterval(() => {
+        const progressBar = this.container.querySelector(
+          ".loading-progress-bar"
+        );
+        const progressText = this.container.querySelector(
+          ".loading-progress-text"
+        );
+
+        if (progressBar && progressText) {
+          const currentWidth = parseInt(progressBar.style.width) || 0;
+          if (currentWidth < 90) {
+            const newWidth = currentWidth + 5;
+            progressBar.style.width = `${newWidth}%`;
+            progressText.textContent = `${newWidth}%`;
+          } else {
+            clearInterval(this._loadingProgressInterval);
+          }
+        }
+      }, 300);
     } catch (error) {
       // Fallback em caso de erro no template
       this.container.innerHTML = `
@@ -87,6 +126,11 @@ export class SystemsScreen {
 
   // Método para esconder o indicador de loading
   hideLoading() {
+    if (this._loadingProgressInterval) {
+      clearInterval(this._loadingProgressInterval);
+      this._loadingProgressInterval = null;
+    }
+
     const loadingElement = this.container.querySelector(".loading");
     if (loadingElement) {
       loadingElement.remove();
@@ -123,6 +167,10 @@ export class SystemsScreen {
       // Usar o ThemeManager para renderizar o template
       const renderedHtml = await this.app.themeManager.renderSystemsView(data);
 
+      // Limpar o container antes de atualizar o HTML
+      // This ensures we don't have duplicate elements
+      this.container.innerHTML = "";
+
       // Atualizar o container com o HTML renderizado
       this.container.innerHTML = renderedHtml;
 
@@ -133,6 +181,7 @@ export class SystemsScreen {
       this.setupSearchFunctionality(systems);
     } catch (error) {
       // Erro ao renderizar sistemas com tema
+      console.error("Erro ao renderizar sistemas com tema:", error);
       // Fallback para o método original em caso de erro
       this.renderSystems(systems);
     }
@@ -364,6 +413,38 @@ export class SystemsScreen {
         error
       );
       return null;
+    }
+  }
+
+  // Atualiza o progresso na tela de carregamento
+  updateLoadingProgress(progress, message = null) {
+    // Verificar se container existe
+    if (!this.container) return;
+
+    // Parar o intervalo automático
+    if (this._loadingProgressInterval) {
+      clearInterval(this._loadingProgressInterval);
+      this._loadingProgressInterval = null;
+    }
+
+    // Atualizar barra de progresso
+    const progressBar = this.container.querySelector(".loading-progress-bar");
+    if (progressBar) {
+      progressBar.style.width = `${progress}%`;
+    }
+
+    // Atualizar texto de progresso
+    const progressText = this.container.querySelector(".loading-progress-text");
+    if (progressText) {
+      progressText.textContent = `${Math.round(progress)}%`;
+    }
+
+    // Atualizar mensagem, se fornecida
+    if (message) {
+      const messageElement = this.container.querySelector(".loading-message");
+      if (messageElement) {
+        messageElement.textContent = message;
+      }
     }
   }
 }

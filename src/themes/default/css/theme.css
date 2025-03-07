@@ -346,14 +346,6 @@ select {
   flex: 1;
 }
 
-.game-title {
-  font-weight: bold;
-  margin-bottom: var(--spacing-sm);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .game-metadata {
   display: flex;
   font-size: 0.8em;
@@ -367,6 +359,7 @@ select {
   font-size: 0.9em;
   color: var(--text-secondary);
   display: -webkit-box;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -379,26 +372,18 @@ select {
   padding: var(--spacing-md);
 }
 
+.systems-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 25px;
+}
+
 .system-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: var(--spacing-md);
   margin-top: var(--spacing-md);
-}
-
-.system-card {
-  background-color: var(--card-background);
-  border-radius: var(--border-radius);
-  padding: var(--spacing-md);
-  cursor: pointer;
-  transition: transform var(--transition-speed),
-    box-shadow var(--transition-speed);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 220px;
-  overflow: hidden;
-  position: relative;
 }
 
 .system-card:hover {
@@ -566,11 +551,6 @@ select {
   flex: 1;
 }
 
-.game-title {
-  font-size: 2em;
-  margin-bottom: var(--spacing-md);
-}
-
 .game-metadata {
   margin-bottom: var(--spacing-md);
 }
@@ -586,12 +566,6 @@ select {
 .game-description {
   line-height: 1.6;
   color: var(--text-secondary);
-}
-
-.game-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
 }
 
 .play-button {

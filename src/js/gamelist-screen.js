@@ -16,126 +16,94 @@ export class GameListScreen {
 
   async loadGames(systemName) {
     if (!this.container) {
-      this.container = document.querySelector(".gamelist-container");
-      if (!this.container) {
-        // Container da lista de jogos não encontrado
-        return false;
-      }
+      console.error("Container não encontrado para a lista de jogos");
+      return false;
     }
 
-    await this.showLoading("Carregando jogos...");
-    this.currentSystem = systemName;
-    this.games = []; // Initialize games array
-
     try {
-      // Verificar qual API está disponível
-      const hasIpcApi = window.api && typeof window.api.invoke === "function";
-      const hasLocalApi =
-        window.api && window.api.localApi && window.api.localApi.games;
-      const hasReadGameList =
-        window.api && typeof window.api.readGameList === "function";
+      // Mostrar tela de carregamento
+      await this.showLoading(`Carregando jogos do sistema ${systemName}...`);
 
-      let response = null;
+      // Iniciar progresso automático
+      this.startAutoProgress(8000);
 
-      // Tentar carregar usando a API IPC
-      if (hasIpcApi) {
-        try {
-          response = await window.api.invoke(
-            "api:games:getGamesBySystem",
-            systemName
-          );
-        } catch (ipcError) {
-          // Erro na API IPC
-        }
+      // Obter o objeto completo do sistema, não apenas o nome
+      let systemObject = this.getSystemObject(systemName);
+
+      // Atualizar o sistema atual (nome)
+      this.currentSystem = systemName;
+
+      // Armazenar o objeto do sistema
+      this.currentSystemObject = systemObject;
+
+      // Atualizar estado da interface
+      this.updateLoadingProgress(10, "Inicializando...");
+
+      let games = [];
+
+      // Método principal: usar API direta
+      if (window.api && typeof window.api.readGameList === "function") {
+        this.updateLoadingProgress(20, "Lendo lista de jogos...");
+        games = await this.getGamesFromAPI(systemName);
       }
 
-      // Se não conseguiu via IPC, tentar API Local
-      if (!response && hasLocalApi) {
-        try {
-          response = await window.api.localApi.games.getBySystem(systemName);
-        } catch (localApiError) {
-          // Erro na API Local
-        }
+      // Se não conseguir jogos pela API principal, tentar pela API local
+      if (games.length === 0 && window.api && window.api.localApi) {
+        this.updateLoadingProgress(40, "Usando API local...");
+        games = await this.getGamesFromLocalAPI(systemName);
       }
 
-      // Se não conseguiu via API Local, tentar readGameList
-      if (!response && hasReadGameList) {
-        try {
-          response = await window.api.readGameList(systemName);
-        } catch (readError) {
-          // Erro no readGameList
-        }
-      }
-
-      // Processar a resposta se houver
-      if (response && !response.error) {
-        if (response.gameList && response.gameList.game) {
-          this.games = Array.isArray(response.gameList.game)
-            ? response.gameList.game
-            : [response.gameList.game];
-        } else if (Array.isArray(response)) {
-          this.games = response;
-        } else if (typeof response === "object") {
-          // Tentar encontrar os jogos em diferentes formatos possíveis
-          if (response.games) {
-            this.games = Array.isArray(response.games)
-              ? response.games
-              : [response.games];
-          } else if (response.game) {
-            this.games = Array.isArray(response.game)
-              ? response.game
-              : [response.game];
-          }
-        }
-      }
-
-      // Se nenhum método funcionou, tentar o método legado
-      if (this.games.length === 0) {
+      // Se ainda não conseguir jogos, tentar método legado
+      if (games.length === 0) {
+        this.updateLoadingProgress(60, "Usando método legado...");
         const legacyGames = await this.loadGamesWithLegacyMethod(systemName);
         if (legacyGames && legacyGames.length > 0) {
-          this.games = legacyGames;
+          games = legacyGames;
         }
       }
 
-      // Processar os jogos carregados
-      if (this.games.length > 0) {
-        this.games = this.games.map((game) => {
-          const processedGame = {
-            ...game,
-            id: game.id || game.path,
-            name: game.name || game.path,
-            path: game.path,
-            image: game.image || "",
-            desc: game.desc || "",
-            developer: game.developer || "",
-            publisher: game.publisher || "",
-            genre: game.genre || "",
-            players: game.players || "",
-            rating: game.rating || "",
-            releasedate: game.releasedate || "",
-            video: game.video || "",
-          };
-          return processedGame;
-        });
-      } else {
-        this.showEmptyState(
-          `Nenhum jogo encontrado para o sistema ${systemName}`
-        );
-        return false;
+      this.updateLoadingProgress(80, "Processando dados...");
+
+      // Salvar a lista de jogos carregada
+      this.games = games || [];
+
+      // Ordenar jogos por nome
+      this.games.sort((a, b) => {
+        const nameA = a.name || "";
+        const nameB = b.name || "";
+        return nameA.localeCompare(nameB);
+      });
+
+      // Atualizar a contagem de jogos para o sistema
+      const systemIndex = this.app.systemsScreen.loadedSystems.findIndex(
+        (system) => system.name === systemName
+      );
+      if (systemIndex !== -1) {
+        this.app.systemsScreen.loadedSystems[systemIndex].gameCount =
+          this.games.length;
       }
+
+      this.updateLoadingProgress(90, "Renderizando jogos...");
 
       // Renderizar a lista de jogos
       try {
+        // Usar o objeto do sistema completo em vez de apenas o nome
         const renderedGameList = await this.app.themeManager.renderGameListView(
-          this.currentSystem,
+          this.currentSystemObject,
           this.games
         );
 
         if (renderedGameList) {
+          this.updateLoadingProgress(100, "Concluído!");
+
+          // Pequeno delay para mostrar o 100% antes de esconder o loading
+          setTimeout(() => {
+            this.hideLoading();
+            this.app.themeManager.applyGameListTheme(systemName);
+            this.addGameListEvents();
+          }, 500);
+
           this.container.innerHTML = renderedGameList;
-          this.hideLoading();
-          this.app.themeManager.applyGameListTheme(systemName);
-          this.addGameListEvents();
           return true;
         } else {
           throw new Error("HTML não retornado pelo renderizador");
@@ -212,12 +180,18 @@ export class GameListScreen {
         title: "Carregando Jogos",
         message: message,
         systemLogo: this.currentSystem
-          ? `themes/default/assets/logos/${this.currentSystem}.png`
+          ? `src/themes/default/assets/logos/${this.currentSystem}.png`
           : null,
+        showProgress: true,
+        progress: 0,
       });
 
       // Atualizar o container com o HTML renderizado
       this.container.innerHTML = loadingHtml;
+
+      // Guardar o timestamp para calcular progresso automático se necessário
+      this._loadingStartTime = Date.now();
+      this._loadingProgressInterval = null;
     } catch (error) {
       // Fallback em caso de erro no template
       const loadingElement = document.createElement("div");
@@ -232,7 +206,61 @@ export class GameListScreen {
     }
   }
 
+  // Atualizar o progresso na tela de carregamento
+  updateLoadingProgress(progress, message = null) {
+    // Verificar se container existe
+    if (!this.container) return;
+
+    // Atualizar barra de progresso
+    const progressBar = this.container.querySelector(".loading-progress-bar");
+    if (progressBar) {
+      progressBar.style.width = `${progress}%`;
+    }
+
+    // Atualizar texto de progresso
+    const progressText = this.container.querySelector(".loading-progress-text");
+    if (progressText) {
+      progressText.textContent = `${Math.round(progress)}%`;
+    }
+
+    // Atualizar mensagem, se fornecida
+    if (message) {
+      const messageElement = this.container.querySelector(".loading-message");
+      if (messageElement) {
+        messageElement.textContent = message;
+      }
+    }
+  }
+
+  // Iniciar progresso automático (útil quando não há como saber o progresso real)
+  startAutoProgress(durationMs = 5000, finalProgress = 90) {
+    // Limpar qualquer intervalo existente
+    if (this._loadingProgressInterval) {
+      clearInterval(this._loadingProgressInterval);
+    }
+
+    // Configurar intervalo para atualizar o progresso
+    const updateInterval = 100; // Atualizar a cada 100ms
+    const incrementPerUpdate = (finalProgress / durationMs) * updateInterval;
+    let currentProgress = 0;
+
+    this._loadingProgressInterval = setInterval(() => {
+      currentProgress += incrementPerUpdate;
+      if (currentProgress >= finalProgress) {
+        currentProgress = finalProgress;
+        clearInterval(this._loadingProgressInterval);
+      }
+      this.updateLoadingProgress(currentProgress);
+    }, updateInterval);
+  }
+
   hideLoading() {
+    // Limpar intervalo de progresso automático
+    if (this._loadingProgressInterval) {
+      clearInterval(this._loadingProgressInterval);
+      this._loadingProgressInterval = null;
+    }
+
     const loadingElement = this.container.querySelector(".loading-message");
     if (loadingElement) {
       loadingElement.remove();
@@ -832,12 +860,12 @@ export class GameListScreen {
 
       content.innerHTML = `
         <div style="margin-bottom: 20px; height: 80px; display: flex; justify-content: center; align-items: center;">
-          <img src="${systemLogo}" alt="${systemName}" style="max-height: 100%; max-width: 100%;" onerror="this.onerror=null;this.src='themes/default/assets/icons/default-system.png';" />
+          <img src="${systemLogo}" alt="${systemName}" style="max-height: 100%; max-width: 100%;" onerror="this.onerror=null;this.src='src/themes/default/assets/icons/default-system.png';" />
         </div>
         <h2 style="margin-bottom: 15px; font-size: 2em; color: #1a88ff;">Iniciando Jogo</h2>
         <p style="margin-bottom: 20px; font-size: 1.2em; color: #ccc;">${game.name}</p>
         <div style="margin: 0 auto 20px; max-width: 400px; height: 300px; display: flex; justify-content: center; align-items: center;">
-          <img src="${gameImagePath}" alt="${game.name}" style="max-height: 100%; max-width: 100%; border-radius: 5px;" onerror="this.onerror=null;this.src='themes/default/assets/icons/default-game.png';" />
+          <img src="${gameImagePath}" alt="${game.name}" style="max-height: 100%; max-width: 100%; border-radius: 5px;" onerror="this.onerror=null;this.src='src/themes/default/assets/icons/default-game.png';" />
         </div>
         <div style="width: 60px; height: 60px; border: 5px solid rgba(255, 255, 255, 0.1); border-radius: 50%; border-top-color: #1a88ff; animation: spin 1s linear infinite; margin: 20px auto;"></div>
         <p style="margin-bottom: 20px; font-size: 1.2em; color: #ccc;">Carregando, por favor aguarde...</p>
@@ -964,5 +992,106 @@ export class GameListScreen {
     if (this.app && this.app.themeManager) {
       this.app.themeManager.changeView("system");
     }
+  }
+
+  // Método para obter jogos da API principal
+  async getGamesFromAPI(systemName) {
+    try {
+      const response = await window.api.readGameList(systemName);
+
+      if (response && response.gameList && response.gameList.game) {
+        if (Array.isArray(response.gameList.game)) {
+          return response.gameList.game.map((game) =>
+            this.processGameData(game)
+          );
+        } else {
+          return [this.processGameData(response.gameList.game)];
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error("Erro ao carregar jogos da API principal:", error);
+      return [];
+    }
+  }
+
+  // Método para obter jogos da API local
+  async getGamesFromLocalAPI(systemName) {
+    try {
+      if (
+        window.api.localApi.games &&
+        typeof window.api.localApi.games.getBySystem === "function"
+      ) {
+        const response = await window.api.localApi.games.getBySystem(
+          systemName
+        );
+
+        if (Array.isArray(response)) {
+          return response.map((game) => this.processGameData(game));
+        } else if (response && typeof response === "object") {
+          if (response.games) {
+            const games = Array.isArray(response.games)
+              ? response.games
+              : [response.games];
+            return games.map((game) => this.processGameData(game));
+          } else if (response.game) {
+            const games = Array.isArray(response.game)
+              ? response.game
+              : [response.game];
+            return games.map((game) => this.processGameData(game));
+          }
+        }
+      }
+      return [];
+    } catch (error) {
+      console.error("Erro ao carregar jogos da API local:", error);
+      return [];
+    }
+  }
+
+  // Processar dados do jogo para formato padrão
+  processGameData(game) {
+    return {
+      ...game,
+      id: game.id || game.path,
+      name: game.name || game.path,
+      path: game.path,
+      image: game.image || "",
+      desc: game.desc || "",
+      developer: game.developer || "",
+      publisher: game.publisher || "",
+      genre: game.genre || "",
+      players: game.players || "",
+      rating: game.rating || "",
+      releasedate: game.releasedate || "",
+      video: game.video || "",
+    };
+  }
+
+  // Método para obter o objeto do sistema a partir do nome
+  getSystemObject(systemName) {
+    // Verificar se podemos obter o sistema a partir do systemsScreen
+    if (this.app.systemsScreen && this.app.systemsScreen.loadedSystems) {
+      const system = this.app.systemsScreen.loadedSystems.find(
+        (s) => s.name === systemName
+      );
+
+      if (system) {
+        console.log(`Sistema encontrado para ${systemName}:`, system);
+        return system;
+      }
+    }
+
+    // Fallback: criar um objeto básico de sistema se não encontramos o objeto completo
+    console.warn(
+      `Sistema não encontrado para ${systemName}, criando objeto básico`
+    );
+    return {
+      name: systemName,
+      fullname: systemName,
+      id: systemName,
+      gameCount: this.games ? this.games.length : 0,
+      logoPath: this.app.themeManager.getSystemLogoPath(systemName),
+    };
   }
 }

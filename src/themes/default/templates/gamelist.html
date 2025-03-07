@@ -2,7 +2,11 @@
   <div class="gamelist-header">
     <div class="system-info">
       <div class="system-logo">
-        <img src="{{system.logoPath}}" alt="{{system.name}}" />
+        <img
+          src="{{system.logoPath}}"
+          alt="{{system.name}}"
+          onerror="this.onerror=null; this.src='themes/default/assets/icons/default-system.png'; console.log('Error loading system logo:', this.alt);"
+        />
       </div>
       <h2>{{system.fullname}}</h2>
     </div>
@@ -12,7 +16,6 @@
         <i class="fas fa-times"></i>
       </button>
     </div>
-    <button id="back-to-systems" class="btn-back">Voltar</button>
   </div>
 
   <div class="games-grid">

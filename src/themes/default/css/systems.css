@@ -5,7 +5,14 @@
   padding: var(--spacing-md);
 }
 
-.system-grid {
+.systems-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 25px;
+}
+
+.systems-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: var(--spacing-md);
@@ -68,11 +75,11 @@
   text-align: center;
 }
 
-.system-search {
+.systems-search {
   position: relative;
   margin-bottom: var(--spacing-md);
 }
 
-.system-search input {
+.systems-search input {
   padding-right: 40px;
 }

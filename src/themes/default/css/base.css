@@ -362,6 +362,5 @@ select {
 .gamelist-container {
   width: 100%;
   padding: var(--spacing-md);
-  overflow-y: auto;
   max-height: 100vh;
 }
