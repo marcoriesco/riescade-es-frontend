@@ -40,7 +40,7 @@ if (window.api) {
 console.log("=== FIM DA VERIFICAÇÃO DA API ===");
 
 // Corrigir erro de "dragEvent is not defined"
-if (typeof dragEvent === "undefined") {
+if (typeof DragEvent === "undefined") {
   window.DragEvent = null;
 }
 

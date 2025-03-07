@@ -59,5 +59,8 @@ contextBridge.exposeInMainWorld("api", {
   getInternalThemes: () => ipcRenderer.invoke("get-internal-themes"),
   getExternalThemes: () => ipcRenderer.invoke("get-external-themes"),
 
+  // Verificar se um arquivo existe
+  fileExists: (filePath) => ipcRenderer.invoke("file-exists", filePath),
+
   // ... existing code ...
 });

@@ -33,6 +33,7 @@ export class ThemeManager {
   // Initialize the theme manager
   async init(themeName = "default") {
     try {
+      console.log(`[ThemeManager] Inicializando tema: ${themeName}`);
       this.currentTheme = themeName;
 
       // Verificar se o tema existe no diretório externo primeiro (se a API estiver disponível)
@@ -56,6 +57,20 @@ export class ThemeManager {
 
       // Carregar estilos do tema
       await this.loadThemeStyles();
+
+      // Carregar scripts do tema
+      console.log(`[ThemeManager] Carregando scripts do tema: ${themeName}`);
+      try {
+        await this.loadThemeScripts();
+        console.log(
+          `[ThemeManager] Scripts do tema ${themeName} carregados com sucesso`
+        );
+      } catch (scriptError) {
+        console.warn(
+          `[ThemeManager] Erro ao carregar scripts do tema: ${scriptError.message}`
+        );
+        // Continuamos mesmo se os scripts falharem
+      }
 
       return true;
     } catch (error) {
@@ -251,36 +266,72 @@ export class ThemeManager {
       const scriptPath = `src/themes/${themeName}/js/theme.js`;
       const scriptId = "theme-script";
 
+      console.log(
+        `[ThemeManager] Tentando carregar script do tema: ${scriptPath}`
+      );
+
       // Remove existing theme script if it exists
       const existingScript = document.getElementById(scriptId);
       if (existingScript) {
         existingScript.remove();
+        console.log(`[ThemeManager] Script anterior removido`);
       }
 
-      // Verificar se o script existe usando fetch antes de tentar carregar
-      try {
-        const response = await fetch(scriptPath, { method: "HEAD" });
-        if (!response.ok) {
+      // Verificar se o arquivo existe usando a API (se disponível)
+      if (window.api && window.api.fileExists) {
+        const exists = await window.api.fileExists(scriptPath);
+        if (!exists) {
           console.log(
-            `[ThemeManager] Script não encontrado: ${scriptPath} - isso é normal para temas que usam apenas theme.json`
+            `[ThemeManager] Script não encontrado: ${scriptPath} - tentando tema padrão.`
           );
-          return true; // Retornar sucesso mesmo sem carregar script
+
+          // Se não for o tema padrão, tentar o tema padrão
+          if (themeName !== "default") {
+            const defaultScriptPath = "src/themes/default/js/theme.js";
+            const defaultExists = await window.api.fileExists(
+              defaultScriptPath
+            );
+
+            if (defaultExists) {
+              console.log(
+                `[ThemeManager] Script do tema padrão encontrado, carregando.`
+              );
+              const script = document.createElement("script");
+              script.id = scriptId;
+              script.type = "module";
+              script.src = defaultScriptPath;
+              // Adicionar ao final do body em vez do head
+              document.body.appendChild(script);
+              return true;
+            } else {
+              console.log(
+                `[ThemeManager] Script do tema padrão também não encontrado.`
+              );
+              return false;
+            }
+          }
+          return false;
         }
-      } catch (fetchError) {
-        // Ignorar erro de fetch, o script pode não existir
-        console.log(
-          `[ThemeManager] Script não encontrado via fetch: ${scriptPath}`
-        );
-        return true; // Retornar sucesso mesmo sem carregar script
       }
 
-      // Add new theme script
+      // Adicionar evento para registrar quando o módulo for carregado
+      window.addEventListener(
+        "theme-loaded",
+        (event) => {
+          console.log(
+            `[ThemeManager] Evento theme-loaded recebido para tema: ${
+              event.detail?.themeName || "desconhecido"
+            }`
+          );
+        },
+        { once: true }
+      );
+
+      // Adicionar script para carregar o tema
       const script = document.createElement("script");
       script.id = scriptId;
       script.type = "module";
       script.src = scriptPath;
-
-      console.log(`[ThemeManager] Carregando script do tema: ${scriptPath}`);
 
       // Promise para saber quando o script terminar de carregar
       return new Promise((resolve, reject) => {
@@ -288,17 +339,47 @@ export class ThemeManager {
           console.log(
             `[ThemeManager] Script do tema ${themeName} carregado com sucesso`
           );
+
+          // Verificar se o tema foi carregado corretamente
+          setTimeout(() => {
+            if (window.defaultTheme) {
+              console.log(
+                `[ThemeManager] Tema ${themeName} inicializado e disponível globalmente`
+              );
+            } else {
+              console.warn(
+                `[ThemeManager] Tema ${themeName} carregado, mas não está disponível globalmente`
+              );
+            }
+          }, 100);
+
           resolve(true);
         };
+
         script.onerror = (error) => {
           console.warn(
             `[ThemeManager] Erro ao carregar script do tema ${themeName}:`,
             error
           );
-          // Não rejeitar para não interromper o carregamento do tema
-          resolve(false);
+
+          // Tentar carregar do tema padrão se não for o tema padrão
+          if (themeName !== "default") {
+            console.log(
+              `[ThemeManager] Tentando carregar script do tema padrão`
+            );
+            script.src = `src/themes/default/js/theme.js`;
+          } else {
+            // Não rejeitar para não interromper o carregamento do tema
+            resolve(false);
+          }
         };
-        document.head.appendChild(script);
+
+        // Adicionar ao final do body em vez do head
+        document.body.appendChild(script);
+        console.log(
+          `[ThemeManager] Script adicionado ao final do body:`,
+          scriptPath
+        );
       });
     } catch (error) {
       console.warn(
@@ -782,16 +863,20 @@ export class ThemeManager {
   }
 
   // Inicializar o gerenciador de temas
-  async initialize() {
+  async initialize(themeName = "default") {
     try {
-      console.log("Iniciando inicialização do gerenciador de temas...");
+      console.log(
+        `Iniciando inicialização do gerenciador de temas com tema: ${themeName}...`
+      );
 
       // Configurar valores iniciais
-      this.currentTheme = "default"; // Tema padrão
+      this.currentTheme = themeName; // Usar o tema especificado
       this.templateCache = new Map(); // Cache de templates
       this.systemThemeCache = {}; // Cache de temas por sistema
 
-      console.log("Valores iniciais configurados. Carregando tema padrão...");
+      console.log(
+        `Valores iniciais configurados. Carregando tema: ${themeName}...`
+      );
 
       // Carregar dados do tema
       await this.loadThemeData();
@@ -814,7 +899,7 @@ export class ThemeManager {
         // Continuamos mesmo se os scripts falharem
       }
 
-      console.log("Tema padrão carregado com sucesso");
+      console.log(`Tema ${themeName} carregado com sucesso`);
       return true;
     } catch (error) {
       console.error("Erro ao inicializar gerenciador de temas:", error);

@@ -1199,5 +1199,16 @@ ipcMain.handle("reload-app", () => {
   }
 });
 
+// Handler para verificar se um arquivo existe
+ipcMain.handle("file-exists", (event, filePath) => {
+  try {
+    const fullPath = path.join(rootDir, filePath);
+    return fs.existsSync(fullPath);
+  } catch (error) {
+    console.error("Erro ao verificar existência do arquivo:", error);
+    return false;
+  }
+});
+
 // Exportar os caminhos para que outros módulos possam acessá-los
 module.exports = { PATHS };
