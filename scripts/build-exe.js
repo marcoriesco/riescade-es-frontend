@@ -110,8 +110,7 @@ const workingDir = process.cwd();
 
 // Função para verificar diretórios em um caminho
 const checkPortableIndicators = (basePath) => {
-  return fs.existsSync(path.join(basePath, 'retrobat.exe')) ||
-         fs.existsSync(path.join(basePath, 'emulationstation')) ||
+  return fs.existsSync(path.join(basePath, 'emulationstation')) ||
          fs.existsSync(path.join(basePath, 'roms')) ||
          fs.existsSync(path.join(basePath, 'emulators'));
 };

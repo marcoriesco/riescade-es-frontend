@@ -1,90 +1,134 @@
-{"level":"info","message":"EmulationStation encontrado em: Y:\\images\\RIESCADE\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 03:17:15"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 03:17:15"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/Windows.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 03:17:17"}
-{"level":"warn","message":"Diretório de configuração do EmulationStation não encontrado. Alguns recursos podem não funcionar.","service":"es-theme-engine","timestamp":"2025-03-10 03:42:17"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 03:42:18"}
-{"level":"info","message":"EmulationStation encontrado em: Y:\\images\\RIESCADE\\_riescade\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 04:44:28"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 04:44:28"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 04:44:28"}
-{"level":"info","message":"EmulationStation encontrado em: Y:\\images\\RIESCADE\\_riescade\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:02:09"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:02:09"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:02:09"}
-{"level":"info","message":"EmulationStation encontrado em: Y:\\images\\RIESCADE\\_riescade\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:05:11"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:05:11"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:05:11"}
-{"level":"info","message":"EmulationStation encontrado em: Y:\\images\\RIESCADE\\_riescade\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:07:57"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:07:57"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:07:57"}
-{"level":"info","message":"EmulationStation encontrado em: Y:\\images\\RIESCADE\\_riescade\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:11:07"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:11:07"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:11:07"}
-{"level":"info","message":"EmulationStation encontrado em: Y:\\images\\RIESCADE\\_riescade\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:12:03"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:12:03"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:12:03"}
-{"level":"info","message":"EmulationStation encontrado em: Y:\\images\\RIESCADE\\_riescade\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:12:07"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:12:07"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:12:07"}
-{"level":"info","message":"EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:12:35"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:12:35"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:12:35"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:38"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:55"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:55"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:12:56"}
-{"level":"info","message":"EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:17:24"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:17:24"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:17:24"}
-{"level":"info","message":"EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 05:17:26"}
-{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 05:17:26"}
-{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 05:17:26"}
-{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/jojo-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:22:15"}
-{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/redearth-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:22:15"}
-{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/sfiii-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:22:15"}
-{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/sfiii2-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:22:15"}
-{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/sfiii3-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:22:15"}
-{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/jojoba-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:22:15"}
-{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/jojo-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 05:22:15"}
+{"level":"info","message":"EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 16:00:07"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 16:00:07"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 16:00:07"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:00:27"}
+{"level":"info","message":"EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 16:04:04"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 16:04:04"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 16:04:04"}
+{"level":"info","message":"EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 16:53:12"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 16:53:12"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 16:53:12"}
+{"level":"info","message":"EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 16:54:56"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 16:54:56"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 16:54:56"}
+{"level":"info","message":"EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 16:55:19"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 16:55:19"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 16:55:19"}
+{"level":"info","message":"Diretório de configuração do EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 16:59:28"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 16:59:28"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 16:59:28"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:34"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 16:59:36"}
+{"level":"info","message":"Diretório de configuração do EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 17:01:11"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 17:01:11"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 17:01:11"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:20"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/agallet-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/crusherm-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/ddp2-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/deathsml-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/donpachi-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/espgal-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/espgal2-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/esprade-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/feversos-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/gaia-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/guwange-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/hotdogst-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/ibara-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/ibarablk-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/ket-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/mazinger-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/metmqstr-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/mmpork-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/mushisam-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/plegends-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/pwrinst2-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/sailormn-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/theroes-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/tjumpman-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/uopoko-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cave/images/ddonpach-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cave/images/agallet-image.jpg - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:27"}
+{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/jojo-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:31"}
+{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/redearth-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:31"}
+{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/sfiii-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:31"}
+{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/sfiii2-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:31"}
+{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/sfiii3-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:31"}
+{"level":"error","message":"404 - Não encontrado - /roms/cps3/images/jojoba-thumb.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:31"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/jojo-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:31"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/redearth-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:32"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/sfiii-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:32"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/sfiii2-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:33"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/sfiii3-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:33"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/jojoba-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:33"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/sfiii3-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:33"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/sfiii2-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:33"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/sfiii-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:34"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/redearth-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:34"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/jojo-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:01:34"}
+{"level":"error","message":"500 - path must be absolute or specify root to res.sendFile - /roms-media/cps3/images/jojo-image.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:02:05"}
+{"level":"error","message":"404 - Não encontrado - /favicon.ico - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-10 17:02:05"}
+{"level":"info","message":"Diretório de configuração do EmulationStation encontrado em: Y:\\images\\RIESCADE\\_riescade\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-10 17:05:50"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-10 17:05:50"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-10 17:05:50"}

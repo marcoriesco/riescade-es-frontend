@@ -75,7 +75,9 @@ if (!esPaths.configDir) {
     "Diretório de configuração do EmulationStation não encontrado. Alguns recursos podem não funcionar."
   );
 } else {
-  logger.info(`EmulationStation encontrado em: ${esPaths.configDir}`);
+  logger.info(
+    `Diretório de configuração do EmulationStation encontrado em: ${esPaths.configDir}`
+  );
 }
 
 // Definir o tema atual como um middleware
