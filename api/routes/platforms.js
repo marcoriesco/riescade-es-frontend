@@ -14,15 +14,10 @@ const router = express.Router();
  * Retorna todas as plataformas
  */
 router.get("/", (req, res) => {
-  console.log("Requisição recebida para /api/platforms");
-
   const systems = configService.getSystems(req.query.refresh === "true");
-  console.log(`Sistemas encontrados: ${systems ? systems.length : 0}`);
-  console.log("Sistemas:", systems);
 
   // Obter os caminhos para diagnóstico
   const paths = configService.getPaths(true);
-  console.log("Caminhos encontrados:", JSON.stringify(paths, null, 2));
 
   // Converter para formato de resposta
   let platforms = [];
@@ -44,18 +39,6 @@ router.get("/", (req, res) => {
     const platformsWithEmulators = platforms.filter(
       (p) => p.emulators && p.emulators.length > 0
     );
-    console.log(
-      `Plataformas com emuladores: ${platformsWithEmulators.length}/${platforms.length}`
-    );
-
-    if (platformsWithEmulators.length > 0) {
-      // Mostrar detalhes de uma plataforma de exemplo
-      const example = platformsWithEmulators[0];
-      console.log(
-        `Exemplo - Plataforma ${example.id} tem ${example.emulators.length} emuladores`
-      );
-      console.log(`Emuladores: ${JSON.stringify(example.emulators, null, 2)}`);
-    }
 
     // Retornar as plataformas encontradas
     return res.json({
@@ -65,10 +48,6 @@ router.get("/", (req, res) => {
     });
   } else {
     // Se não encontrou sistemas, retornar mensagem de diagnóstico
-    console.log(
-      "Nenhum sistema encontrado! Retornando informações de diagnóstico."
-    );
-
     return res.status(404).json({
       success: false,
       message: "Nenhuma plataforma encontrada!",
@@ -112,28 +91,15 @@ router.get("/:id", (req, res) => {
     });
   }
 
-  // Log detalhado para depuração
-  console.log(`Sistema ${system.id} encontrado`);
-  console.log(`Emuladores: ${JSON.stringify(system.emulators, null, 2)}`);
-
   if (system.emulators && system.emulators.length > 0) {
-    console.log(`Este sistema tem ${system.emulators.length} emuladores`);
-
     // Verificar cada emulador
     system.emulators.forEach((emulator, index) => {
-      console.log(`Emulador ${index + 1}: ${emulator.name}`);
-
       if (emulator.cores && emulator.cores.length > 0) {
-        console.log(`  Tem ${emulator.cores.length} cores`);
         emulator.cores.forEach((core, coreIndex) => {
           console.log(`  Core ${coreIndex + 1}: ${core.name}`);
         });
-      } else {
-        console.log(`  Não tem cores definidas`);
       }
     });
-  } else {
-    console.log(`Este sistema não tem emuladores definidos`);
   }
 
   // Converter para formato de resposta

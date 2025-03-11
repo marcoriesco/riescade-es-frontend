@@ -237,7 +237,6 @@ function parseGamelist(filePath) {
  */
 function parseSystemsConfig(filePath) {
   try {
-    console.log(`Analisando arquivo de configuração de sistemas: ${filePath}`);
     const xmlContent = fs.readFileSync(filePath, "utf8");
 
     // Adicionar verificação para lidar com atributos *name* e *default*
@@ -250,20 +249,11 @@ function parseSystemsConfig(filePath) {
     const parser = new XMLParser(parserOptions);
     const systemsData = parser.parse(processedContent);
 
-    console.log(
-      `Resultado da análise XML:`,
-      JSON.stringify(systemsData, null, 2).substring(0, 300) + "..."
-    );
-
     if (
       !systemsData ||
       !systemsData.systemList ||
       !systemsData.systemList.system
     ) {
-      console.log(
-        `Arquivo ${filePath} não contém sistemas válidos. Estrutura:`,
-        systemsData
-      );
       return [];
     }
 
@@ -286,13 +276,6 @@ function parseSystemsConfig(filePath) {
 
       // Extrair emuladores e cores
       const emulators = parseEmulators(system);
-      console.log(
-        `Sistema ${system.name}: encontrados ${emulators.length} emuladores`
-      );
-
-      if (emulators.length > 0) {
-        console.log(`Primeiro emulador: ${JSON.stringify(emulators[0])}`);
-      }
 
       return {
         id: system.name || generateId(system.fullname),
@@ -320,19 +303,11 @@ function parseSystemsConfig(filePath) {
 function parseEmulators(system) {
   // Verificar se o sistema tem emuladores
   if (!system.emulators) {
-    console.log(`Sistema ${system.name} não tem emuladores definidos`);
     return [];
   }
 
-  // Depurar a estrutura do elemento emulators
-  console.log(`Estrutura do elemento emulators para ${system.name}:`);
-  console.log(JSON.stringify(system.emulators).substring(0, 300));
-
   // Verificar se emulators tem a propriedade emulator
   if (!system.emulators.emulator) {
-    console.log(
-      `Sistema ${system.name} tem tag emulators mas sem emuladores dentro`
-    );
     return [];
   }
 
@@ -340,10 +315,6 @@ function parseEmulators(system) {
   const emulatorsArr = Array.isArray(system.emulators.emulator)
     ? system.emulators.emulator
     : [system.emulators.emulator];
-
-  console.log(
-    `Processando ${emulatorsArr.length} emuladores para ${system.name}`
-  );
 
   // Processar cada emulador
   return emulatorsArr.map((emulator) => {
@@ -357,21 +328,6 @@ function parseEmulators(system) {
       const coresArr = Array.isArray(emulator.cores.core)
         ? emulator.cores.core
         : [emulator.cores.core];
-
-      console.log(`Processando ${coresArr.length} cores para emulador ${name}`);
-      console.log(`Exemplo do primeiro core: ${JSON.stringify(coresArr[0])}`);
-
-      // Depurar o primeiro core para entender sua estrutura
-      if (coresArr.length > 0) {
-        const firstCore = coresArr[0];
-        console.log(`Tipo do core: ${typeof firstCore}`);
-        if (typeof firstCore !== "string") {
-          console.log(
-            `Propriedades do core: ${Object.keys(firstCore).join(", ")}`
-          );
-          console.log(`Valor do core: ${firstCore._text || firstCore}`);
-        }
-      }
 
       cores = coresArr.map((core) => {
         // Verificação especial para quando o core é um valor simples (texto)
@@ -410,20 +366,13 @@ function parseEmulators(system) {
               if (nonAttrKeys.length > 0) {
                 coreName = core[nonAttrKeys[0]];
               } else {
-                coreName = "unknown";
-                console.log(
-                  `Não foi possível extrair o nome do core: ${JSON.stringify(
-                    core
-                  )}`
-                );
+                coreName = "";
               }
             }
           }
         } else {
           coreName = String(core);
         }
-
-        console.log(`Core extraído: ${coreName} (default: ${isDefault})`);
 
         return {
           name: coreName,

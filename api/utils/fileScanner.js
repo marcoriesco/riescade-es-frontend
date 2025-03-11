@@ -37,7 +37,6 @@ function scanSystems(configDir) {
 
       // Obter e exibir informações sobre os caminhos para ajudar no diagnóstico
       const paths = pathFinder.findEmulationStationPaths();
-      console.log("Caminhos encontrados:", JSON.stringify(paths, null, 2));
     }
   } catch (err) {
     console.error("Erro ao escanear sistemas:", err);
