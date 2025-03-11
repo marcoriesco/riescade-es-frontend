@@ -15170,3 +15170,81 @@
 {"level":"info","message":"Solicitação de mídia: cps3/images/jojoba-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:03:24"}
 {"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojoba-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:03:24"}
 {"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojoba-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:03:24"}
+{"level":"info","message":"Usando diretório de temas existente: Y:\\images\\RIESCADE\\_riescade\\themes","service":"es-theme-engine","timestamp":"2025-03-11 05:07:04"}
+{"level":"info","message":"Tema padrão encontrado em: Y:\\images\\RIESCADE\\_riescade\\themes\\default","service":"es-theme-engine","timestamp":"2025-03-11 05:07:04"}
+{"level":"info","message":"Arquivo index.html do tema padrão encontrado: Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html","service":"es-theme-engine","timestamp":"2025-03-11 05:07:04"}
+{"level":"info","message":"Diretório de configuração do EmulationStation encontrado em: ..\\emulationstation\\.emulationstation","service":"es-theme-engine","timestamp":"2025-03-11 05:07:04"}
+{"level":"info","message":"Servidor rodando na porta 3000","service":"es-theme-engine","timestamp":"2025-03-11 05:07:04"}
+{"level":"info","message":"Mensagem de inicialização enviada ao processo pai","service":"es-theme-engine","timestamp":"2025-03-11 05:07:04"}
+{"level":"info","message":"Enviando tema atual: Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html com content-type text/html","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:08"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/jojo-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojo-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojo-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/redearth-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\redearth-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\redearth-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/sfiii-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/sfiii2-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii2-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii2-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/sfiii3-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii3-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii3-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/jojoba-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojoba-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojoba-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/jojo-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojo-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojo-image.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:10"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/redearth-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:13"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\redearth-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:13"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\redearth-image.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:13"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/sfiii-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii-image.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/sfiii2-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii2-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii2-image.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/sfiii3-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii3-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\sfiii3-image.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Solicitação de mídia: cps3/images/jojoba-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojoba-image.png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojoba-image.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 05:07:14"}
+{"level":"info","message":"Enviando tema atual: Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html com content-type text/html","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 05:07:31"}
