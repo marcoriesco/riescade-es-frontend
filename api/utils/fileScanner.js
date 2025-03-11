@@ -19,125 +19,25 @@ function scanSystems(configDir) {
 
   try {
     // Lista de possíveis locais para o arquivo es_systems.cfg
-    const possibleLocations = [
-      // Localização padrão no diretório de configuração
-      path.join(configDir, "es_systems.cfg"),
-
-      // Outras localizações comuns no RetroBat
-      path.join(path.dirname(configDir), "es_systems.cfg"),
-
-      // Verificar se estamos no modo portátil
-      ...(process.env.ES_PORTABLE_MODE === "true" && process.env.ES_ROOT_PATH
-        ? [
-            path.join(process.env.ES_ROOT_PATH, "es_systems.cfg"),
-            path.join(process.env.ES_ROOT_PATH, "system", "es_systems.cfg"),
-            path.join(
-              process.env.ES_ROOT_PATH,
-              "system",
-              "configs",
-              "es_systems.cfg"
-            ),
-            path.join(process.env.ES_ROOT_PATH, "configs", "es_systems.cfg"),
-            path.join(
-              process.env.ES_ROOT_PATH,
-              "emulationstation",
-              "es_systems.cfg"
-            ),
-          ]
-        : []),
-    ];
-
-    console.log("Verificando possíveis localizações para es_systems.cfg:");
-    possibleLocations.forEach((loc) =>
-      console.log(` - ${loc} (${fs.existsSync(loc) ? "Existe" : "Não existe"})`)
-    );
-
-    // Filtrar apenas os arquivos que existem
-    const systemFiles = possibleLocations.filter((loc) => fs.existsSync(loc));
-
-    console.log(
-      `Arquivos de sistemas encontrados: ${systemFiles.length}`,
-      systemFiles
-    );
+    const systemFile = path.join(configDir, "es_systems.cfg");
 
     // Para cada arquivo de sistemas
-    for (const systemFile of systemFiles) {
-      console.log(`Analisando arquivo de sistemas: ${systemFile}`);
-      const systemsFromFile = xmlParser.parseSystemsConfig(systemFile);
-      console.log(
-        `Sistemas encontrados no arquivo ${path.basename(systemFile)}: ${
-          systemsFromFile ? systemsFromFile.length : 0
-        }`
-      );
+    const systemsFromFile = xmlParser.parseSystemsConfig(systemFile);
 
-      if (systemsFromFile && systemsFromFile.length > 0) {
-        console.log(
-          `Adicionando ${systemsFromFile.length} sistemas de ${path.basename(
-            systemFile
-          )}`
-        );
-        systems.push(...systemsFromFile);
-      }
+    if (systemsFromFile && systemsFromFile.length > 0) {
+      console.log(
+        `Adicionando ${systemsFromFile.length} sistemas de ${systemFile}`
+      );
+      systems.push(...systemsFromFile);
     }
 
-    // Se não encontrou sistemas, verificar se há diretórios de ROMs e criar sistemas manualmente
+    // Se não encontrou sistemas, registrar no log e retornar array vazio
     if (systems.length === 0) {
-      console.log(
-        "Nenhum sistema encontrado nos arquivos de configuração. Tentando detectar sistemas pelos diretórios de ROMs..."
-      );
+      console.log("Nenhum sistema encontrado nos arquivos de configuração!");
 
-      // Obter o diretório de ROMs
+      // Obter e exibir informações sobre os caminhos para ajudar no diagnóstico
       const paths = pathFinder.findEmulationStationPaths();
-      if (paths.romsDir && fs.existsSync(paths.romsDir)) {
-        console.log(`Escaneando diretório de ROMs: ${paths.romsDir}`);
-
-        // Listar todos os diretórios no diretório de ROMs
-        const romDirs = fs
-          .readdirSync(paths.romsDir, { withFileTypes: true })
-          .filter((dirent) => dirent.isDirectory())
-          .map((dirent) => dirent.name);
-
-        console.log(
-          `Diretórios de ROMs encontrados: ${romDirs.length}`,
-          romDirs
-        );
-
-        // Para cada diretório, criar um sistema
-        for (const romDir of romDirs) {
-          // Verificar se há ROMs no diretório
-          const romFiles = fs
-            .readdirSync(path.join(paths.romsDir, romDir))
-            .filter((file) => !file.startsWith(".") && file !== "gamelist.xml");
-
-          if (romFiles.length > 0) {
-            console.log(
-              `Criando sistema para diretório de ROMs: ${romDir} (${romFiles.length} ROMs)`
-            );
-
-            // Determinar extensões com base nos arquivos encontrados
-            const extensions = [
-              ...new Set(
-                romFiles.map((file) => path.extname(file).toLowerCase())
-              ),
-            ].filter((ext) => ext !== "");
-
-            // Criar sistema
-            systems.push({
-              id: romDir,
-              name: romDir,
-              fullName:
-                romDir.charAt(0).toUpperCase() +
-                romDir.slice(1).replace(/_/g, " "),
-              path: path.join(paths.romsDir, romDir),
-              extension: extensions.length > 0 ? extensions : [".zip", ".7z"],
-              command: "",
-              platform: romDir,
-              theme: romDir,
-              emulators: [],
-            });
-          }
-        }
-      }
+      console.log("Caminhos encontrados:", JSON.stringify(paths, null, 2));
     }
   } catch (err) {
     console.error("Erro ao escanear sistemas:", err);

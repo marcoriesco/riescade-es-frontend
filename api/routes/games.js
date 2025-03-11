@@ -4,7 +4,7 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs-extra");
-const { execFile } = require("child_process");
+const { execFile, spawn } = require("child_process");
 const configService = require("../services/configService");
 const fileScanner = require("../utils/fileScanner");
 
@@ -107,13 +107,30 @@ router.get("/:id", (req, res) => {
   const gamelistPath = path.join(platformRomsDir, "gamelist.xml");
   console.log(`Tentando ler gamelist.xml em: ${gamelistPath}`);
 
+  // Variável para armazenar o caminho do ROM
+  let romPath = null;
+  let foundGameName = null;
+
+  // Extrair o ID específico do jogo (parte após o primeiro hífen)
+  const gameSpecificId = gameId.substring(systemId.length + 1);
+  console.log(`ID específico do jogo: ${gameSpecificId}`);
+
+  // Verificar se temos um ID específico
+  if (!gameSpecificId) {
+    console.log(`ID específico não encontrado no ID do jogo: ${gameId}`);
+    return res.status(404).json({
+      success: false,
+      message: "ID do jogo inválido",
+    });
+  }
+
+  // Estratégia 1: Tentar encontrar o jogo na gamelist.xml
   if (fs.existsSync(gamelistPath)) {
     try {
-      // Ler e parsear o arquivo XML
-      console.log("gamelist.xml encontrada, lendo conteúdo...");
+      console.log("Lendo gamelist.xml para encontrar o jogo...");
       const xmlContent = fs.readFileSync(gamelistPath, "utf8");
 
-      // Usar o XMLParser diretamente
+      // Usar o XMLParser para analisar o arquivo
       const { XMLParser } = require("fast-xml-parser");
       const parser = new XMLParser({
         ignoreAttributes: false,
@@ -121,7 +138,6 @@ router.get("/:id", (req, res) => {
       });
 
       const parsedXml = parser.parse(xmlContent);
-      console.log("XML parseado com sucesso");
 
       if (parsedXml.gameList && parsedXml.gameList.game) {
         // Converter para array, caso seja um único jogo
@@ -131,22 +147,16 @@ router.get("/:id", (req, res) => {
 
         console.log(`${games.length} jogos encontrados na gamelist.xml`);
 
-        // Buscar o jogo pelo ID específico da gamelist
+        // Buscar o jogo pelo ID específico
         let foundGame = null;
 
-        // Primeiro, registramos todos os métodos que usaremos para identificar o jogo
-        console.log(
-          `Iniciando busca pelo jogo com ID específico: ${specificId} usando múltiplas estratégias`
-        );
-
-        // Método 1: Buscar pelo atributo ID na gamelist (se houver)
-        if (/^\d+$/.test(specificId)) {
-          // Procurar pelo atributo id na gamelist
+        // Método 1: Buscar pelo atributo ID na gamelist
+        if (/^\d+$/.test(gameSpecificId)) {
           console.log(
-            `Estratégia 1: Procurando jogo com ID ${specificId} na gamelist...`
+            `Procurando jogo com ID ${gameSpecificId} na gamelist...`
           );
           foundGame = games.find(
-            (game) => game["@_id"] && game["@_id"].toString() === specificId
+            (game) => game["@_id"] && game["@_id"].toString() === gameSpecificId
           );
 
           if (foundGame) {
@@ -158,17 +168,11 @@ router.get("/:id", (req, res) => {
           }
         }
 
-        // Método 2: Se não encontrou pelo ID, procurar pelo caminho do arquivo/nome
+        // Método 2: Se não encontrou pelo ID, procurar pelo nome ou caminho
         if (!foundGame) {
           console.log(
-            `Estratégia 2: Comparando pelo caminho e nome do arquivo...`
+            `Procurando jogo com nome ou caminho relacionado a ${gameSpecificId}...`
           );
-
-          // Extrair o nome do arquivo sem extensão do specificId
-          // (caso o specificId seja um nome de arquivo)
-          const possibleFilename = specificId.includes(".")
-            ? specificId.substring(0, specificId.lastIndexOf("."))
-            : specificId;
 
           foundGame = games.find((game) => {
             if (!game.path) return false;
@@ -181,277 +185,386 @@ router.get("/:id", (req, res) => {
               path.extname(filename)
             );
 
-            // Verificar se o nome do arquivo corresponde ao specificId
+            // Verificar se o nome do arquivo ou o nome do jogo corresponde ao gameSpecificId
             return (
-              filenameNoExt === possibleFilename || filename === specificId
+              filenameNoExt === gameSpecificId ||
+              filename === gameSpecificId ||
+              (game.name &&
+                game.name.toLowerCase() === gameSpecificId.toLowerCase())
             );
           });
 
           if (foundGame) {
             console.log(
-              `Jogo encontrado pela correspondência de nome de arquivo: ${
+              `Jogo encontrado por nome ou caminho: ${
                 foundGame.name || path.basename(foundGame.path)
               }`
             );
           }
         }
 
-        // Método 3: Se ainda não encontrou, e o specificId é um número, tentar pelo índice
-        if (!foundGame && /^\d+$/.test(specificId)) {
-          console.log(
-            `Estratégia 3: Tentando encontrar pelo índice ${specificId}...`
-          );
-          const index = parseInt(specificId);
-          if (!isNaN(index) && index >= 0 && index < games.length) {
-            foundGame = games[index];
-            console.log(
-              `Jogo encontrado pelo índice ${index}: ${
-                foundGame.name || "sem nome"
-              }`
-            );
+        // Se encontrou o jogo, usar seu caminho
+        if (foundGame && foundGame.path) {
+          foundGameName = foundGame.name || path.basename(foundGame.path);
+
+          // Verificar se o caminho é absoluto ou relativo
+          if (path.isAbsolute(foundGame.path)) {
+            romPath = foundGame.path;
+          } else {
+            // Construir caminho completo
+            romPath = path.join(platformRomsDir, foundGame.path);
           }
-        }
 
-        // Método 4: Se ainda não encontrou e temos um formato de ID específico para arquivo
-        if (!foundGame && specificId.startsWith("file-")) {
-          // Formato sistema-file-X, precisa procurar pelos arquivos
-          console.log(`Formato de ID file-X detectado: ${specificId}`);
-
-          // Verificar os arquivos no diretório
-          const files = fs
-            .readdirSync(platformRomsDir)
-            .filter(
-              (f) =>
-                !f.includes("gamelist.xml") &&
-                !fs.statSync(path.join(platformRomsDir, f)).isDirectory()
-            );
-
-          // Extrair o índice do arquivo
-          const fileIndex = parseInt(specificId.split("-")[1]);
-          if (!isNaN(fileIndex) && fileIndex >= 0 && fileIndex < files.length) {
-            const file = files[fileIndex];
-            const filePath = path.join(platformRomsDir, file);
-            const fileName = path.basename(file, path.extname(file));
-
-            // Criar um objeto de jogo simples
-            return res.json({
-              success: true,
-              data: {
-                id: gameId,
-                name: fileName,
-                path: filePath,
-                desc: `${fileName} para ${system.fullName || system.name}`,
-                extension: path.extname(file).substring(1),
-                platform: {
-                  id: system.id,
-                  name: system.fullName || system.name,
-                  shortName: system.name,
-                },
-              },
-            });
-          }
-        }
-
-        // Se encontrou o jogo, processar e retornar
-        if (foundGame) {
-          console.log(
-            `Jogo encontrado na gamelist: ${foundGame.name || "sem nome"}`
-          );
-
-          // Processar caminhos de mídia
-          const processPath = (mediaPath) => {
-            if (!mediaPath) return "";
-
-            // Se já é uma URL, manter como está
-            if (
-              mediaPath.startsWith("http://") ||
-              mediaPath.startsWith("https://")
-            ) {
-              return mediaPath;
-            }
-
-            // Converter caminho absoluto para URL
-            if (path.isAbsolute(mediaPath)) {
-              // Extrair a parte após romsDir
-              const romsDir = paths.romsDir;
-              if (mediaPath.startsWith(romsDir)) {
-                const relativePath = mediaPath
-                  .substring(romsDir.length + 1)
-                  .replace(/\\/g, "/");
-                return `/roms-media/${relativePath}`;
-              }
-              return mediaPath;
-            }
-
-            // Processar caminho relativo
-            // Remover o ./ do início se existir
-            const normalizedPath = mediaPath.startsWith("./")
-              ? mediaPath.substring(2)
-              : mediaPath;
-
-            // Criar URL relativa ao diretório do sistema
-            return `/roms-media/${system.id}/${normalizedPath.replace(
-              /\\/g,
-              "/"
-            )}`;
-          };
-
-          // Extrair o nome do arquivo da ROM do caminho
-          const gamePath = foundGame.path || "";
-          const romFilename = path.basename(gamePath);
-
-          // Criar o objeto do jogo com todos os dados da gamelist
-          const gameData = {
-            id: gameId,
-            name:
-              foundGame.name ||
-              path.basename(romFilename, path.extname(romFilename)),
-            path: path.join(platformRomsDir, romFilename),
-            desc:
-              foundGame.desc || `Jogo para ${system.fullName || system.name}`,
-            image: processPath(foundGame.image),
-            thumbnail: processPath(foundGame.thumbnail),
-            video: processPath(foundGame.video),
-            marquee: processPath(foundGame.marquee),
-            fanart: processPath(foundGame.fanart),
-            rating: parseFloat(foundGame.rating) || 0,
-            releaseDate: foundGame.releasedate,
-            developer: foundGame.developer || "",
-            publisher: foundGame.publisher || "",
-            genre: foundGame.genre || "",
-            players: foundGame.players || "",
-            family: foundGame.family || "",
-            arcadeSystemName: foundGame.arcadesystemname || "",
-            region: foundGame.region || "",
-            lang: foundGame.lang || "",
-            extension: path.extname(romFilename).substring(1),
-            favorite:
-              foundGame.favorite === "true" || foundGame.favorite === true,
-            platform: {
-              id: system.id,
-              name: system.fullName || system.name,
-              shortName: system.name,
-            },
-          };
-
-          return res.json({
-            success: true,
-            data: gameData,
-            source: "gamelist.xml",
-          });
-        } else {
-          console.log(
-            `Jogo com ID ${specificId} não encontrado na gamelist.xml`
-          );
+          console.log(`Caminho da ROM encontrado na gamelist: ${romPath}`);
         }
       }
     } catch (err) {
-      console.error("Erro ao processar gamelist.xml:", err);
+      console.error(`Erro ao ler gamelist.xml: ${err.message}`);
     }
   }
 
-  // Se chegamos aqui, não encontramos o jogo na gamelist, tentar o método tradicional
-  try {
-    console.log("Tentando método tradicional de escaneamento...");
-    // Escanear ROMs para o sistema
-    const games = fileScanner.scanRoms(system, paths.romsDir);
-    console.log(`${games.length} jogos encontrados para ${system.name}`);
+  // Estratégia 2: Se não encontrou na gamelist, procurar diretamente no diretório
+  if (!romPath) {
+    console.log(`Procurando ROM diretamente no diretório: ${platformRomsDir}`);
 
-    // Encontrar o jogo pelo ID
-    const foundGame = games.find((game) => game.id === gameId);
+    try {
+      // Listar todos os arquivos no diretório
+      const files = fs.readdirSync(platformRomsDir);
+      console.log(`${files.length} arquivos encontrados no diretório`);
 
-    if (!foundGame) {
-      console.log(
-        `Jogo ${gameId} não encontrado entre os ${games.length} jogos escaneados`
+      // Verificar extensões válidas para o sistema
+      const validExtensions = system.extension || [".zip", ".7z"];
+      console.log(`Extensões válidas: ${validExtensions.join(", ")}`);
+
+      // Procurar por um arquivo que corresponda ao gameSpecificId
+      const matchingFile = files.find((file) => {
+        const fileNoExt = path.basename(file, path.extname(file));
+        const fileExt = path.extname(file).toLowerCase();
+
+        // Verificar se a extensão é válida
+        const isValidExtension = validExtensions.some(
+          (ext) => fileExt === ext || fileExt === ext.toLowerCase()
+        );
+
+        // Verificar se o nome do arquivo corresponde ao gameSpecificId
+        return (
+          isValidExtension &&
+          (fileNoExt === gameSpecificId ||
+            fileNoExt.toLowerCase() === gameSpecificId.toLowerCase() ||
+            file === gameSpecificId)
+        );
+      });
+
+      if (matchingFile) {
+        romPath = path.join(platformRomsDir, matchingFile);
+        foundGameName = path.basename(matchingFile, path.extname(matchingFile));
+        console.log(`ROM encontrada diretamente no diretório: ${romPath}`);
+      }
+    } catch (err) {
+      console.error(`Erro ao listar arquivos no diretório: ${err.message}`);
+    }
+  }
+
+  // Estratégia 3: Se o gameSpecificId parece ser um caminho de arquivo, usar diretamente
+  if (
+    !romPath &&
+    (gameSpecificId.includes(".") || gameSpecificId.includes("/"))
+  ) {
+    console.log(
+      `Tentando usar gameSpecificId como caminho direto: ${gameSpecificId}`
+    );
+
+    // Verificar se é um caminho absoluto
+    if (path.isAbsolute(gameSpecificId)) {
+      romPath = gameSpecificId;
+    } else {
+      // Construir caminho completo
+      romPath = path.join(platformRomsDir, gameSpecificId);
+    }
+
+    foundGameName = path.basename(romPath, path.extname(romPath));
+    console.log(`Usando gameSpecificId como caminho direto: ${romPath}`);
+  }
+
+  // Verificar se o arquivo ROM existe
+  if (!fs.existsSync(romPath)) {
+    console.log(`Arquivo ROM não encontrado: ${romPath}`);
+    return res.status(404).json({
+      success: false,
+      message: "Arquivo ROM não encontrado",
+    });
+  }
+
+  console.log(`Caminho da ROM: ${romPath}`);
+  console.log(`Nome do jogo: ${foundGameName}`);
+
+  // Preparar comando para o emulatorLauncher
+  const args = [];
+
+  // Determinar o emulador e core a serem usados
+  let selectedEmulator = null;
+  let selectedCore = null;
+
+  console.log(`Verificando emuladores para o sistema ${system.id}`);
+  console.log(
+    `Emuladores disponíveis:`,
+    JSON.stringify(system.emulators || [], null, 2)
+  );
+
+  // Verificar se o emulador foi especificado na requisição
+  if (req.body.emulator) {
+    selectedEmulator = req.body.emulator;
+    console.log(
+      `Usando emulador especificado na requisição: ${selectedEmulator}`
+    );
+
+    // Se um emulador específico foi solicitado, procurar pelo core correspondente
+    if (req.body.core) {
+      selectedCore = req.body.core;
+      console.log(`Usando core especificado na requisição: ${selectedCore}`);
+    } else if (system.emulators && system.emulators.length > 0) {
+      // Procurar o emulador solicitado
+      const emulatorObj = system.emulators.find(
+        (e) => e.name === req.body.emulator
+      );
+      if (emulatorObj && emulatorObj.cores && emulatorObj.cores.length > 0) {
+        // Usar o primeiro core deste emulador
+        selectedCore = emulatorObj.cores[0].name;
+        console.log(
+          `Usando o primeiro core (${selectedCore}) do emulador ${req.body.emulator}`
+        );
+      }
+    }
+  } else if (system.emulators && system.emulators.length > 0) {
+    // Se nenhum emulador foi especificado, usar o primeiro com seu primeiro core
+    selectedEmulator = system.emulators[0].name;
+    console.log(`Usando o primeiro emulador disponível: ${selectedEmulator}`);
+
+    // Verificar se o emulador tem cores
+    if (system.emulators[0].cores && system.emulators[0].cores.length > 0) {
+      // Verificar se há um core padrão
+      const defaultCore = system.emulators[0].cores.find(
+        (c) => c.default === true
       );
 
-      // Se não encontrou, tentar escanear diretamente o diretório
-      if (fs.existsSync(platformRomsDir)) {
-        console.log(
-          `Tentando alternativa: escaneando diretamente o diretório ${platformRomsDir}`
-        );
-
-        // Verificar se o sistema tem extensões definidas
-        if (!system.extension || system.extension.length === 0) {
-          system.extension = [".zip", ".7z", ".rom"]; // Extensões padrão
-        }
-
-        // Normalizar extensões
-        const supportedExtensions = system.extension.map((ext) =>
-          ext.startsWith(".") ? ext.toLowerCase() : "." + ext.toLowerCase()
-        );
-
-        // Listar arquivos no diretório
-        const files = fs.readdirSync(platformRomsDir);
-
-        // Filtrar pelos arquivos com extensões suportadas
-        const validFiles = files.filter((file) => {
-          const ext = path.extname(file).toLowerCase();
-          return supportedExtensions.includes(ext);
-        });
-
-        console.log(`${validFiles.length} arquivos válidos encontrados`);
-
-        // Tentar encontrar o jogo pelo índice no ID (formato: sistema-índice)
-        const parts = gameId.split("-");
-        if (parts.length > 1) {
-          const index = parseInt(parts[1]);
-          if (!isNaN(index) && index >= 0 && index < validFiles.length) {
-            const file = validFiles[index];
-            const filePath = path.join(platformRomsDir, file);
-            const fileName = path.basename(file, path.extname(file));
-
-            console.log(`Encontrado jogo pelo índice ${index}: ${fileName}`);
-
-            // Criar objeto do jogo
-            const game = {
-              id: gameId,
-              name: fileName,
-              path: filePath,
-              filename: file,
-              extension: path.extname(file).substring(1),
-              desc: `${fileName} para ${system.fullName || system.name}`,
-              platform: {
-                id: system.id,
-                name: system.fullName || system.name,
-                shortName: system.name,
-              },
-            };
-
-            return res.json({
-              success: true,
-              data: game,
-            });
-          }
-        }
+      if (defaultCore) {
+        selectedCore = defaultCore.name;
+        console.log(`Usando core padrão: ${selectedCore}`);
+      } else {
+        // Se não há core padrão, usar o primeiro
+        selectedCore = system.emulators[0].cores[0].name;
+        console.log(`Usando o primeiro core disponível: ${selectedCore}`);
       }
-
-      return res.status(404).json({
-        success: false,
-        message: "Jogo não encontrado",
-      });
+    } else {
+      console.log(`O emulador ${selectedEmulator} não tem cores definidos`);
     }
+  } else {
+    console.log(`Sistema ${system.id} não tem emuladores definidos`);
+  }
 
-    // Adicionar informação do sistema ao jogo
-    foundGame.platform = {
-      id: system.id,
-      name: system.fullName || system.name,
-      shortName: system.name,
-    };
+  // Adicionar parâmetros do sistema (essencial)
+  args.push("-system", system.id);
 
-    console.log(`Jogo encontrado: ${foundGame.name}`);
-    res.json({
-      success: true,
-      data: foundGame,
-    });
-  } catch (err) {
-    console.error(`Erro ao buscar detalhes do jogo ${gameId}:`, err);
-    res.status(500).json({
+  // Adicionar emulador aos argumentos, se disponível
+  if (selectedEmulator) {
+    args.push("-emulator", selectedEmulator);
+    console.log(`Adicionando parâmetro -emulator ${selectedEmulator}`);
+  }
+
+  // Adicionar core aos argumentos, se disponível
+  if (selectedCore) {
+    args.push("-core", selectedCore);
+    console.log(`Adicionando parâmetro -core ${selectedCore}`);
+  }
+
+  // Adicionar o caminho da ROM (essencial)
+  // Usar o caminho absoluto da ROM
+  console.log(`Caminho original da ROM: ${romPath}`);
+
+  // Garantir que o caminho da ROM seja absoluto
+  if (!path.isAbsolute(romPath)) {
+    console.log(`Convertendo caminho relativo para absoluto: ${romPath}`);
+    romPath = path.resolve(romPath);
+  }
+
+  // Remover qualquer referência a caminhos relativos como '..'
+  if (romPath.includes("..")) {
+    console.log(
+      `Removendo referências a caminhos relativos '..' do caminho da ROM`
+    );
+    romPath = path.normalize(romPath);
+  }
+
+  console.log(`Caminho final da ROM: ${romPath}`);
+
+  // Adicionar aspas ao caminho da ROM se ele não já estiver entre aspas
+  if (!romPath.startsWith('"') && !romPath.endsWith('"')) {
+    romPath = `"${romPath}"`;
+    console.log(`Caminho da ROM com aspas: ${romPath}`);
+  }
+
+  args.push("-rom", romPath);
+
+  // Adicionar informações do controle (completas)
+  args.push("-p1index", "0");
+  args.push("-p1guid", "030000005e0400008e02000000007200"); // GUID padrão do controle Xbox 360
+  args.push("-p1path", "USB\\VID_045E&PID_028E&IG_00\\2&DEE0F28&0&00");
+  args.push("-p1name", "Xbox 360 Controller");
+  args.push("-p1nbbuttons", "11");
+  args.push("-p1nbhats", "1");
+  args.push("-p1nbaxes", "6");
+
+  // Procurar pelo emulatorLauncher.exe
+  const launcherPath = path.join(
+    paths.rootDir,
+    "emulationstation",
+    "emulatorLauncher.exe"
+  );
+
+  if (!launcherPath) {
+    return res.status(500).json({
       success: false,
-      message: `Erro ao buscar detalhes do jogo: ${err.message}`,
+      message: "emulatorLauncher.exe não encontrado",
     });
   }
+
+  // Criar string do comando completo para log
+  // Montar o comando completo com todos os argumentos
+  const fullCommand = `"${launcherPath}" ${args.join(" ")}`;
+
+  console.log("==================================================");
+  console.log("COMANDO COMPLETO:");
+  console.log(fullCommand);
+  console.log("==================================================");
+  console.log("DETALHES:");
+  console.log(`Executável: ${launcherPath}`);
+  console.log(`Sistema: ${system.id}`);
+  console.log(`Emulador: ${selectedEmulator}`);
+  console.log(`Core: ${selectedCore}`);
+  console.log(`ROM: ${romPath}`);
+  console.log(`Argumentos completos: ${JSON.stringify(args, null, 2)}`);
+  console.log("==================================================");
+
+  // Executar o emulatorLauncher
+  // Vamos usar spawn em vez de execFile para ter mais controle sobre os argumentos
+  console.log(
+    `Executando: "${launcherPath}" com argumentos: ${JSON.stringify(
+      args,
+      null,
+      2
+    )}`
+  );
+
+  // Encontrar o índice do argumento -rom
+  const romIndex = args.indexOf("-rom");
+  if (romIndex !== -1 && romIndex + 1 < args.length) {
+    // Garantir que o caminho da ROM seja absoluto
+    const romPath = args[romIndex + 1];
+    console.log(`Caminho da ROM a ser usado: ${romPath}`);
+  }
+
+  const child = spawn(launcherPath, args, {
+    shell: true, // Usar shell para lidar com aspas e caracteres especiais
+    windowsVerbatimArguments: true, // Preservar aspas em argumentos no Windows
+  });
+
+  child.stdout.on("data", (data) => {
+    console.log(`emulatorLauncher stdout: ${data}`);
+  });
+
+  child.stderr.on("data", (data) => {
+    console.error(`emulatorLauncher stderr: ${data}`);
+  });
+
+  child.on("error", (error) => {
+    console.error(`Erro ao executar emulatorLauncher: ${error.message}`);
+    return res.status(500).json({
+      success: false,
+      message: `Erro ao executar emulatorLauncher: ${error.message}`,
+    });
+  });
+
+  child.on("close", (code) => {
+    console.log(`emulatorLauncher encerrado com código: ${code}`);
+  });
+
+  // Retornar sucesso imediatamente
+  return res.json({
+    success: true,
+    message: "Jogo iniciado com sucesso",
+    data: {
+      game: {
+        id: gameId,
+        name: foundGameName,
+        path: romPath,
+      },
+      system: {
+        id: system.id,
+        name: system.name,
+        emulator: selectedEmulator,
+        core: selectedCore,
+      },
+      command: {
+        launcher: launcherPath,
+        args: args,
+        fullCommand: fullCommand,
+      },
+    },
+  });
 });
+
+/**
+ * Função para enviar um arquivo como stream, com o tipo de conteúdo apropriado
+ */
+function sendFileAsStream(res, filePath) {
+  if (!fs.existsSync(filePath)) {
+    console.log(`Arquivo não encontrado: ${filePath}`);
+    return false;
+  }
+
+  // Verificar o tipo de arquivo para definir o content-type
+  const extname = path.extname(filePath).toLowerCase();
+  const contentType =
+    {
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".mp4": "video/mp4",
+      ".webm": "video/webm",
+    }[extname] || "application/octet-stream";
+
+  console.log(`Enviando arquivo ${filePath} com content-type ${contentType}`);
+
+  try {
+    // Enviar o arquivo como uma stream
+    const stream = fs.createReadStream(filePath);
+    res.setHeader("Content-Type", contentType);
+
+    stream.on("error", (error) => {
+      console.error(`Erro na stream: ${error.message}`);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: `Erro ao ler arquivo: ${error.message}`,
+        });
+      }
+    });
+
+    stream.pipe(res);
+    return true;
+  } catch (error) {
+    console.error(`Erro ao enviar arquivo: ${error.message}`);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: `Erro ao enviar arquivo: ${error.message}`,
+      });
+    }
+    return false;
+  }
+}
 
 /**
  * GET /api/games/:id/media/:mediaType
@@ -510,7 +623,7 @@ router.get("/:id/media/:mediaType", (req, res) => {
         console.log(
           `Retornando imagem placeholder para jogo não encontrado: ${gameId}`
         );
-        return res.sendFile(placeholderPath);
+        return sendFileAsStream(res, placeholderPath);
       }
 
       return res.status(404).json({
@@ -543,11 +656,27 @@ router.get("/:id/media/:mediaType", (req, res) => {
     }
 
     // Verificar se a mídia existe
-    if (mediaPath && fs.existsSync(mediaPath)) {
-      console.log(
-        `Enviando ${mediaType} para o jogo ${game.name}: ${mediaPath}`
-      );
-      return res.sendFile(mediaPath);
+    if (mediaPath && mediaPath.startsWith("/roms-media/")) {
+      // Já está no formato correto, redirecionar
+      return res.redirect(301, mediaPath);
+    } else if (
+      mediaPath &&
+      (mediaPath.startsWith("http://") || mediaPath.startsWith("https://"))
+    ) {
+      // URL externa, redirecionar
+      return res.redirect(301, mediaPath);
+    } else if (mediaPath) {
+      // Caminho local, verificar se é absoluto
+      const isAbsolute = path.isAbsolute(mediaPath);
+      const absolutePath = isAbsolute
+        ? mediaPath
+        : path.join(paths.romsDir, system.id, mediaPath);
+
+      console.log(`Tentando servir mídia de: ${absolutePath}`);
+
+      if (fs.existsSync(absolutePath)) {
+        return sendFileAsStream(res, absolutePath);
+      }
     }
 
     // Se a mídia não existir diretamente, tentar encontrar na estrutura padrão de pastas
@@ -570,7 +699,7 @@ router.get("/:id/media/:mediaType", (req, res) => {
       for (const imgPath of possibleImagePaths) {
         if (fs.existsSync(imgPath)) {
           console.log(`Imagem alternativa encontrada: ${imgPath}`);
-          return res.sendFile(imgPath);
+          return sendFileAsStream(res, imgPath);
         }
       }
     }
@@ -585,7 +714,7 @@ router.get("/:id/media/:mediaType", (req, res) => {
       console.log(
         `Enviando logo do sistema para ${game.name}: ${systemLogoPath}`
       );
-      return res.sendFile(systemLogoPath);
+      return sendFileAsStream(res, systemLogoPath);
     }
 
     // Se não encontrou mídia específica, retornar o placeholder
@@ -595,9 +724,9 @@ router.get("/:id/media/:mediaType", (req, res) => {
     );
     if (fs.existsSync(placeholderPath)) {
       console.log(
-        `Retornando imagem placeholder para ${mediaType} do jogo ${game.name}`
+        `Retornando imagem placeholder para jogo não encontrado: ${gameId}`
       );
-      return res.sendFile(placeholderPath);
+      return sendFileAsStream(res, placeholderPath);
     }
 
     // Se nem o placeholder existir, retornar 404
@@ -606,7 +735,7 @@ router.get("/:id/media/:mediaType", (req, res) => {
       message: `Mídia ${mediaType} não encontrada para o jogo ${gameId}`,
     });
   } catch (err) {
-    console.error(`Erro ao buscar mídia para o jogo ${gameId}:`, err);
+    console.error(`Erro ao buscar mídia: ${err.message}`);
     res.status(500).json({
       success: false,
       message: `Erro ao buscar mídia: ${err.message}`,
@@ -618,64 +747,84 @@ router.get("/:id/media/:mediaType", (req, res) => {
  * POST /api/games/:id/launch
  * Lança um jogo
  */
-router.post("/:id/launch", (req, res) => {
-  console.log(`Requisição para lançar o jogo ${req.params.id} recebida`);
-
-  const gameId = req.params.id;
-  const emulator = req.body.emulator; // Opcional: emulador específico
-  const core = req.body.core; // Opcional: core específico
-  const systems = configService.getSystems();
-  const paths = configService.getPaths();
-
-  if (!paths.romsDir) {
-    console.log("Diretório de ROMs não encontrado");
-    return res.status(404).json({
-      success: false,
-      message: "Diretório de ROMs não encontrado",
-    });
-  }
-
-  // Extrair o ID do sistema a partir do ID do jogo (formato: sistema-índice)
-  const systemId = gameId.split("-")[0];
-  console.log(`Sistema inferido: ${systemId}`);
-
-  // Encontrar o sistema pelo ID
-  const system = systems.find((s) => s.id === systemId);
-  if (!system) {
-    console.log(`Sistema ${systemId} não encontrado`);
-    return res.status(404).json({
-      success: false,
-      message: "Sistema não encontrado",
-    });
-  }
-
-  // Processar a solicitação de lançamento
+router.post("/:id/launch", async (req, res) => {
   try {
-    // Primeiro, tentar encontrar o jogo pelo ID usando a mesma lógica da rota GET /:id
-    const platformRomsDir = path.join(paths.romsDir, system.id);
-    console.log(`Diretório de ROMs: ${platformRomsDir}`);
+    const gameId = req.params.id;
+    const { emulator, core } = req.body; // Opcional: emulador e core específicos
 
-    // Verificar se o diretório existe
-    if (!fs.existsSync(platformRomsDir)) {
-      console.log(`Diretório de ROMs não encontrado: ${platformRomsDir}`);
+    console.log(`Requisição para lançar o jogo ${gameId} recebida`);
+    console.log(`Emulador solicitado: ${emulator}, Core solicitado: ${core}`);
+
+    // Extrair o ID do sistema a partir do ID do jogo (formato: sistema-índice)
+    const systemId = gameId.split("-")[0];
+    console.log(`Sistema inferido: ${systemId}`);
+
+    // Obter sistemas e caminhos do configService
+    const systems = configService.getSystems();
+    const paths = configService.getPaths();
+
+    // Encontrar o sistema pelo ID
+    const system = systems.find((s) => s.id === systemId);
+    if (!system) {
+      console.log(`Sistema ${systemId} não encontrado`);
+      return res.status(404).json({
+        success: false,
+        message: "Sistema não encontrado",
+      });
+    }
+
+    // Verificar se temos o diretório de ROMs
+    if (!paths.romsDir) {
+      console.log("Diretório de ROMs não encontrado");
       return res.status(404).json({
         success: false,
         message: "Diretório de ROMs não encontrado",
       });
     }
 
+    // Determinar o diretório de ROMs para o sistema
+    const platformRomsDir = path.join(paths.romsDir, system.id);
+    console.log(`Diretório de ROMs para ${system.name}: ${platformRomsDir}`);
+
+    // Verificar se o diretório existe
+    if (!fs.existsSync(platformRomsDir)) {
+      console.log(
+        `Diretório de ROMs para ${system.name} não encontrado: ${platformRomsDir}`
+      );
+      return res.status(404).json({
+        success: false,
+        message: "Diretório de ROMs não encontrado",
+      });
+    }
+
+    // Primeiro, tentar ler a gamelist.xml diretamente
+    const gamelistPath = path.join(platformRomsDir, "gamelist.xml");
+    console.log(`Tentando ler gamelist.xml em: ${gamelistPath}`);
+
     // Variável para armazenar o caminho do ROM
     let romPath = null;
     let foundGameName = null;
 
-    // Tentar ler a gamelist.xml se existir
-    const gamelistPath = path.join(platformRomsDir, "gamelist.xml");
+    // Extrair o ID específico do jogo (parte após o primeiro hífen)
+    const gameSpecificId = gameId.substring(systemId.length + 1);
+    console.log(`ID específico do jogo: ${gameSpecificId}`);
+
+    // Verificar se temos um ID específico
+    if (!gameSpecificId) {
+      console.log(`ID específico não encontrado no ID do jogo: ${gameId}`);
+      return res.status(404).json({
+        success: false,
+        message: "ID do jogo inválido",
+      });
+    }
+
+    // Estratégia 1: Tentar encontrar o jogo na gamelist.xml
     if (fs.existsSync(gamelistPath)) {
       try {
-        console.log("Lendo gamelist.xml...");
+        console.log("Lendo gamelist.xml para encontrar o jogo...");
         const xmlContent = fs.readFileSync(gamelistPath, "utf8");
 
-        // Usar o XMLParser
+        // Usar o XMLParser para analisar o arquivo
         const { XMLParser } = require("fast-xml-parser");
         const parser = new XMLParser({
           ignoreAttributes: false,
@@ -692,27 +841,38 @@ router.post("/:id/launch", (req, res) => {
 
           console.log(`${games.length} jogos encontrados na gamelist.xml`);
 
-          // Extrair o ID específico (parte após o hífen no gameId)
-          const specificId = gameId.substring(systemId.length + 1);
-          console.log(`Procurando jogo com ID específico: ${specificId}`);
-
-          // Procurar o jogo na gamelist usando múltiplas estratégias
+          // Buscar o jogo pelo ID específico
           let foundGame = null;
 
-          // 1. Procurar pelo atributo ID
-          if (/^\d+$/.test(specificId)) {
-            console.log("Procurando pelo atributo ID...");
-            foundGame = games.find(
-              (game) => game["@_id"] && game["@_id"].toString() === specificId
+          // Método 1: Buscar pelo atributo ID na gamelist
+          if (/^\d+$/.test(gameSpecificId)) {
+            console.log(
+              `Procurando jogo com ID ${gameSpecificId} na gamelist...`
             );
+            foundGame = games.find(
+              (game) =>
+                game["@_id"] && game["@_id"].toString() === gameSpecificId
+            );
+
+            if (foundGame) {
+              console.log(
+                `Jogo encontrado pelo atributo ID: ${
+                  foundGame.name || "sem nome"
+                }`
+              );
+            }
           }
 
-          // 2. Procurar pelo nome do arquivo
+          // Método 2: Se não encontrou pelo ID, procurar pelo nome ou caminho
           if (!foundGame) {
-            console.log("Procurando pelo nome do arquivo...");
+            console.log(
+              `Procurando jogo com nome ou caminho relacionado a ${gameSpecificId}...`
+            );
+
             foundGame = games.find((game) => {
               if (!game.path) return false;
 
+              // Extrair nome do arquivo do caminho
               const gamePath = game.path;
               const filename = path.basename(gamePath);
               const filenameNoExt = path.basename(
@@ -720,216 +880,343 @@ router.post("/:id/launch", (req, res) => {
                 path.extname(filename)
               );
 
-              return filenameNoExt === specificId || filename === specificId;
+              // Verificar se o nome do arquivo ou o nome do jogo corresponde ao gameSpecificId
+              return (
+                filenameNoExt === gameSpecificId ||
+                filename === gameSpecificId ||
+                (game.name &&
+                  game.name.toLowerCase() === gameSpecificId.toLowerCase())
+              );
             });
-          }
 
-          // 3. Procurar pelo índice
-          if (!foundGame && /^\d+$/.test(specificId)) {
-            console.log("Procurando pelo índice...");
-            const index = parseInt(specificId);
-            if (!isNaN(index) && index >= 0 && index < games.length) {
-              foundGame = games[index];
+            if (foundGame) {
+              console.log(
+                `Jogo encontrado por nome ou caminho: ${
+                  foundGame.name || path.basename(foundGame.path)
+                }`
+              );
             }
           }
 
-          // Se encontrou o jogo na gamelist, usar seu caminho
-          if (foundGame) {
-            console.log(
-              `Jogo encontrado na gamelist: ${foundGame.name || "sem nome"}`
-            );
+          // Se encontrou o jogo, usar seu caminho
+          if (foundGame && foundGame.path) {
+            foundGameName = foundGame.name || path.basename(foundGame.path);
 
-            // Normalmente, o caminho na gamelist é relativo ao diretório de ROMs
-            const gamePath = foundGame.path || "";
-
-            // Se for um caminho absoluto, usar diretamente
-            if (path.isAbsolute(gamePath)) {
-              romPath = gamePath;
+            // Verificar se o caminho é absoluto ou relativo
+            if (path.isAbsolute(foundGame.path)) {
+              romPath = foundGame.path;
             } else {
-              // Remover ./ do início se existir
-              const normalizedPath = gamePath.startsWith("./")
-                ? gamePath.substring(2)
-                : gamePath;
-
-              romPath = path.join(platformRomsDir, normalizedPath);
+              // Construir caminho completo
+              romPath = path.join(platformRomsDir, foundGame.path);
             }
 
-            foundGameName = foundGame.name || path.basename(romPath);
+            console.log(`Caminho da ROM encontrado na gamelist: ${romPath}`);
           }
         }
       } catch (err) {
-        console.error("Erro ao processar gamelist.xml:", err);
+        console.error(`Erro ao ler gamelist.xml: ${err.message}`);
       }
     }
 
-    // Se não encontrou o jogo na gamelist, tentar o escaneamento tradicional
+    // Estratégia 2: Se não encontrou na gamelist, procurar diretamente no diretório
     if (!romPath) {
-      console.log("Tentando escaneamento tradicional...");
-      const games = fileScanner.scanRoms(system, paths.romsDir);
-      const foundGame = games.find((game) => game.id === gameId);
+      console.log(
+        `Procurando ROM diretamente no diretório: ${platformRomsDir}`
+      );
 
-      if (foundGame) {
-        console.log(`Jogo encontrado pelo scanner: ${foundGame.name}`);
-        romPath = foundGame.path;
-        foundGameName = foundGame.name;
-      } else {
-        console.log("Jogo não encontrado pelo scanner");
-        return res.status(404).json({
-          success: false,
-          message: "Jogo não encontrado",
+      try {
+        // Listar todos os arquivos no diretório
+        const files = fs.readdirSync(platformRomsDir);
+        console.log(`${files.length} arquivos encontrados no diretório`);
+
+        // Verificar extensões válidas para o sistema
+        const validExtensions = system.extension || [".zip", ".7z"];
+        console.log(`Extensões válidas: ${validExtensions.join(", ")}`);
+
+        // Procurar por um arquivo que corresponda ao gameSpecificId
+        const matchingFile = files.find((file) => {
+          const fileNoExt = path.basename(file, path.extname(file));
+          const fileExt = path.extname(file).toLowerCase();
+
+          // Verificar se a extensão é válida
+          const isValidExtension = validExtensions.some(
+            (ext) => fileExt === ext || fileExt === ext.toLowerCase()
+          );
+
+          // Verificar se o nome do arquivo corresponde ao gameSpecificId
+          return (
+            isValidExtension &&
+            (fileNoExt === gameSpecificId ||
+              fileNoExt.toLowerCase() === gameSpecificId.toLowerCase() ||
+              file === gameSpecificId)
+          );
         });
+
+        if (matchingFile) {
+          romPath = path.join(platformRomsDir, matchingFile);
+          foundGameName = path.basename(
+            matchingFile,
+            path.extname(matchingFile)
+          );
+          console.log(`ROM encontrada diretamente no diretório: ${romPath}`);
+        }
+      } catch (err) {
+        console.error(`Erro ao listar arquivos no diretório: ${err.message}`);
       }
     }
 
-    // Verificar se temos um caminho de ROM válido
-    if (!romPath) {
-      console.log("Caminho da ROM não encontrado");
+    // Estratégia 3: Se o gameSpecificId parece ser um caminho de arquivo, usar diretamente
+    if (
+      !romPath &&
+      (gameSpecificId.includes(".") || gameSpecificId.includes("/"))
+    ) {
+      console.log(
+        `Tentando usar gameSpecificId como caminho direto: ${gameSpecificId}`
+      );
+
+      // Verificar se é um caminho absoluto
+      if (path.isAbsolute(gameSpecificId)) {
+        romPath = gameSpecificId;
+      } else {
+        // Construir caminho completo
+        romPath = path.join(platformRomsDir, gameSpecificId);
+      }
+
+      foundGameName = path.basename(romPath, path.extname(romPath));
+      console.log(`Usando gameSpecificId como caminho direto: ${romPath}`);
+    }
+
+    // Verificar se o arquivo ROM existe
+    if (!fs.existsSync(romPath)) {
+      console.log(`Arquivo ROM não encontrado: ${romPath}`);
       return res.status(404).json({
         success: false,
-        message: "ROM não encontrada",
+        message: "Arquivo ROM não encontrado",
       });
     }
 
     console.log(`Caminho da ROM: ${romPath}`);
     console.log(`Nome do jogo: ${foundGameName}`);
 
-    // Construir comando para lançar o jogo
-    let command = system.command;
+    // Preparar comando para o emulatorLauncher
+    const args = [];
 
-    // Se um emulador específico foi solicitado
-    if (emulator && system.emulators) {
-      const selectedEmulator = system.emulators.find(
-        (e) => e.name === emulator
+    // Determinar o emulador e core a serem usados
+    let selectedEmulator = null;
+    let selectedCore = null;
+
+    console.log(`Verificando emuladores para o sistema ${system.id}`);
+    console.log(
+      `Emuladores disponíveis:`,
+      JSON.stringify(system.emulators || [], null, 2)
+    );
+
+    // Verificar se o emulador foi especificado na requisição
+    if (emulator) {
+      selectedEmulator = emulator;
+      console.log(
+        `Usando emulador especificado na requisição: ${selectedEmulator}`
       );
 
-      if (selectedEmulator) {
-        command = selectedEmulator.command;
-
-        // Se um core específico foi solicitado
-        if (core && selectedEmulator.cores) {
-          const selectedCore = selectedEmulator.cores.find(
-            (c) => c.name === core
+      // Se um emulador específico foi solicitado, procurar pelo core correspondente
+      if (core) {
+        selectedCore = core;
+        console.log(`Usando core especificado na requisição: ${selectedCore}`);
+      } else if (system.emulators && system.emulators.length > 0) {
+        // Procurar o emulador solicitado
+        const emulatorObj = system.emulators.find((e) => e.name === emulator);
+        if (emulatorObj && emulatorObj.cores && emulatorObj.cores.length > 0) {
+          // Usar o primeiro core deste emulador
+          selectedCore = emulatorObj.cores[0].name;
+          console.log(
+            `Usando o primeiro core (${selectedCore}) do emulador ${emulator}`
           );
-
-          if (selectedCore) {
-            command = selectedCore.command;
-          }
         }
       }
+    } else if (system.emulators && system.emulators.length > 0) {
+      // Se nenhum emulador foi especificado, usar o primeiro com seu primeiro core
+      selectedEmulator = system.emulators[0].name;
+      console.log(`Usando o primeiro emulador disponível: ${selectedEmulator}`);
+
+      // Verificar se o emulador tem cores
+      if (system.emulators[0].cores && system.emulators[0].cores.length > 0) {
+        // Verificar se há um core padrão
+        const defaultCore = system.emulators[0].cores.find(
+          (c) => c.default === true
+        );
+
+        if (defaultCore) {
+          selectedCore = defaultCore.name;
+          console.log(`Usando core padrão: ${selectedCore}`);
+        } else {
+          // Se não há core padrão, usar o primeiro
+          selectedCore = system.emulators[0].cores[0].name;
+          console.log(`Usando o primeiro core disponível: ${selectedCore}`);
+        }
+      } else {
+        console.log(`O emulador ${selectedEmulator} não tem cores definidos`);
+      }
+    } else {
+      console.log(`Sistema ${system.id} não tem emuladores definidos`);
     }
 
-    // Substituir variáveis no comando
-    command = command
-      .replace(/{rom}/gi, romPath)
-      .replace(/{basename}/gi, path.basename(romPath, path.extname(romPath)))
-      .replace(/{rom_raw}/gi, romPath.replace(/['"]/g, ""));
+    // Adicionar parâmetros do sistema (essencial)
+    args.push("-system", system.id);
 
-    console.log(`Comando de execução: ${command}`);
+    // Adicionar emulador aos argumentos, se disponível
+    if (selectedEmulator) {
+      args.push("-emulator", selectedEmulator);
+      console.log(`Adicionando parâmetro -emulator ${selectedEmulator}`);
+    }
 
-    // Dividir o comando em programa e argumentos
-    const parts = command.split(" ");
-    const program = parts[0];
-    const args = parts.slice(1);
+    // Adicionar core aos argumentos, se disponível
+    if (selectedCore) {
+      args.push("-core", selectedCore);
+      console.log(`Adicionando parâmetro -core ${selectedCore}`);
+    }
 
-    // Lançar o jogo
-    console.log(`Executando: ${program} ${args.join(" ")}`);
-    execFile(program, args, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Erro na execução do jogo: ${error.message}`);
-        // Mesmo com erro, consideramos como sucesso, pois o jogo pode ter sido lançado
-      }
+    // Adicionar o caminho da ROM (essencial)
+    // Usar o caminho absoluto da ROM
+    console.log(`Caminho original da ROM: ${romPath}`);
 
-      if (stdout) console.log(`Saída padrão: ${stdout}`);
-      if (stderr) console.log(`Erro padrão: ${stderr}`);
+    // Garantir que o caminho da ROM seja absoluto
+    if (!path.isAbsolute(romPath)) {
+      console.log(`Convertendo caminho relativo para absoluto: ${romPath}`);
+      romPath = path.resolve(romPath);
+    }
+
+    // Remover qualquer referência a caminhos relativos como '..'
+    if (romPath.includes("..")) {
+      console.log(
+        `Removendo referências a caminhos relativos '..' do caminho da ROM`
+      );
+      romPath = path.normalize(romPath);
+    }
+
+    console.log(`Caminho final da ROM: ${romPath}`);
+
+    // Adicionar aspas ao caminho da ROM se ele não já estiver entre aspas
+    if (!romPath.startsWith('"') && !romPath.endsWith('"')) {
+      romPath = `"${romPath}"`;
+      console.log(`Caminho da ROM com aspas: ${romPath}`);
+    }
+
+    args.push("-rom", romPath);
+
+    // Adicionar informações do controle (completas)
+    args.push("-p1index", "0");
+    args.push("-p1guid", "030000005e0400008e02000000007200"); // GUID padrão do controle Xbox 360
+    args.push("-p1path", "USB\\VID_045E&PID_028E&IG_00\\2&DEE0F28&0&00");
+    args.push("-p1name", "Xbox 360 Controller");
+    args.push("-p1nbbuttons", "11");
+    args.push("-p1nbhats", "1");
+    args.push("-p1nbaxes", "6");
+
+    // Procurar pelo emulatorLauncher.exe
+    const launcherPath = path.join(
+      paths.rootDir,
+      "emulationstation",
+      "emulatorLauncher.exe"
+    );
+
+    if (!launcherPath) {
+      return res.status(500).json({
+        success: false,
+        message: "emulatorLauncher.exe não encontrado",
+      });
+    }
+
+    // Criar string do comando completo para log
+    // Montar o comando completo com todos os argumentos
+    const fullCommand = `"${launcherPath}" ${args.join(" ")}`;
+
+    console.log("==================================================");
+    console.log("COMANDO COMPLETO:");
+    console.log(fullCommand);
+    console.log("==================================================");
+    console.log("DETALHES:");
+    console.log(`Executável: ${launcherPath}`);
+    console.log(`Sistema: ${system.id}`);
+    console.log(`Emulador: ${selectedEmulator}`);
+    console.log(`Core: ${selectedCore}`);
+    console.log(`ROM: ${romPath}`);
+    console.log(`Argumentos completos: ${JSON.stringify(args, null, 2)}`);
+    console.log("==================================================");
+
+    // Executar o emulatorLauncher
+    // Vamos usar spawn em vez de execFile para ter mais controle sobre os argumentos
+    console.log(
+      `Executando: "${launcherPath}" com argumentos: ${JSON.stringify(
+        args,
+        null,
+        2
+      )}`
+    );
+
+    // Encontrar o índice do argumento -rom
+    const romIndex = args.indexOf("-rom");
+    if (romIndex !== -1 && romIndex + 1 < args.length) {
+      // Garantir que o caminho da ROM seja absoluto
+      const romPath = args[romIndex + 1];
+      console.log(`Caminho da ROM a ser usado: ${romPath}`);
+    }
+
+    const child = spawn(launcherPath, args, {
+      shell: true, // Usar shell para lidar com aspas e caracteres especiais
+      windowsVerbatimArguments: true, // Preservar aspas em argumentos no Windows
     });
 
-    res.json({
+    child.stdout.on("data", (data) => {
+      console.log(`emulatorLauncher stdout: ${data}`);
+    });
+
+    child.stderr.on("data", (data) => {
+      console.error(`emulatorLauncher stderr: ${data}`);
+    });
+
+    child.on("error", (error) => {
+      console.error(`Erro ao executar emulatorLauncher: ${error.message}`);
+      return res.status(500).json({
+        success: false,
+        message: `Erro ao executar emulatorLauncher: ${error.message}`,
+      });
+    });
+
+    child.on("close", (code) => {
+      console.log(`emulatorLauncher encerrado com código: ${code}`);
+    });
+
+    // Retornar sucesso imediatamente
+    return res.json({
       success: true,
-      message: `Jogo "${foundGameName}" lançado com sucesso`,
-      game: {
-        name: foundGameName,
-        path: romPath,
+      message: "Jogo iniciado com sucesso",
+      data: {
+        game: {
+          id: gameId,
+          name: foundGameName,
+          path: romPath,
+        },
+        system: {
+          id: system.id,
+          name: system.name,
+          emulator: selectedEmulator,
+          core: selectedCore,
+        },
+        command: {
+          launcher: launcherPath,
+          args: args,
+          fullCommand: fullCommand,
+        },
       },
     });
   } catch (err) {
-    console.error(`Erro ao lançar jogo ${gameId}:`, err);
-
-    res.status(500).json({
+    console.error(`Erro ao lançar jogo ${req.params.id}:`, err);
+    return res.status(500).json({
       success: false,
-      message: `Erro ao lançar jogo: ${err.message || err}`,
+      message: `Erro ao iniciar o jogo: ${err.message}`,
     });
   }
 });
 
-/**
- * GET /api/games/debug/gamelist/:systemId
- * Rota de debug para ver o conteúdo bruto da gamelist.xml
- */
-router.get("/debug/gamelist/:systemId", (req, res) => {
-  const systemId = req.params.systemId;
-  console.log(`Requisição de debug para gamelist do sistema ${systemId}`);
-
-  const paths = configService.getPaths();
-
-  if (!paths.romsDir) {
-    return res.status(404).json({
-      success: false,
-      message: "Diretório de ROMs não encontrado",
-    });
-  }
-
-  const gamelistPath = path.join(paths.romsDir, systemId, "gamelist.xml");
-  console.log(`Procurando gamelist em: ${gamelistPath}`);
-
-  if (!fs.existsSync(gamelistPath)) {
-    return res.status(404).json({
-      success: false,
-      message: "Arquivo gamelist.xml não encontrado",
-    });
-  }
-
-  try {
-    // Ler o conteúdo bruto do arquivo
-    const content = fs.readFileSync(gamelistPath, "utf8");
-
-    // Tentar parsear o XML para verificar se é válido
-    const { XMLParser } = require("fast-xml-parser");
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: "@_",
-    });
-
-    try {
-      const parsedXml = parser.parse(content);
-      console.log("Estrutura XML análisada com sucesso");
-
-      // Retornar tanto o XML bruto quanto a versão parseada
-      res.json({
-        success: true,
-        rawContentPreview: content.substring(0, 1000) + "...",
-        parsedContent: parsedXml,
-        gameCount:
-          parsedXml.gameList && Array.isArray(parsedXml.gameList.game)
-            ? parsedXml.gameList.game.length
-            : parsedXml.gameList && parsedXml.gameList.game
-            ? 1
-            : 0,
-      });
-    } catch (parseErr) {
-      console.error("Erro ao parsear XML:", parseErr);
-      res.json({
-        success: false,
-        rawContent: content,
-        error: `Erro ao parsear XML: ${parseErr.message}`,
-      });
-    }
-  } catch (err) {
-    console.error("Erro ao ler arquivo gamelist.xml:", err);
-    res.status(500).json({
-      success: false,
-      message: `Erro ao ler arquivo: ${err.message}`,
-    });
-  }
-});
-
+// Exportar o router
 module.exports = router;

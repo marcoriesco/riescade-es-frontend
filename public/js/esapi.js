@@ -140,14 +140,13 @@ const ESAPI = (function () {
       const response = await fetch(
         `${API_BASE}/platforms?refresh=${forceRefresh}`
       );
-      console.log("Status da resposta:", response.status);
       const data = await response.json();
       console.log("Dados recebidos:", data);
 
       if (data.success) {
-        cache.platforms = data.data;
+        cache.platforms = data.platforms;
         console.log("Plataformas armazenadas em cache:", cache.platforms);
-        return data.data;
+        return data.platforms;
       }
 
       throw new Error(data.message || "Erro ao obter plataformas");
@@ -534,6 +533,43 @@ const ESAPI = (function () {
   async function launchGame(gameId, options = {}) {
     console.log("launchGame chamado para jogo:", gameId);
     try {
+      // Se nenhuma opção for fornecida, tentar extrair emulador e core da plataforma atual
+      if (!options.emulator && !options.core) {
+        // Extrair o ID da plataforma do ID do jogo (formato: sistema-índice)
+        const platformId = gameId.split("-")[0];
+        const platform = getPlatform(platformId);
+
+        console.log(`Detectada plataforma ${platformId} para o jogo ${gameId}`);
+
+        if (platform && platform.emulators && platform.emulators.length > 0) {
+          // Usar o primeiro emulador disponível
+          options.emulator = platform.emulators[0].name;
+          console.log(`Usando emulador ${options.emulator} da plataforma`);
+
+          // Verificar se há cores disponíveis
+          if (
+            platform.emulators[0].cores &&
+            platform.emulators[0].cores.length > 0
+          ) {
+            // Procurar por um core padrão
+            const defaultCore = platform.emulators[0].cores.find(
+              (core) => core.default === true
+            );
+
+            if (defaultCore) {
+              options.core = defaultCore.name;
+              console.log(`Usando core padrão ${options.core}`);
+            } else {
+              // Se não houver core padrão, usar o primeiro
+              options.core = platform.emulators[0].cores[0].name;
+              console.log(`Usando primeiro core disponível ${options.core}`);
+            }
+          }
+        }
+      }
+
+      console.log(`Lançando jogo ${gameId} com opções:`, options);
+
       // Notificar sobre lançamento
       for (const callback of callbacks.onGameLaunch) {
         callback(gameId);
@@ -551,6 +587,7 @@ const ESAPI = (function () {
       const data = await response.json();
 
       if (data.success) {
+        console.log(`Jogo ${gameId} lançado com sucesso:`, data);
         return true;
       }
 

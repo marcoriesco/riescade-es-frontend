@@ -66,6 +66,25 @@ const themesDir = path.join(__dirname, "themes");
 if (!fs.existsSync(themesDir)) {
   fs.mkdirSync(themesDir, { recursive: true });
   logger.info(`Diretório de temas criado: ${themesDir}`);
+} else {
+  logger.info(`Usando diretório de temas existente: ${themesDir}`);
+}
+
+const defaultThemeDir = path.join(themesDir, "default");
+if (!fs.existsSync(defaultThemeDir)) {
+  logger.warn(`Tema padrão não encontrado em: ${defaultThemeDir}`);
+} else {
+  logger.info(`Tema padrão encontrado em: ${defaultThemeDir}`);
+
+  // Verificar se o arquivo index.html existe
+  const indexPath = path.join(defaultThemeDir, "index.html");
+  if (fs.existsSync(indexPath)) {
+    logger.info(`Arquivo index.html do tema padrão encontrado: ${indexPath}`);
+  } else {
+    logger.warn(
+      `Arquivo index.html do tema padrão NÃO encontrado: ${indexPath}`
+    );
+  }
 }
 
 // Descobrir caminhos do EmulationStation
@@ -99,6 +118,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Configuração do Express para lidar com diferentes tipos de mídia
+express.static.mime.define({
+  "image/webp": ["webp"],
+  "image/png": ["png"],
+  "image/jpeg": ["jpg", "jpeg"],
+  "image/gif": ["gif"],
+  "video/mp4": ["mp4"],
+  "video/webm": ["webm"],
+  "application/javascript": ["js"],
+  "text/css": ["css"],
+});
+
 // Rotas estáticas
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -111,6 +142,64 @@ app.use("/api/games", gamesRouter);
 app.use("/api/config", configRouter);
 app.use("/api/themes", themesRouter);
 
+/**
+ * Função para enviar um arquivo como stream, com o tipo de conteúdo apropriado
+ */
+function sendFileAsStream(res, filePath) {
+  if (!fs.existsSync(filePath)) {
+    logger.error(`Arquivo não encontrado: ${filePath}`);
+    return false;
+  }
+
+  // Verificar o tipo de arquivo para definir o content-type
+  const extname = path.extname(filePath).toLowerCase();
+  const contentType =
+    {
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".mp4": "video/mp4",
+      ".webm": "video/webm",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".html": "text/html",
+      ".svg": "image/svg+xml",
+      ".ico": "image/x-icon",
+    }[extname] || "application/octet-stream";
+
+  logger.info(`Enviando arquivo ${filePath} com content-type ${contentType}`);
+
+  try {
+    // Enviar o arquivo como uma stream
+    const stream = fs.createReadStream(filePath);
+    res.setHeader("Content-Type", contentType);
+
+    stream.on("error", (error) => {
+      logger.error(`Erro na stream: ${error.message}`);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: `Erro ao ler arquivo: ${error.message}`,
+        });
+      }
+    });
+
+    stream.pipe(res);
+    return true;
+  } catch (error) {
+    logger.error(`Erro ao enviar arquivo: ${error.stack}`);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: `Erro ao enviar arquivo: ${error.message}`,
+      });
+    }
+    return false;
+  }
+}
+
 // Rota para o tema atual
 app.get("/", (req, res) => {
   const themePath = path.join(
@@ -121,10 +210,25 @@ app.get("/", (req, res) => {
   );
 
   if (fs.existsSync(themePath)) {
-    res.sendFile(themePath);
+    logger.info(`Enviando tema atual: ${themePath}`);
+    if (!sendFileAsStream(res, themePath)) {
+      logger.error(`Falha ao enviar tema atual: ${themePath}`);
+      res.status(500).send("Erro ao carregar tema");
+    }
   } else {
     // Fallback para o tema padrão se o tema atual não for encontrado
-    res.sendFile(path.join(__dirname, "themes/default/index.html"));
+    const defaultThemePath = path.join(__dirname, "themes/default/index.html");
+    logger.info(`Usando tema padrão: ${defaultThemePath}`);
+
+    if (fs.existsSync(defaultThemePath)) {
+      if (!sendFileAsStream(res, defaultThemePath)) {
+        logger.error(`Falha ao enviar tema padrão: ${defaultThemePath}`);
+        res.status(500).send("Erro ao carregar tema padrão");
+      }
+    } else {
+      logger.error(`Erro: Tema padrão não encontrado em ${defaultThemePath}`);
+      res.status(404).send("Tema não encontrado");
+    }
   }
 });
 
@@ -134,23 +238,93 @@ app.use("/roms-media", (req, res) => {
   const paths = configService.getPaths();
 
   if (!paths.romsDir) {
-    return res.status(404).send("Diretório de ROMs não configurado");
+    return res.status(404).json({
+      success: false,
+      message: "Diretório de ROMs não configurado",
+    });
   }
 
-  // Pegar o caminho relativo da URL
-  const relativePath = req.url;
-  // Construir o caminho absoluto para o arquivo
-  const filePath = path.join(paths.romsDir, relativePath);
+  // Pegar o caminho relativo da URL (remover a barra inicial)
+  const relativePath = req.url.replace(/^\//, "");
+  logger.info(`Solicitação de mídia: ${relativePath}`);
 
-  console.log(`Solicitação de mídia: ${relativePath}`);
-  console.log(`Tentando servir arquivo: ${filePath}`);
+  // Construir o caminho absoluto para o arquivo
+  const filePath = path.resolve(paths.romsDir, relativePath);
+  logger.info(`Caminho absoluto criado: ${filePath}`);
 
   // Verificar se o arquivo existe
   if (fs.existsSync(filePath)) {
-    return res.sendFile(filePath);
-  }
+    try {
+      // Verificar o tipo de arquivo para definir o content-type
+      const extname = path.extname(filePath).toLowerCase();
+      const contentType =
+        {
+          ".png": "image/png",
+          ".jpg": "image/jpeg",
+          ".jpeg": "image/jpeg",
+          ".gif": "image/gif",
+          ".webp": "image/webp",
+          ".mp4": "video/mp4",
+          ".webm": "video/webm",
+        }[extname] || "application/octet-stream";
 
-  res.status(404).send("Arquivo não encontrado");
+      logger.info(
+        `Enviando arquivo ${filePath} com content-type ${contentType}`
+      );
+
+      // Enviar o arquivo como uma stream em vez de usar sendFile
+      const stream = fs.createReadStream(filePath);
+      res.setHeader("Content-Type", contentType);
+
+      stream.on("error", (error) => {
+        logger.error(`Erro na stream: ${error.message}`);
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            message: `Erro ao ler arquivo: ${error.message}`,
+          });
+        }
+      });
+
+      stream.pipe(res);
+    } catch (error) {
+      logger.error(`Erro ao enviar arquivo: ${error.stack}`);
+      return res.status(500).json({
+        success: false,
+        message: `Erro ao enviar arquivo: ${error.message}`,
+      });
+    }
+  } else {
+    logger.warn(`Arquivo não encontrado: ${filePath}`);
+    return res.status(404).json({
+      success: false,
+      message: "Arquivo de mídia não encontrado",
+    });
+  }
+});
+
+// Rota para compatibilidade com URLs antigas (/roms/...)
+app.use("/roms", (req, res) => {
+  console.log(`Redirecionando de /roms${req.url} para /roms-media${req.url}`);
+  return res.redirect(301, `/roms-media${req.url}`);
+});
+
+// Rota para compatibilidade com formato /sistema/images/...
+app.use("/:system/images/*", (req, res) => {
+  const system = req.params.system;
+  const imagePath = req.path.replace(`/${system}/images/`, "");
+
+  // Redirecionar para o formato padrão
+  const newUrl = `/roms-media/${system}/images/${imagePath}`;
+  console.log(`Redirecionando de ${req.path} para ${newUrl}`);
+  return res.redirect(301, newUrl);
+});
+
+// Rota específica para arquivos WebP
+app.get("*.webp", (req, res, next) => {
+  // Continuar com o próximo middleware, mas garantir que o Content-Type esteja definido
+  res.type("image/webp");
+  next();
 });
 
 // Tratamento de erros

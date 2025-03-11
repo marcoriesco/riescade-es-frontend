@@ -335,8 +335,8 @@ router.get("/:id/files/*", (req, res) => {
       });
     }
   } else {
-    // Enviar o arquivo
-    res.sendFile(fullPath);
+    console.log(`Enviando arquivo ${filePath}`);
+    return sendFileAsStream(res, fullPath);
   }
 });
 
@@ -551,6 +551,63 @@ function listThemeFiles(dir, baseDir = dir) {
   }
 
   return result;
+}
+
+/**
+ * Função para enviar um arquivo como stream, com o tipo de conteúdo apropriado
+ */
+function sendFileAsStream(res, filePath) {
+  if (!fs.existsSync(filePath)) {
+    console.log(`Arquivo não encontrado: ${filePath}`);
+    return false;
+  }
+
+  // Verificar o tipo de arquivo para definir o content-type
+  const extname = path.extname(filePath).toLowerCase();
+  const contentType =
+    {
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".mp4": "video/mp4",
+      ".webm": "video/webm",
+      ".css": "text/css",
+      ".js": "application/javascript",
+      ".html": "text/html",
+      ".svg": "image/svg+xml",
+    }[extname] || "application/octet-stream";
+
+  console.log(`Enviando arquivo ${filePath} com content-type ${contentType}`);
+
+  try {
+    // Enviar o arquivo como uma stream
+    const stream = fs.createReadStream(filePath);
+    res.setHeader("Content-Type", contentType);
+
+    stream.on("error", (error) => {
+      console.error(`Erro na stream: ${error.message}`);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: `Erro ao ler arquivo: ${error.message}`,
+        });
+      }
+    });
+
+    stream.pipe(res);
+    return true;
+  } catch (error) {
+    console.error(`Erro ao enviar arquivo: ${error.message}`);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: `Erro ao enviar arquivo: ${error.message}`,
+      });
+    }
+    return false;
+  }
 }
 
 module.exports = router;

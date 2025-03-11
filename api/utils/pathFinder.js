@@ -3,49 +3,42 @@
  */
 const path = require("path");
 const fs = require("fs");
-const os = require("os");
 
 /**
  * Encontra os diretórios relacionados ao EmulationStation
  * @returns {Object} Objeto com os caminhos encontrados
  */
 function findEmulationStationPaths() {
-  console.log(
-    "Iniciando busca por caminhos do EmulationStation (Modo Portable)..."
-  );
   console.log("Diretório de trabalho atual:", process.cwd());
   console.log("Diretório do executável:", process.execPath);
+  console.log("ES_PORTABLE_MODE:", process.env.ES_PORTABLE_MODE);
+  console.log("ES_ROOT_PATH:", process.env.ES_ROOT_PATH);
 
-  // No modo portable, sempre usamos o diretório atual como raiz
-  const rootPath = process.cwd();
-  console.log("Usando caminho raiz:", rootPath);
-
-  // Definir todos os caminhos diretamente
   const result = {
-    rootDir: rootPath,
-    emulationStationDir: path.join(rootPath, "emulationstation"),
-    configDir: path.join(rootPath, "emulationstation", ".emulationstation"),
-    romsDir: path.join(rootPath, "roms"),
-    biosDir: path.join(rootPath, "bios"),
-    emulatorsDir: path.join(rootPath, "emulators"),
-    themesDir: path.join(
-      rootPath,
-      "emulationstation",
-      ".emulationstation",
-      "themes"
-    ),
+    rootDir: null,
+    emulationStationDir: null,
+    configDir: null,
+    romsDir: null,
+    biosDir: null,
+    emulatorsDir: null,
+    themesDir: null,
   };
 
-  // Definir variáveis de ambiente para garantir consistência
-  process.env.ES_PORTABLE_MODE = "true";
-  process.env.ES_ROOT_PATH = rootPath;
+  const rootPathDev = "..";
+  const rootPathBuild = process.env.ES_ROOT_PATH;
+
+  result.rootDir = process.env.ES_PORTABLE_MODE ? rootPathBuild : rootPathDev;
+
+  result.emulationStationDir = path.join(result.rootDir, "emulationstation");
+  result.configDir = path.join(result.emulationStationDir, ".emulationstation");
+  result.romsDir = path.join(result.rootDir, "roms");
+  result.emulatorsDir = path.join(result.rootDir, "emulators");
+  result.biosDir = path.join(result.rootDir, "bios");
+  result.themesDir = path.join(result.configDir, "themes");
 
   // Log dos caminhos encontrados
-  console.log("Caminhos do EmulationStation (Modo Portable):");
-  Object.entries(result).forEach(([key, value]) => {
-    const exists = value ? fs.existsSync(value) : false;
-    console.log(`${key}: ${value} (Existe: ${exists})`);
-  });
+  console.log("Caminhos do EmulationStation encontrados:");
+  console.log(JSON.stringify(result, null, 2));
 
   return result;
 }

@@ -18,6 +18,11 @@ router.get("/", (req, res) => {
 
   const systems = configService.getSystems(req.query.refresh === "true");
   console.log(`Sistemas encontrados: ${systems ? systems.length : 0}`);
+  console.log("Sistemas:", systems);
+
+  // Obter os caminhos para diagnóstico
+  const paths = configService.getPaths(true);
+  console.log("Caminhos encontrados:", JSON.stringify(paths, null, 2));
 
   // Converter para formato de resposta
   let platforms = [];
@@ -32,50 +37,64 @@ router.get("/", (req, res) => {
       extensions: system.extension,
       path: system.path,
       command: system.command,
+      emulators: system.emulators || [],
     }));
+
+    // Verificar se as plataformas têm emuladores e cores
+    const platformsWithEmulators = platforms.filter(
+      (p) => p.emulators && p.emulators.length > 0
+    );
+    console.log(
+      `Plataformas com emuladores: ${platformsWithEmulators.length}/${platforms.length}`
+    );
+
+    if (platformsWithEmulators.length > 0) {
+      // Mostrar detalhes de uma plataforma de exemplo
+      const example = platformsWithEmulators[0];
+      console.log(
+        `Exemplo - Plataforma ${example.id} tem ${example.emulators.length} emuladores`
+      );
+      console.log(`Emuladores: ${JSON.stringify(example.emulators, null, 2)}`);
+    }
+
+    // Retornar as plataformas encontradas
+    return res.json({
+      success: true,
+      count: platforms.length,
+      platforms: platforms,
+    });
   } else {
-    // Se não encontrou sistemas, criar plataformas de exemplo
-    console.log("Nenhum sistema encontrado, criando plataformas de exemplo");
-    platforms = [
-      {
-        id: "snes",
-        name: "Super Nintendo Entertainment System",
-        shortName: "SNES",
-        theme: "snes",
-        platform: "snes",
-        extensions: [".smc", ".sfc", ".zip"],
-        path: "./roms/snes",
-        command: "emulatorcommand",
+    // Se não encontrou sistemas, retornar mensagem de diagnóstico
+    console.log(
+      "Nenhum sistema encontrado! Retornando informações de diagnóstico."
+    );
+
+    return res.status(404).json({
+      success: false,
+      message: "Nenhuma plataforma encontrada!",
+      diagnosis: {
+        paths: paths,
+        currentDir: process.cwd(),
+        execPath: process.execPath,
+        portableMode: process.env.ES_PORTABLE_MODE === "true",
+        rootPath: process.env.ES_ROOT_PATH,
+        envVars: {
+          ES_PORTABLE_MODE: process.env.ES_PORTABLE_MODE,
+          ES_ROOT_PATH: process.env.ES_ROOT_PATH,
+        },
+        dirExists: {
+          rootDir: paths.rootDir ? fs.existsSync(paths.rootDir) : false,
+          configDir: paths.configDir ? fs.existsSync(paths.configDir) : false,
+          romsDir: paths.romsDir ? fs.existsSync(paths.romsDir) : false,
+          emulationStationDir: paths.emulationStationDir
+            ? fs.existsSync(paths.emulationStationDir)
+            : false,
+          biosDir: paths.biosDir ? fs.existsSync(paths.biosDir) : false,
+          themesDir: paths.themesDir ? fs.existsSync(paths.themesDir) : false,
+        },
       },
-      {
-        id: "nes",
-        name: "Nintendo Entertainment System",
-        shortName: "NES",
-        theme: "nes",
-        platform: "nes",
-        extensions: [".nes", ".zip"],
-        path: "./roms/nes",
-        command: "emulatorcommand",
-      },
-      {
-        id: "megadrive",
-        name: "Sega Mega Drive",
-        shortName: "Genesis",
-        theme: "megadrive",
-        platform: "megadrive",
-        extensions: [".md", ".gen", ".zip"],
-        path: "./roms/megadrive",
-        command: "emulatorcommand",
-      },
-    ];
+    });
   }
-
-  console.log(`Enviando ${platforms.length} plataformas na resposta`);
-
-  res.json({
-    success: true,
-    data: platforms,
-  });
 });
 
 /**
@@ -93,6 +112,30 @@ router.get("/:id", (req, res) => {
     });
   }
 
+  // Log detalhado para depuração
+  console.log(`Sistema ${system.id} encontrado`);
+  console.log(`Emuladores: ${JSON.stringify(system.emulators, null, 2)}`);
+
+  if (system.emulators && system.emulators.length > 0) {
+    console.log(`Este sistema tem ${system.emulators.length} emuladores`);
+
+    // Verificar cada emulador
+    system.emulators.forEach((emulator, index) => {
+      console.log(`Emulador ${index + 1}: ${emulator.name}`);
+
+      if (emulator.cores && emulator.cores.length > 0) {
+        console.log(`  Tem ${emulator.cores.length} cores`);
+        emulator.cores.forEach((core, coreIndex) => {
+          console.log(`  Core ${coreIndex + 1}: ${core.name}`);
+        });
+      } else {
+        console.log(`  Não tem cores definidas`);
+      }
+    });
+  } else {
+    console.log(`Este sistema não tem emuladores definidos`);
+  }
+
   // Converter para formato de resposta
   const platform = {
     id: system.id,
@@ -103,7 +146,7 @@ router.get("/:id", (req, res) => {
     extensions: system.extension,
     path: system.path,
     command: system.command,
-    emulators: system.emulators,
+    emulators: system.emulators || [],
   };
 
   res.json({
@@ -111,6 +154,59 @@ router.get("/:id", (req, res) => {
     data: platform,
   });
 });
+
+/**
+ * Função para enviar um arquivo como stream, com o tipo de conteúdo apropriado
+ */
+function sendFileAsStream(res, filePath) {
+  if (!fs.existsSync(filePath)) {
+    console.log(`Arquivo não encontrado: ${filePath}`);
+    return false;
+  }
+
+  // Verificar o tipo de arquivo para definir o content-type
+  const extname = path.extname(filePath).toLowerCase();
+  const contentType =
+    {
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".mp4": "video/mp4",
+      ".webm": "video/webm",
+    }[extname] || "application/octet-stream";
+
+  console.log(`Enviando arquivo ${filePath} com content-type ${contentType}`);
+
+  try {
+    // Enviar o arquivo como uma stream
+    const stream = fs.createReadStream(filePath);
+    res.setHeader("Content-Type", contentType);
+
+    stream.on("error", (error) => {
+      console.error(`Erro na stream: ${error.message}`);
+      if (!res.headersSent) {
+        res.status(500).json({
+          success: false,
+          message: `Erro ao ler arquivo: ${error.message}`,
+        });
+      }
+    });
+
+    stream.pipe(res);
+    return true;
+  } catch (error) {
+    console.error(`Erro ao enviar arquivo: ${error.message}`);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: `Erro ao enviar arquivo: ${error.message}`,
+      });
+    }
+    return false;
+  }
+}
 
 /**
  * GET /api/platforms/:id/image
@@ -175,7 +271,17 @@ router.get("/:id/image", (req, res) => {
   // Procurar a primeira imagem que existe
   for (const imagePath of possibleImages) {
     if (fs.existsSync(imagePath)) {
-      return res.sendFile(imagePath);
+      console.log(`Enviando imagem de logo: ${imagePath}`);
+      return sendFileAsStream(res, imagePath);
+    } else {
+      console.log(
+        `Logo não encontrado para ${system.id}, enviando placeholder`
+      );
+      const placeholderPath = path.join(
+        __dirname,
+        "../../themes/default/img/logo-placeholder.png"
+      );
+      return sendFileAsStream(res, placeholderPath);
     }
   }
 
@@ -183,13 +289,13 @@ router.get("/:id/image", (req, res) => {
   // Verificar se temos uma imagem placeholder
   const placeholderPath = path.join(
     __dirname,
-    "../../themes/default/img/placeholder.png"
+    "../../themes/default/img/logo-placeholder.png"
   );
   if (fs.existsSync(placeholderPath)) {
     console.log(
       `Retornando imagem placeholder para plataforma ${req.params.id}`
     );
-    return res.sendFile(placeholderPath);
+    return sendFileAsStream(res, placeholderPath);
   }
 
   // Se nem o placeholder existir, aí sim retornamos erro 404

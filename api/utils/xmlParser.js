@@ -239,14 +239,17 @@ function parseSystemsConfig(filePath) {
   try {
     console.log(`Analisando arquivo de configuração de sistemas: ${filePath}`);
     const xmlContent = fs.readFileSync(filePath, "utf8");
-    console.log(
-      `Conteúdo do arquivo (primeiros 200 caracteres): ${xmlContent.substring(
-        0,
-        200
-      )}...`
-    );
 
-    const systemsData = parseXmlFile(filePath);
+    // Adicionar verificação para lidar com atributos *name* e *default*
+    // Substituir esses padrões por @_ para manter compatibilidade com o parser
+    const processedContent = xmlContent
+      .replace(/\*name\*=/g, "@_name=")
+      .replace(/\*default\*=/g, "@_default=");
+
+    // Analisar o conteúdo processado em vez do original
+    const parser = new XMLParser(parserOptions);
+    const systemsData = parser.parse(processedContent);
+
     console.log(
       `Resultado da análise XML:`,
       JSON.stringify(systemsData, null, 2).substring(0, 300) + "..."
@@ -281,6 +284,16 @@ function parseSystemsConfig(filePath) {
         .replace(/%BASENAME%/g, "{basename}")
         .replace(/%ROM_RAW%/g, "{rom_raw}");
 
+      // Extrair emuladores e cores
+      const emulators = parseEmulators(system);
+      console.log(
+        `Sistema ${system.name}: encontrados ${emulators.length} emuladores`
+      );
+
+      if (emulators.length > 0) {
+        console.log(`Primeiro emulador: ${JSON.stringify(emulators[0])}`);
+      }
+
       return {
         id: system.name || generateId(system.fullname),
         name: system.name || "",
@@ -290,7 +303,7 @@ function parseSystemsConfig(filePath) {
         command: command,
         platform: system.platform || "",
         theme: system.theme || system.name || "",
-        emulators: parseEmulators(system),
+        emulators: emulators,
       };
     });
   } catch (err) {
@@ -301,34 +314,128 @@ function parseSystemsConfig(filePath) {
 
 /**
  * Extrai informações de emuladores de um sistema
+ * @param {Object} system - Objeto do sistema
+ * @returns {Array} Array de emuladores
  */
 function parseEmulators(system) {
-  if (!system._children || !system._children.emulator) {
+  // Verificar se o sistema tem emuladores
+  if (!system.emulators) {
+    console.log(`Sistema ${system.name} não tem emuladores definidos`);
     return [];
   }
 
-  const emulators = Array.isArray(system._children.emulator)
-    ? system._children.emulator
-    : [system._children.emulator];
+  // Depurar a estrutura do elemento emulators
+  console.log(`Estrutura do elemento emulators para ${system.name}:`);
+  console.log(JSON.stringify(system.emulators).substring(0, 300));
 
-  return emulators.map((emulator) => {
+  // Verificar se emulators tem a propriedade emulator
+  if (!system.emulators.emulator) {
+    console.log(
+      `Sistema ${system.name} tem tag emulators mas sem emuladores dentro`
+    );
+    return [];
+  }
+
+  // Converter para array se for apenas um emulador
+  const emulatorsArr = Array.isArray(system.emulators.emulator)
+    ? system.emulators.emulator
+    : [system.emulators.emulator];
+
+  console.log(
+    `Processando ${emulatorsArr.length} emuladores para ${system.name}`
+  );
+
+  // Processar cada emulador
+  return emulatorsArr.map((emulator) => {
+    // Extrair o nome do emulador
     const name = emulator["@_name"] || "default";
-
+    let command = emulator._text || "";
     let cores = [];
-    if (emulator._children && emulator._children.core) {
-      cores = Array.isArray(emulator._children.core)
-        ? emulator._children.core
-        : [emulator._children.core];
 
-      cores = cores.map((core) => ({
-        name: core["@_name"] || "default",
-        command: core._text || "",
-      }));
+    // Verificar se o emulador tem cores
+    if (emulator.cores && emulator.cores.core) {
+      const coresArr = Array.isArray(emulator.cores.core)
+        ? emulator.cores.core
+        : [emulator.cores.core];
+
+      console.log(`Processando ${coresArr.length} cores para emulador ${name}`);
+      console.log(`Exemplo do primeiro core: ${JSON.stringify(coresArr[0])}`);
+
+      // Depurar o primeiro core para entender sua estrutura
+      if (coresArr.length > 0) {
+        const firstCore = coresArr[0];
+        console.log(`Tipo do core: ${typeof firstCore}`);
+        if (typeof firstCore !== "string") {
+          console.log(
+            `Propriedades do core: ${Object.keys(firstCore).join(", ")}`
+          );
+          console.log(`Valor do core: ${firstCore._text || firstCore}`);
+        }
+      }
+
+      cores = coresArr.map((core) => {
+        // Verificação especial para quando o core é um valor simples (texto)
+        if (typeof core === "string") {
+          return {
+            name: core,
+            command: "",
+            default: false,
+          };
+        }
+
+        // Quando é um objeto, pode ter atributos e texto
+        const isDefault =
+          core["@_default"] === true || core["@_default"] === "true";
+
+        // O valor do core (o nome) é o conteúdo de texto do elemento
+        let coreName;
+
+        // Na estrutura do parser, o valor de texto pode estar diretamente no objeto
+        // ou em uma propriedade chamada _text ou #text
+        if (typeof core === "object") {
+          if (core._text) {
+            coreName = core._text;
+          } else if (core["#text"]) {
+            coreName = core["#text"];
+          } else {
+            // Se não encontrar o texto de forma padrão, tentar extrair o valor diretamente
+            const coreStr = String(core);
+            if (coreStr !== "[object Object]") {
+              coreName = coreStr;
+            } else {
+              // Último recurso: procurar por qualquer propriedade que não seja um atributo
+              const nonAttrKeys = Object.keys(core).filter(
+                (k) => !k.startsWith("@_")
+              );
+              if (nonAttrKeys.length > 0) {
+                coreName = core[nonAttrKeys[0]];
+              } else {
+                coreName = "unknown";
+                console.log(
+                  `Não foi possível extrair o nome do core: ${JSON.stringify(
+                    core
+                  )}`
+                );
+              }
+            }
+          }
+        } else {
+          coreName = String(core);
+        }
+
+        console.log(`Core extraído: ${coreName} (default: ${isDefault})`);
+
+        return {
+          name: coreName,
+          command: "",
+          default: isDefault,
+        };
+      });
     }
 
     return {
       name,
-      command: emulator._text || "",
+      command,
       cores,
     };
   });
