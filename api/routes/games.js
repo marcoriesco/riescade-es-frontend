@@ -10,6 +10,8 @@ const fileScanner = require("../utils/fileScanner");
 
 const router = express.Router();
 
+const runningGames = {};
+
 /**
  * GET /api/games
  * Retorna todos os jogos de todas as plataformas
@@ -1045,16 +1047,23 @@ router.post("/:id/launch", async (req, res) => {
       console.log(`Caminho da ROM com aspas: ${romPath}`);
     }
 
-    args.push("-rom", romPath);
+    // Adicionar o caminho do arquivo game.xml (completo)
+    args.push(
+      "-gameinfo",
+      path.join("%TEMP%", "emulationstation.tmp", "game.xml")
+    );
 
     // Adicionar informações do controle (completas)
     args.push("-p1index", "0");
     args.push("-p1guid", "030000005e0400008e02000000007200"); // GUID padrão do controle Xbox 360
-    args.push("-p1path", "USB\\VID_045E&PID_028E&IG_00\\2&DEE0F28&0&00");
-    args.push("-p1name", "Xbox 360 Controller");
+    args.push("-p1path", '"USB\\VID_045E&PID_028E&IG_00\\2&DEE0F28&0&00"');
+    args.push("-p1name", '"Xbox 360 Controller"');
     args.push("-p1nbbuttons", "11");
     args.push("-p1nbhats", "1");
     args.push("-p1nbaxes", "6");
+
+    // Adicionar o caminho da ROM (essencial)
+    args.push("-rom", romPath);
 
     // Procurar pelo emulatorLauncher.exe
     const launcherPath = path.join(
@@ -1129,7 +1138,20 @@ router.post("/:id/launch", async (req, res) => {
 
     child.on("close", (code) => {
       console.log(`emulatorLauncher encerrado com código: ${code}`);
+
+      // Marcar o jogo como encerrado
+      runningGames[gameId] = {
+        running: false,
+        closedAt: new Date(),
+        exitCode: code,
+      };
     });
+
+    // Quando o jogo é iniciado
+    runningGames[gameId] = {
+      running: true,
+      startedAt: new Date(),
+    };
 
     // Retornar sucesso imediatamente
     return res.json({
@@ -1161,6 +1183,16 @@ router.post("/:id/launch", async (req, res) => {
       message: `Erro ao iniciar o jogo: ${err.message}`,
     });
   }
+});
+
+router.get("/:id/status", (req, res) => {
+  const gameId = req.params.id;
+  const status = runningGames[gameId] || { running: false };
+
+  res.json({
+    success: true,
+    data: status,
+  });
 });
 
 // Exportar o router

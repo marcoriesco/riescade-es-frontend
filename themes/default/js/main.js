@@ -530,6 +530,35 @@ function showGameLoading(gameId) {
   document.getElementById("loading-game-system").textContent = platform.name;
 
   showScreen("game-loading-screen");
+
+  // Configurar um intervalo para verificar se o jogo ainda está em execução
+  const statusCheckInterval = setInterval(() => {
+    fetch(`/api/games/${gameId}/status`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success && !data.data.running) {
+          // O jogo foi encerrado
+          clearInterval(statusCheckInterval);
+
+          // Esconder o loader
+          hideLoader();
+
+          // Retornar à tela de jogos
+          showScreen("games-screen");
+          setCurrentScreen("games-screen");
+
+          console.log("Jogo encerrado, retornando à tela de jogos");
+        }
+      })
+      .catch((error) => {
+        console.error("Erro ao verificar status do jogo:", error);
+        // Em caso de erro, também retornamos à tela de jogos
+        clearInterval(statusCheckInterval);
+        hideLoader();
+        showScreen("games-screen");
+        setCurrentScreen("games-screen");
+      });
+  }, 2000); // Verificar a cada 2 segundos
 }
 
 /**

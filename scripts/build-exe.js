@@ -10,9 +10,6 @@ const glob = require("glob");
 // Diretório raiz do projeto
 const rootDir = path.join(__dirname, "..");
 
-// Diretório raiz do projeto
-const esRootDir = path.join(__dirname, "../../");
-
 // Diretório para build temporário
 const buildDir = path.join(rootDir, "build");
 
