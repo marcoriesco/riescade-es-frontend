@@ -12845,3 +12845,366 @@
 {"level":"info","message":"Solicitação de mídia: cps3/images/jojoba-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:13:54"}
 {"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojoba-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:13:54"}
 {"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cps3\\images\\jojoba-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:13:54"}
+{"level":"info","message":"Enviando tema atual: Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html com content-type text/html","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:18"}
+{"level":"info","message":"Solicitação de mídia: cave/images/agallet-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\agallet-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\agallet-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/crusherm-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\crusherm-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\crusherm-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/ddp2-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\ddp2-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\ddp2-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/deathsml-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\deathsml-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\deathsml-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/donpachi-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\donpachi-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\donpachi-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/espgal-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\espgal-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\espgal-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/espgal2-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\espgal2-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\espgal2-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/esprade-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\esprade-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\esprade-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/feversos-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\feversos-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\feversos-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:19"}
+{"level":"info","message":"Solicitação de mídia: cave/images/gaia-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\gaia-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\gaia-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/guwange-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\guwange-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\guwange-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/hotdogst-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\hotdogst-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\hotdogst-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/ibara-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\ibara-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\ibara-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/ibarablk-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\ibarablk-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\ibarablk-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/ket-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\ket-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\ket-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/mazinger-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\mazinger-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\mazinger-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/metmqstr-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\metmqstr-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\metmqstr-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/mmpork-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\mmpork-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\mmpork-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/mushisam-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\mushisam-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\mushisam-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/plegends-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\plegends-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\plegends-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/pwrinst2-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\pwrinst2-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\pwrinst2-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/sailormn-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\sailormn-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\sailormn-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/theroes-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\theroes-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\theroes-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/tjumpman-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\tjumpman-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\tjumpman-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/uopoko-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\uopoko-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\uopoko-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Solicitação de mídia: cave/images/ddonpach-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\cave\\images\\ddonpach-thumb.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\cave\\images\\ddonpach-thumb.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:20"}
+{"level":"info","message":"Enviando tema atual: Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\_riescade\\themes\\default\\index.html com content-type text/html","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/gw.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/doom3.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/screenshots.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/apple2group.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/atarijaguargroup.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/bandaiwonderswan.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/segamegadrive.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboyadvance.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendogameboy.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendon64.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendones.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/nintendosnes.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/necpcengine.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeo.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/snkneogeopocket.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"error","message":"404 - Não encontrado - /themes/default/img/logos/windowsgames.png - GET - ::1","service":"es-theme-engine","timestamp":"2025-03-11 03:26:50"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Garou%20Densetsu%20-%20Shukumei%20no%20Tatakai%20-%20Fatal%20Fury%20-%20King%20of%20Fighters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Garou%20Densetsu%20-%20Shukumei%20no%20Tatakai%20-%20Fatal%20Fury%20-%20King%20of%20Fighters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Garou%20Densetsu%20-%20Shukumei%20no%20Tatakai%20-%20Fatal%20Fury%20-%20King%20of%20Fighters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/3%20Count%20Bout.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\3%20Count%20Bout.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\3%20Count%20Bout.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/ADK%20World.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\ADK%20World.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\ADK%20World.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Voltage%20Fighter%20Gowcaizer.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Voltage%20Fighter%20Gowcaizer.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Voltage%20Fighter%20Gowcaizer.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Puzzle%20Bobble%20-%20Bust-a-Move.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Puzzle%20Bobble%20-%20Bust-a-Move.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Puzzle%20Bobble%20-%20Bust-a-Move.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Aero%20Fighters%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Aero%20Fighters%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Aero%20Fighters%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Aero%20Fighters%203.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Aero%20Fighters%203.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Aero%20Fighters%203.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Aggressors%20of%20Dark%20Kombat.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Aggressors%20of%20Dark%20Kombat.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Aggressors%20of%20Dark%20Kombat.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Alpha%20Mission%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Alpha%20Mission%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Alpha%20Mission%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Art%20of%20Fighting%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Art%20of%20Fighting%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Art%20of%20Fighting%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Art%20of%20Fighting%203%20-%20The%20Path%20of%20the%20Warrior.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Art%20of%20Fighting%203%20-%20The%20Path%20of%20the%20Warrior.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Art%20of%20Fighting%203%20-%20The%20Path%20of%20the%20Warrior.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Bang%20Bang%20Busters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Bang%20Bang%20Busters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Bang%20Bang%20Busters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Baseball%20Stars%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Baseball%20Stars%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Baseball%20Stars%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Breakers.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Breakers.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Breakers.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Burning%20Fight.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Burning%20Fight.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Burning%20Fight.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Bust-A-Move.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Bust-A-Move.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Bust-A-Move.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Crossed%20Swords%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Crossed%20Swords%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Crossed%20Swords%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Crossed%20Swords.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Crossed%20Swords.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Crossed%20Swords.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Cyber-Lip.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Cyber-Lip.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Cyber-Lip.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Double%20Dragon.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Double%20Dragon.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Double%20Dragon.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Fatal%20Fury%203%20-%20Road%20to%20the%20Final%20Victory.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Fatal%20Fury%203%20-%20Road%20to%20the%20Final%20Victory.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Fatal%20Fury%203%20-%20Road%20to%20the%20Final%20Victory.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Fatal%20Fury%20Special.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Fatal%20Fury%20Special.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Fatal%20Fury%20Special.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Fatal%20Fury.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Fatal%20Fury.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Fatal%20Fury.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Galaxy%20Fight%20-%20Universal%20Warriors.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Galaxy%20Fight%20-%20Universal%20Warriors.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Galaxy%20Fight%20-%20Universal%20Warriors.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Garou%20Densetsu%202%20-%20Fatal%20Fury%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Garou%20Densetsu%202%20-%20Fatal%20Fury%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Garou%20Densetsu%202%20-%20Fatal%20Fury%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Ghost%20Pilots.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Ghost%20Pilots.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Ghost%20Pilots.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Gowcaizer.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Gowcaizer.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Gowcaizer.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Ironclad.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Ironclad.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Ironclad.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Janshin%20Densetsu%20-%20Quest%20of%20Jongmaster.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Janshin%20Densetsu%20-%20Quest%20of%20Jongmaster.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Janshin%20Densetsu%20-%20Quest%20of%20Jongmaster.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Joy%20Joy%20Kid%20-%20Puzzled.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Joy%20Joy%20Kid%20-%20Puzzled.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Joy%20Joy%20Kid%20-%20Puzzled.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Kabuki%20Klash.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Kabuki%20Klash.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Kabuki%20Klash.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Karnovs%20Revenge.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Karnovs%20Revenge.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Karnovs%20Revenge.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/King%20of%20Fighters%2094,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2094,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2094,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/King%20of%20Fighters%2095,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2095,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2095,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/King%20of%20Fighters%2096%20NeoGeo%20Collection,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2096%20NeoGeo%20Collection,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2096%20NeoGeo%20Collection,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/King%20of%20Fighters%2096,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2096,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2096,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/King%20of%20Fighters%2097,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2097,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2097,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/King%20of%20Fighters%2098,%20The%20-%20The%20Slugfest.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2098,%20The%20-%20The%20Slugfest.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2098,%20The%20-%20The%20Slugfest.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/King%20of%20Fighters%2099,%20The%20-%20Millennium%20Battle.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2099,%20The%20-%20Millennium%20Battle.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20Fighters%2099,%20The%20-%20Millennium%20Battle.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/King%20of%20the%20Monsters%202%20-%20The%20Next%20Thing.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20the%20Monsters%202%20-%20The%20Next%20Thing.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\King%20of%20the%20Monsters%202%20-%20The%20Next%20Thing.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Last%20Blade%202,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Last%20Blade%202,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Last%20Blade%202,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Last%20Blade,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Last%20Blade,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Last%20Blade,%20The.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Last%20Hope.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Last%20Hope.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Last%20Hope.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Last%20Resort.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Last%20Resort.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Last%20Resort.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/League%20Bowling.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\League%20Bowling.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\League%20Bowling.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Magical%20Drop%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Magical%20Drop%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Magical%20Drop%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Magician%20Lord.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Magician%20Lord.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Magician%20Lord.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Metal%20Slug%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Metal%20Slug%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Metal%20Slug%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Metal%20Slug.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Metal%20Slug.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Metal%20Slug.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Mutation%20Nation.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Mutation%20Nation.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Mutation%20Nation.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/NAM-1975.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\NAM-1975.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\NAM-1975.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Neo%20Turf%20Masters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Neo%20Turf%20Masters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Neo%20Turf%20Masters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Ninja%20Masters%20-%20Haou%20Ninpou-Chou.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Ninja%20Masters%20-%20Haou%20Ninpou-Chou.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Ninja%20Masters%20-%20Haou%20Ninpou-Chou.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/OverTop.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\OverTop.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\OverTop.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Power%20Spikes%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Power%20Spikes%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Power%20Spikes%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Pulstar.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Pulstar.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Pulstar.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Quiz%20King%20of%20Fighters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Quiz%20King%20of%20Fighters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Quiz%20King%20of%20Fighters.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Raguy%20-%20Blues%20Journey.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Raguy%20-%20Blues%20Journey.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Raguy%20-%20Blues%20Journey.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Rally%20Chase.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Rally%20Chase.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Rally%20Chase.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Real%20Bout%20Fatal%20Fury%202%20-%20The%20Newcomers.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Real%20Bout%20Fatal%20Fury%202%20-%20The%20Newcomers.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Real%20Bout%20Fatal%20Fury%202%20-%20The%20Newcomers.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Real%20Bout%20Fatal%20Fury%20Special.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Real%20Bout%20Fatal%20Fury%20Special.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Real%20Bout%20Fatal%20Fury%20Special.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Real%20Bout%20Fatal%20Fury.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Real%20Bout%20Fatal%20Fury.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Real%20Bout%20Fatal%20Fury.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Robo%20Army.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Robo%20Army.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Robo%20Army.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Ryuuko%20no%20Ken%20-%20Art%20of%20Fighting.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Ryuuko%20no%20Ken%20-%20Art%20of%20Fighting.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Ryuuko%20no%20Ken%20-%20Art%20of%20Fighting.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Samurai%20Shodown%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Samurai%20Shodown%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Samurai%20Shodown%20II.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Samurai%20Shodown%20III%20-%20Blades%20of%20Blood.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Samurai%20Shodown%20III%20-%20Blades%20of%20Blood.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Samurai%20Shodown%20III%20-%20Blades%20of%20Blood.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Samurai%20Shodown%20IV%20-%20Amakusas%20Revenge.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Samurai%20Shodown%20IV%20-%20Amakusas%20Revenge.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Samurai%20Shodown%20IV%20-%20Amakusas%20Revenge.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Samurai%20Shodown.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Samurai%20Shodown.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Samurai%20Shodown.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Savage%20Reign.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Savage%20Reign.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Savage%20Reign.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Shinouken%20-%20Ragnagard.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Shinouken%20-%20Ragnagard.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Shinouken%20-%20Ragnagard.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Street%20Hoop.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Street%20Hoop.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Street%20Hoop.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Super%20Sidekicks%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Super%20Sidekicks%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Super%20Sidekicks%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Super%20Sidekicks%203%20-%20The%20Next%20Glory.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Super%20Sidekicks%203%20-%20The%20Next%20Glory.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Super%20Sidekicks%203%20-%20The%20Next%20Glory.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Super%20Sidekicks.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Super%20Sidekicks.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Super%20Sidekicks.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Top%20Hunter%20-%20Roddy%20%20Cathy.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Top%20Hunter%20-%20Roddy%20%20Cathy.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Top%20Hunter%20-%20Roddy%20%20Cathy.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Treasure%20of%20The%20Caribbean.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Treasure%20of%20The%20Caribbean.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Treasure%20of%20The%20Caribbean.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Twinkle%20Star%20Sprites.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Twinkle%20Star%20Sprites.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Twinkle%20Star%20Sprites.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Viewpoint.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Viewpoint.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Viewpoint.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/World%20Heroes%202%20Jet.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\World%20Heroes%202%20Jet.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\World%20Heroes%202%20Jet.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/World%20Heroes%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\World%20Heroes%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\World%20Heroes%202.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/World%20Heroes%20Perfect.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\World%20Heroes%20Perfect.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\World%20Heroes%20Perfect.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/World%20Heroes.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\World%20Heroes.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"warn","message":"Arquivo não encontrado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\World%20Heroes.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Solicitação de mídia: neogeocd/medium_artwork/cover/Zintrick.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Caminho absoluto criado: Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Zintrick.png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
+{"level":"info","message":"Enviando arquivo Y:\\images\\RIESCADE\\roms\\neogeocd\\medium_artwork\\cover\\Zintrick.png com content-type image/png","service":"es-theme-engine","timestamp":"2025-03-11 03:26:58"}
