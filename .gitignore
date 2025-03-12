@@ -9,3 +9,5 @@ dist/
 build/
 
 package-lock.json
+combined.log
+error.log
