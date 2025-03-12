@@ -56,10 +56,6 @@ router.get("/", (req, res) => {
  * GET /api/games/:id
  * Retorna um jogo específico
  */
-/**
- * GET /api/games/:id
- * Retorna um jogo específico
- */
 router.get("/:id", (req, res) => {
   console.log(`Requisição recebida para o jogo ${req.params.id}`);
 
@@ -140,17 +136,14 @@ router.get("/:id", (req, res) => {
         // Buscar o jogo pelo ID específico da gamelist
         let foundGame = null;
 
-        // Primeiro, registramos todos os métodos que usaremos para identificar o jogo
+        // Estratégia principal: buscar pelo atributo ID
         console.log(
-          `Iniciando busca pelo jogo com ID específico: ${specificId} usando múltiplas estratégias`
+          `Procurando jogo com ID específico: ${specificId} na gamelist...`
         );
 
-        // Método 1: Buscar pelo atributo ID na gamelist (se houver)
+        // Verificar se o ID específico é numérico
         if (/^\d+$/.test(specificId)) {
-          // Procurar pelo atributo id na gamelist
-          console.log(
-            `Estratégia 1: Procurando jogo com ID ${specificId} na gamelist...`
-          );
+          // O ID é numérico, procurar diretamente pelo atributo ID
           foundGame = games.find(
             (game) => game["@_id"] && game["@_id"].toString() === specificId
           );
@@ -161,59 +154,60 @@ router.get("/:id", (req, res) => {
                 foundGame.name || "sem nome"
               }`
             );
+          } else {
+            console.log(
+              `Nenhum jogo encontrado com ID=${specificId}, recorrendo a métodos alternativos`
+            );
           }
+        } else {
+          console.log(
+            `ID específico '${specificId}' não é numérico, usando métodos alternativos`
+          );
         }
 
-        // Método 2: Se não encontrou pelo ID, procurar pelo caminho do arquivo/nome
+        // Se não encontrou pelo ID, tentar métodos alternativos (só como fallback)
         if (!foundGame) {
+          // Método alternativo: procurar pelo nome
           console.log(
-            `Estratégia 2: Comparando pelo caminho e nome do arquivo...`
+            `Tentando encontrar jogo pelo nome ou caminho: ${specificId}`
           );
 
-          // Extrair o nome do arquivo sem extensão do specificId
-          // (caso o specificId seja um nome de arquivo)
-          const possibleFilename = specificId.includes(".")
-            ? specificId.substring(0, specificId.lastIndexOf("."))
-            : specificId;
-
           foundGame = games.find((game) => {
-            if (!game.path) return false;
+            // Se tem nome, comparar
+            if (game.name) {
+              if (
+                game.name === specificId ||
+                game.name.toLowerCase() === specificId.toLowerCase()
+              ) {
+                return true;
+              }
+            }
 
-            // Extrair nome do arquivo do caminho
-            const gamePath = game.path;
-            const filename = path.basename(gamePath);
-            const filenameNoExt = path.basename(
-              filename,
-              path.extname(filename)
-            );
+            // Se tem path, comparar com o nome do arquivo
+            if (game.path) {
+              const filename = path.basename(game.path);
+              const filenameNoExt = path.basename(
+                filename,
+                path.extname(filename)
+              );
 
-            // Verificar se o nome do arquivo corresponde ao specificId
-            return (
-              filenameNoExt === possibleFilename || filename === specificId
-            );
+              if (filenameNoExt === specificId || filename === specificId) {
+                return true;
+              }
+            }
+
+            return false;
           });
 
           if (foundGame) {
             console.log(
-              `Jogo encontrado pela correspondência de nome de arquivo: ${
-                foundGame.name || path.basename(foundGame.path)
+              `Jogo encontrado por método alternativo: ${
+                foundGame.name || path.basename(foundGame.path || "sem path")
               }`
             );
-          }
-        }
-
-        // Método 3: Se ainda não encontrou, e o specificId é um número, tentar pelo índice
-        if (!foundGame && /^\d+$/.test(specificId)) {
-          console.log(
-            `Estratégia 3: Tentando encontrar pelo índice ${specificId}...`
-          );
-          const index = parseInt(specificId);
-          if (!isNaN(index) && index >= 0 && index < games.length) {
-            foundGame = games[index];
+          } else {
             console.log(
-              `Jogo encontrado pelo índice ${index}: ${
-                foundGame.name || "sem nome"
-              }`
+              `Nenhum jogo encontrado para ${specificId} por nenhum método`
             );
           }
         }
@@ -790,7 +784,7 @@ router.post("/:id/launch", async (req, res) => {
           // Buscar o jogo pelo ID específico
           let foundGame = null;
 
-          // Método 1: Buscar pelo atributo ID na gamelist
+          // Método prioritário: buscar pelo atributo ID na gamelist
           if (/^\d+$/.test(gameSpecificId)) {
             console.log(
               `Procurando jogo com ID ${gameSpecificId} na gamelist...`
@@ -806,40 +800,62 @@ router.post("/:id/launch", async (req, res) => {
                   foundGame.name || "sem nome"
                 }`
               );
+            } else {
+              console.log(
+                `Nenhum jogo encontrado com ID=${gameSpecificId}, recorrendo a métodos alternativos`
+              );
             }
+          } else {
+            console.log(
+              `ID específico '${gameSpecificId}' não é numérico, usando métodos alternativos`
+            );
           }
 
-          // Método 2: Se não encontrou pelo ID, procurar pelo nome ou caminho
+          // Método alternativo (fallback): buscar pelo nome ou caminho
           if (!foundGame) {
             console.log(
-              `Procurando jogo com nome ou caminho relacionado a ${gameSpecificId}...`
+              `Tentando encontrar jogo pelo nome ou caminho: ${gameSpecificId}`
             );
 
             foundGame = games.find((game) => {
-              if (!game.path) return false;
+              // Se tem nome, comparar
+              if (game.name) {
+                if (
+                  game.name === gameSpecificId ||
+                  game.name.toLowerCase() === gameSpecificId.toLowerCase()
+                ) {
+                  return true;
+                }
+              }
 
-              // Extrair nome do arquivo do caminho
-              const gamePath = game.path;
-              const filename = path.basename(gamePath);
-              const filenameNoExt = path.basename(
-                filename,
-                path.extname(filename)
-              );
+              // Se tem path, comparar com o nome do arquivo
+              if (game.path) {
+                const filename = path.basename(game.path);
+                const filenameNoExt = path.basename(
+                  filename,
+                  path.extname(filename)
+                );
 
-              // Verificar se o nome do arquivo ou o nome do jogo corresponde ao gameSpecificId
-              return (
-                filenameNoExt === gameSpecificId ||
-                filename === gameSpecificId ||
-                (game.name &&
-                  game.name.toLowerCase() === gameSpecificId.toLowerCase())
-              );
+                if (
+                  filenameNoExt === gameSpecificId ||
+                  filename === gameSpecificId
+                ) {
+                  return true;
+                }
+              }
+
+              return false;
             });
 
             if (foundGame) {
               console.log(
-                `Jogo encontrado por nome ou caminho: ${
-                  foundGame.name || path.basename(foundGame.path)
+                `Jogo encontrado por método alternativo: ${
+                  foundGame.name || path.basename(foundGame.path || "sem path")
                 }`
+              );
+            } else {
+              console.log(
+                `Nenhum jogo encontrado para ${gameSpecificId} por nenhum método`
               );
             }
           }
@@ -1072,7 +1088,7 @@ router.post("/:id/launch", async (req, res) => {
       "emulatorLauncher.exe"
     );
 
-    if (!launcherPath) {
+    if (!fs.existsSync(launcherPath)) {
       return res.status(500).json({
         success: false,
         message: "emulatorLauncher.exe não encontrado",
@@ -1130,6 +1146,15 @@ router.post("/:id/launch", async (req, res) => {
 
     child.on("error", (error) => {
       console.error(`Erro ao executar emulatorLauncher: ${error.message}`);
+
+      // Marcar o jogo como encerrado com erro
+      runningGames[gameId] = {
+        running: false,
+        closedAt: new Date(),
+        exitCode: -1,
+        error: error.message,
+      };
+
       return res.status(500).json({
         success: false,
         message: `Erro ao executar emulatorLauncher: ${error.message}`,
@@ -1185,9 +1210,35 @@ router.post("/:id/launch", async (req, res) => {
   }
 });
 
+/**
+ * GET /api/games/:id/status
+ * Verifica o status de um jogo (se está em execução ou não)
+ */
 router.get("/:id/status", (req, res) => {
   const gameId = req.params.id;
+
+  // Buscar o status do jogo no objeto runningGames
   const status = runningGames[gameId] || { running: false };
+
+  // Adicionar timestamp para ajudar no debugging
+  const now = new Date();
+  status.checkedAt = now.toISOString();
+
+  // Adicionar mais detalhes ao log para facilitar a depuração
+  console.log(
+    `[${now.toISOString()}] Verificação de status para jogo ${gameId}: ${
+      status.running ? "em execução" : "não está rodando"
+    }`
+  );
+
+  // Se o jogo terminou recentemente, incluir essa informação
+  if (status.closedAt) {
+    console.log(
+      `Jogo ${gameId} foi encerrado em ${status.closedAt.toISOString()} com código ${
+        status.exitCode || "desconhecido"
+      }`
+    );
+  }
 
   res.json({
     success: true,

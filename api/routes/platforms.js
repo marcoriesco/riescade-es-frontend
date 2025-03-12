@@ -539,4 +539,163 @@ router.get("/:id/games", (req, res) => {
   });
 });
 
+/**
+ * GET /api/platforms/:id/validate-gamelist
+ * Valida e corrige IDs ausentes na gamelist.xml de uma plataforma
+ */
+router.get("/:id/validate-gamelist", async (req, res) => {
+  try {
+    const platformId = req.params.id;
+    console.log(
+      `Recebida solicitação para validar gamelist.xml de ${platformId}`
+    );
+
+    // Obter caminhos do configService
+    const paths = configService.getPaths();
+
+    if (!paths.romsDir) {
+      return res.status(404).json({
+        success: false,
+        message: "Diretório de ROMs não encontrado",
+      });
+    }
+
+    // Determinar o diretório de ROMs para a plataforma
+    const platformRomsDir = path.join(paths.romsDir, platformId);
+
+    // Verificar se o diretório existe
+    if (!fs.existsSync(platformRomsDir)) {
+      return res.status(404).json({
+        success: false,
+        message: `Diretório de ROMs para ${platformId} não encontrado`,
+      });
+    }
+
+    // Caminho para a gamelist.xml
+    const gamelistPath = path.join(platformRomsDir, "gamelist.xml");
+
+    // Verificar se a gamelist.xml existe
+    if (!fs.existsSync(gamelistPath)) {
+      console.log(
+        `gamelist.xml não encontrada para ${platformId}, nada a corrigir`
+      );
+      return res.json({
+        success: true,
+        message: "gamelist.xml não encontrada, nada a corrigir",
+        changes: false,
+      });
+    }
+
+    // Ler o conteúdo da gamelist.xml
+    const xmlContent = fs.readFileSync(gamelistPath, "utf8");
+
+    // Usar o XMLParser para analisar o arquivo
+    const { XMLParser, XMLBuilder } = require("fast-xml-parser");
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      parseAttributeValue: true,
+      isArray: (name) => name === "game",
+    });
+
+    // Parsear o XML
+    const parsedXml = parser.parse(xmlContent);
+
+    // Verificar se a estrutura é válida
+    if (!parsedXml.gameList || !parsedXml.gameList.game) {
+      return res.status(400).json({
+        success: false,
+        message: "Estrutura inválida de gamelist.xml",
+      });
+    }
+
+    // Garantir que game seja um array mesmo que tenha apenas um item
+    const games = Array.isArray(parsedXml.gameList.game)
+      ? parsedXml.gameList.game
+      : [parsedXml.gameList.game];
+
+    console.log(
+      `Encontrados ${games.length} jogos na gamelist.xml de ${platformId}`
+    );
+
+    // Verificar se há algum jogo sem ID
+    let needsCorrection = false;
+    let highestId = 0;
+
+    // Primeira passagem: verificar IDs existentes e encontrar o maior ID
+    for (const game of games) {
+      if (game["@_id"] !== undefined) {
+        const id = Number(game["@_id"]);
+        if (!isNaN(id) && id > highestId) {
+          highestId = id;
+        }
+      } else {
+        needsCorrection = true;
+      }
+    }
+
+    // Se não precisa de correção, retornar
+    if (!needsCorrection) {
+      console.log(
+        `Todos os jogos já possuem IDs na gamelist.xml de ${platformId}`
+      );
+      return res.json({
+        success: true,
+        message: "Todos os jogos já possuem IDs",
+        changes: false,
+      });
+    }
+
+    console.log(
+      `Corrigindo gamelist.xml para ${platformId}. Último ID: ${highestId}`
+    );
+
+    // Segunda passagem: atribuir IDs para jogos que não têm
+    let correctedCount = 0;
+    for (const game of games) {
+      if (game["@_id"] === undefined) {
+        highestId++;
+        game["@_id"] = highestId;
+        correctedCount++;
+        console.log(
+          `Atribuído ID ${highestId} para o jogo: ${game.name || "sem nome"}`
+        );
+      }
+    }
+
+    // Reconstruir o XML
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      format: true,
+    });
+
+    // Criar o XML atualizado
+    const updatedXml =
+      '<?xml version="1.0"?>\n' + builder.build({ gameList: { game: games } });
+
+    // Fazer backup da gamelist original
+    const backupPath = `${gamelistPath}.backup`;
+    fs.copyFileSync(gamelistPath, backupPath);
+    console.log(`Backup criado em: ${backupPath}`);
+
+    // Salvar o XML atualizado
+    fs.writeFileSync(gamelistPath, updatedXml, "utf8");
+    console.log(`gamelist.xml atualizada com sucesso para ${platformId}`);
+
+    return res.json({
+      success: true,
+      message: `Corrigidos ${correctedCount} jogos sem ID`,
+      correctedCount,
+      changes: true,
+    });
+  } catch (error) {
+    console.error(`Erro ao validar gamelist.xml:`, error);
+    return res.status(500).json({
+      success: false,
+      message: `Erro ao validar gamelist.xml: ${error.message}`,
+    });
+  }
+});
+
 module.exports = router;

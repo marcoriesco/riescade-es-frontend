@@ -532,13 +532,25 @@ const ESAPI = (function () {
    */
   async function launchGame(gameId, options = {}) {
     console.log("launchGame chamado para jogo:", gameId);
+
     try {
+      // Verificar se o ID do jogo é válido
+      if (!gameId) {
+        throw new Error("ID do jogo é obrigatório");
+      }
+
       // Se nenhuma opção for fornecida, tentar extrair emulador e core da plataforma atual
       if (!options.emulator && !options.core) {
         // Extrair o ID da plataforma do ID do jogo (formato: sistema-índice)
         const platformId = gameId.split("-")[0];
-        const platform = getPlatform(platformId);
 
+        if (!platformId) {
+          throw new Error(
+            "Não foi possível determinar a plataforma a partir do ID do jogo"
+          );
+        }
+
+        const platform = getPlatform(platformId);
         console.log(`Detectada plataforma ${platformId} para o jogo ${gameId}`);
 
         if (platform && platform.emulators && platform.emulators.length > 0) {
@@ -575,6 +587,34 @@ const ESAPI = (function () {
         callback(gameId);
       }
 
+      // Iniciar um mecanismo para verificar o status do jogo periodicamente
+      let checkStatusInterval;
+
+      // Função para verificar se o jogo ainda está em execução
+      const checkGameStatus = async () => {
+        try {
+          const statusResponse = await fetch(
+            `${API_BASE}/games/${gameId}/status`
+          );
+          const statusData = await statusResponse.json();
+
+          console.log(`Status do jogo ${gameId}:`, statusData);
+
+          if (statusData.success && statusData.data) {
+            // Se o jogo não está mais em execução
+            if (!statusData.data.running) {
+              console.log(`Jogo ${gameId} encerrado, clearInterval`);
+              clearInterval(checkStatusInterval);
+
+              // Aqui poderíamos disparar um evento de jogo encerrado
+              // Isso permitiria que a UI responda apropriadamente
+            }
+          }
+        } catch (error) {
+          console.error(`Erro ao verificar status do jogo ${gameId}:`, error);
+        }
+      };
+
       // Lançar o jogo
       const response = await fetch(`${API_BASE}/games/${gameId}/launch`, {
         method: "POST",
@@ -588,12 +628,23 @@ const ESAPI = (function () {
 
       if (data.success) {
         console.log(`Jogo ${gameId} lançado com sucesso:`, data);
+
+        // Iniciar verificação periódica do status do jogo
+        checkStatusInterval = setInterval(checkGameStatus, 2000);
+
+        // Verificar o status inicial após 500ms
+        setTimeout(checkGameStatus, 500);
+
         return true;
       }
 
       throw new Error(data.message || "Erro ao lançar jogo");
     } catch (error) {
       console.error(`Erro ao lançar jogo ${gameId}:`, error);
+
+      // Notificar sobre erro de lançamento
+      // Você pode adicionar um callback de erro aqui se necessário
+
       throw error;
     }
   }

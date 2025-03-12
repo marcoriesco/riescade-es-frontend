@@ -349,9 +349,25 @@ function loadPlatforms() {
     card.appendChild(imageDiv);
     card.appendChild(info);
 
-    // Evento de clique
-    card.addEventListener("click", () => {
-      ESAPI.selectPlatform(platform.id);
+    // Evento de clique modificado para validar gamelist antes de carregar
+    card.addEventListener("click", async () => {
+      // Mostrar loader enquanto validamos
+      showLoader();
+
+      try {
+        // Validar a gamelist
+        await validateGamelistIDs(platform.id);
+
+        // Selecionar a plataforma após a validação
+        ESAPI.selectPlatform(platform.id);
+      } catch (error) {
+        console.error(`Erro ao validar gamelist para ${platform.id}:`, error);
+
+        // Mesmo com erro, tentar carregar a plataforma
+        ESAPI.selectPlatform(platform.id);
+
+        // Não esconder o loader aqui, deixar que loadGames faça isso
+      }
     });
 
     // Adicionar à grid
@@ -526,6 +542,9 @@ function showGameLoading(gameId) {
   const gameDetails = ESAPI.getGameDetails(gameId);
   const platform = ESAPI.getPlatform(ESAPI.getCurrentPlatform());
 
+  document.getElementById(
+    "loading-game-background"
+  ).style.backgroundImage = `url(${gameDetails.image})`;
   document.getElementById("loading-game-title").textContent = gameDetails.name;
   document.getElementById("loading-game-system").textContent = platform.name;
 
@@ -648,4 +667,134 @@ function toggleFavorite(gameId) {
 
   // Todo: Implementar toggle de favorito via API
   console.log(`Alternando favorito para ${gameDetails.name}`);
+}
+
+/**
+ * Valida a gamelist.xml de uma plataforma e corrige IDs ausentes
+ * @param {string} platformId - ID da plataforma
+ * @returns {Promise<Object>} Resultado da validação
+ */
+async function validateGamelistIDs(platformId) {
+  try {
+    console.log(`Validando gamelist.xml para plataforma ${platformId}...`);
+
+    // Fazer uma requisição para a API de validação
+    const response = await fetch(
+      `/api/platforms/${platformId}/validate-gamelist`
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Erro ao validar gamelist: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      if (data.changes) {
+        console.log(
+          `gamelist.xml para ${platformId} foi corrigida: ${data.message}`
+        );
+      } else {
+        console.log(`gamelist.xml para ${platformId} está OK: ${data.message}`);
+      }
+    } else {
+      console.error(`Erro na validação: ${data.message}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error(`Erro ao validar gamelist para ${platformId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Carrega e exibe as plataformas disponíveis
+ */
+function loadPlatforms() {
+  const platformsGrid = document.getElementById("platforms-grid");
+  platformsGrid.innerHTML = "";
+
+  const platforms = ESAPI.getPlatforms();
+
+  if (!platforms || platforms.length === 0) {
+    console.log("Nenhuma plataforma encontrada, adicionando mensagem");
+    platformsGrid.innerHTML =
+      "<div class='no-platforms'>Nenhuma plataforma encontrada</div>";
+    return;
+  }
+
+  platforms.forEach((platform) => {
+    const card = document.createElement("div");
+    card.className = "platform-card";
+    card.dataset.id = platform.id;
+
+    // Imagem da plataforma
+    const imageDiv = document.createElement("div");
+    imageDiv.className = "platform-image";
+
+    const img = document.createElement("img");
+    img.src = `/themes/default/img/logos/${platform.id}.png`;
+    img.alt = platform.name;
+    img.onerror = function () {
+      console.log(
+        `Erro ao carregar imagem para ${platform.id}, usando placeholder`
+      );
+      // Verificar se já estamos tentando carregar o placeholder para evitar loop
+      if (this.src.includes("placeholder.png")) {
+        console.log(
+          "Já estamos tentando carregar o placeholder, não vamos tentar novamente"
+        );
+        return;
+      }
+      this.src = "/themes/default/img/placeholder.png";
+      // Remover o handler de erro para evitar loops
+      this.onerror = null;
+    };
+
+    imageDiv.appendChild(img);
+
+    // Informações da plataforma
+    const info = document.createElement("div");
+    info.className = "platform-info";
+
+    const name = document.createElement("h2");
+    name.textContent = platform.name;
+
+    info.appendChild(name);
+
+    // Adicionar à card
+    card.appendChild(imageDiv);
+    card.appendChild(info);
+
+    // Evento de clique modificado para validar gamelist antes de carregar
+    card.addEventListener("click", async () => {
+      // Mostrar loader enquanto validamos
+      showLoader();
+
+      try {
+        // Validar a gamelist
+        await validateGamelistIDs(platform.id);
+
+        // Selecionar a plataforma após a validação
+        ESAPI.selectPlatform(platform.id);
+      } catch (error) {
+        console.error(`Erro ao validar gamelist para ${platform.id}:`, error);
+
+        // Mesmo com erro, tentar carregar a plataforma
+        ESAPI.selectPlatform(platform.id);
+
+        // Não esconder o loader aqui, deixar que loadGames faça isso
+      }
+    });
+
+    // Adicionar à grid
+    platformsGrid.appendChild(card);
+  });
+
+  // Mostrar tela de plataformas
+  showScreen("platforms-screen");
+  setCurrentScreen("platforms-screen");
 }

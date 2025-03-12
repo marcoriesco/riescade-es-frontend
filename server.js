@@ -246,11 +246,9 @@ app.use("/roms-media", (req, res) => {
 
   // Pegar o caminho relativo da URL (remover a barra inicial)
   const relativePath = req.url.replace(/^\//, "");
-  logger.info(`Solicitação de mídia: ${relativePath}`);
 
   // Construir o caminho absoluto para o arquivo
   const filePath = path.resolve(paths.romsDir, relativePath);
-  logger.info(`Caminho absoluto criado: ${filePath}`);
 
   // Verificar se o arquivo existe
   if (fs.existsSync(filePath)) {
