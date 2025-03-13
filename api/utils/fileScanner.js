@@ -16,20 +16,75 @@ const pathFinder = require("./pathFinder");
 function scanSystems(configDir) {
   console.log(`Escaneando sistemas em ${configDir}`);
   const systems = [];
+  const systemsMap = new Map(); // Usar um Map para rastrear sistemas por ID
 
   try {
-    // Lista de possíveis locais para o arquivo es_systems.cfg
-    const systemFile = path.join(configDir, "es_systems.cfg");
+    // Arquivo padrão es_systems.cfg
+    const defaultSystemFile = path.join(configDir, "es_systems.cfg");
 
-    // Para cada arquivo de sistemas
-    const systemsFromFile = xmlParser.parseSystemsConfig(systemFile);
+    // Ler primeiro o arquivo padrão
+    if (fs.existsSync(defaultSystemFile)) {
+      const defaultSystems = xmlParser.parseSystemsConfig(defaultSystemFile);
 
-    if (systemsFromFile && systemsFromFile.length > 0) {
-      console.log(
-        `Adicionando ${systemsFromFile.length} sistemas de ${systemFile}`
-      );
-      systems.push(...systemsFromFile);
+      if (defaultSystems && defaultSystems.length > 0) {
+        console.log(
+          `Adicionando ${defaultSystems.length} sistemas de ${defaultSystemFile}`
+        );
+
+        // Adicionar sistemas ao Map usando o ID como chave
+        // Ignorar sistemas que têm o path vazio (são grupos)
+        defaultSystems.forEach((system) => {
+          // Verificar se o path não está vazio
+          if (system.path && system.path.trim() !== "") {
+            systemsMap.set(system.id, system);
+          } else {
+            console.log(
+              `Ignorando grupo: ${system.name || system.id} (path vazio)`
+            );
+          }
+        });
+      }
     }
+
+    // Buscar por arquivos personalizados es_systems_*.cfg
+    const customSystemFiles = fs
+      .readdirSync(configDir)
+      .filter((file) => file.startsWith("es_systems_") && file.endsWith(".cfg"))
+      .map((file) => path.join(configDir, file));
+
+    console.log(
+      `Encontrados ${customSystemFiles.length} arquivos de configuração customizados`
+    );
+
+    // Processar cada arquivo personalizado
+    for (const customFile of customSystemFiles) {
+      console.log(`Processando arquivo personalizado: ${customFile}`);
+      const customSystems = xmlParser.parseSystemsConfig(customFile);
+
+      if (customSystems && customSystems.length > 0) {
+        console.log(
+          `Adicionando/sobrescrevendo ${customSystems.length} sistemas de ${customFile}`
+        );
+
+        // Sobrescrever sistemas existentes ou adicionar novos
+        // Ignorar sistemas que têm o path vazio (são grupos)
+        customSystems.forEach((system) => {
+          // Verificar se o path não está vazio
+          if (system.path && system.path.trim() !== "") {
+            systemsMap.set(system.id, system);
+          } else {
+            console.log(
+              `Ignorando grupo: ${
+                system.name || system.id
+              } (path vazio) do arquivo ${customFile}`
+            );
+          }
+        });
+      }
+    }
+
+    // Converter o Map de volta para um array
+    systems.push(...systemsMap.values());
 
     // Se não encontrou sistemas, registrar no log e retornar array vazio
     if (systems.length === 0) {

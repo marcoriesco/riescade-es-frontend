@@ -309,13 +309,7 @@ router.get("/:id", (req, res) => {
             path: path.join(platformRomsDir, romFilename),
             desc:
               foundGame.desc || `Jogo para ${system.fullName || system.name}`,
-            image: processPath(
-              getValidImagePath(
-                foundGame.image,
-                null, // sem fallback
-                "/themes/default/img/placeholder.png"
-              )
-            ),
+            image: processPath(foundGame.image),
             thumbnail: processPath(
               getValidImagePath(
                 foundGame.thumbnail,
