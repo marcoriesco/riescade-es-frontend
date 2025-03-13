@@ -148,6 +148,8 @@ function initKeyboardNavigation() {
 
   function handlePlatformsNavigation(event) {
     const platforms = document.querySelectorAll(".platform-card");
+    const container = document.querySelector(".platforms-grid"); // Substitua pelo seletor correto da sua div
+
     if (platforms.length === 0) return;
 
     let newIndex = selectedPlatformIndex;
@@ -191,30 +193,31 @@ function initKeyboardNavigation() {
       // Update index and add selection
       selectedPlatformIndex = newIndex;
       platforms[selectedPlatformIndex].classList.add("selected");
-      platforms[selectedPlatformIndex].scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+
+      // AQUI ESTÁ A NOVA FUNCIONALIDADE: rolagem automática
+      scrollItemIntoView(platforms[selectedPlatformIndex], container);
     }
   }
 
   function handleGamesNavigation(event) {
     const games = document.querySelectorAll(".game-item");
+    const container = document.getElementById("games-list");
+
     if (games.length === 0) return;
 
-    let newIndex = selectedGameIndex;
+    let newIndex = currentGameIndex;
 
     switch (event.key) {
-      case "ArrowUp":
-        newIndex = Math.max(0, selectedGameIndex - 1);
+      case "ArrowLeft":
+        newIndex = Math.max(0, currentGameIndex - 1);
         break;
-      case "ArrowDown":
-        newIndex = Math.min(games.length - 1, selectedGameIndex + 1);
+      case "ArrowRight":
+        newIndex = Math.min(games.length - 1, currentGameIndex + 1);
         break;
       case "Enter":
-        if (selectedGameIndex >= 0 && selectedGameIndex < games.length) {
+        if (currentGameIndex >= 0 && currentGameIndex < games.length) {
           // Lançar o jogo selecionado
-          const gameId = games[selectedGameIndex].dataset.id;
+          const gameId = games[currentGameIndex].dataset.id;
           ESAPI.launchGame(gameId);
         }
         break;
@@ -233,23 +236,30 @@ function initKeyboardNavigation() {
         break;
     }
 
-    if (newIndex !== selectedGameIndex) {
-      // Remove previous selection
-      if (selectedGameIndex >= 0 && selectedGameIndex < games.length) {
-        games[selectedGameIndex].classList.remove("selected");
-      }
+    if (newIndex !== currentGameIndex) {
+      // Atualizar o índice atual
+      currentGameIndex = newIndex;
 
-      // Update index and add selection
-      selectedGameIndex = newIndex;
-      games[selectedGameIndex].classList.add("selected");
-      games[selectedGameIndex].scrollIntoView({
+      // Calcular quanto precisamos rolar para manter a posição fixa
+      const targetGame = games[currentGameIndex];
+      const fixedSelectionGame =
+        games[Math.min(FIXED_SELECTION_INDEX, games.length - 1)];
+
+      // Calcular o deslocamento necessário
+      const offset = targetGame.offsetLeft - fixedSelectionGame.offsetLeft;
+
+      // Rolar para esse offset
+      container.scrollTo({
+        left: offset,
         behavior: "smooth",
-        block: "center",
       });
 
       // Mostrar detalhes do jogo selecionado
-      const gameId = games[selectedGameIndex].dataset.id;
+      const gameId = games[currentGameIndex].dataset.id;
       ESAPI.selectGame(gameId);
+
+      // Atualizar classes visuais
+      updateGameSelectionClasses(games);
     }
   }
 
@@ -262,6 +272,13 @@ function initKeyboardNavigation() {
         break;
     }
   }
+
+  /**
+   * Rola o container para garantir que o jogo selecionado esteja visível
+   * com efeito de rolagem suave e centralizando o item na tela quando possível
+   * @param {HTMLElement} gameItem - O elemento de jogo selecionado
+   * @param {HTMLElement} container - O container com overflow
+   */
 
   // Função para definir a tela atual
   window.setCurrentScreen = function (screen) {
@@ -436,9 +453,11 @@ function loadGames(platformId) {
       const thumbnail = document.createElement("div");
       thumbnail.className = "game-item-thumbnail";
 
-      if (game.thumbnail) {
+      const gameCarouselImage = game.mix ? game.mix : game.thumbnail;
+
+      if (gameCarouselImage) {
         const img = document.createElement("img");
-        img.src = convertPathToUrl(game.thumbnail);
+        img.src = gameCarouselImage;
         img.alt = game.name;
         img.onerror = () => {
           thumbnail.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
@@ -489,6 +508,26 @@ function loadGames(platformId) {
     // Mostrar tela de jogos
     showScreen("games-screen");
     setCurrentScreen("games-screen");
+
+    // Inicializar a seleção fixa
+    initFixedPositionNavigation();
+
+    // Resetar o índice atual para 0
+    currentGameIndex = 0;
+
+    // Atualizar as classes visuais
+    const gamesItems = document.querySelectorAll(".game-item");
+    updateGameSelectionClasses(gamesItems);
+
+    // Garantir que o primeiro jogo esteja na posição fixa
+    if (gamesItems.length > 0) {
+      const container = document.getElementById("games-list");
+      container.scrollLeft = 0;
+
+      // Mostrar detalhes do primeiro jogo
+      const gameId = gamesItems[0].dataset.id;
+      ESAPI.selectGame(gameId);
+    }
   } catch (error) {
     console.error("Erro ao carregar jogos:", error);
     alert("Erro ao carregar jogos. Verifique o console para mais detalhes.");
@@ -498,7 +537,7 @@ function loadGames(platformId) {
 }
 
 /**
- * Exibe os detalhes de um jogo
+ * Exibe os detalhes de um jogo com efeito de transição
  * @param {string} gameId - ID do jogo
  */
 function showGameDetails(gameId) {
@@ -511,13 +550,28 @@ function showGameDetails(gameId) {
   document.getElementById("game-description").textContent =
     gameDetails.desc || "Sem descrição disponível.";
 
-  // Imagem
+  // Imagem com efeito de transição
   const gameImage = document.getElementById("game-image");
-  if (gameDetails.image) {
-    gameImage.src = convertPathToUrl(gameDetails.image);
-  } else {
-    gameImage.src = "themes/default/img/placeholder.png";
-  }
+
+  // Adicionar classe de fade-out para iniciar a transição
+  gameImage.classList.add("fade-out");
+
+  // Usar setTimeout para dar tempo para a animação acontecer
+  // antes de atualizar a nova imagem
+  setTimeout(() => {
+    // Atualizar a fonte da imagem
+    if (gameDetails.image) {
+      gameImage.src = gameDetails.image;
+    } else {
+      gameImage.src = "themes/default/img/default.jpg";
+    }
+
+    // Força reflow para que a transição de opacity funcione
+    void gameImage.offsetWidth;
+
+    // Remover a classe de fade-out para fazer a imagem aparecer
+    gameImage.classList.remove("fade-out");
+  }, 250); // 250ms para a transição de saída
 
   // Metadados
   document.getElementById("game-developer").textContent =
@@ -542,9 +596,11 @@ function showGameLoading(gameId) {
   const gameDetails = ESAPI.getGameDetails(gameId);
   const platform = ESAPI.getPlatform(ESAPI.getCurrentPlatform());
 
+  console.log("GAME DETAILS:", gameDetails);
+
   document.getElementById(
     "loading-game-background"
-  ).style.backgroundImage = `url(${gameDetails.image})`;
+  ).style.backgroundImage = `url("${gameDetails.image}")`;
   document.getElementById("loading-game-title").textContent = gameDetails.name;
   document.getElementById("loading-game-system").textContent = platform.name;
 
@@ -797,4 +853,103 @@ function loadPlatforms() {
   // Mostrar tela de plataformas
   showScreen("platforms-screen");
   setCurrentScreen("platforms-screen");
+}
+
+// Função para verificar se a imagem existe e carregar com fallback
+function loadImageWithFallback(
+  thumbnail,
+  primaryImagePath,
+  fallbackImagePath,
+  gameName
+) {
+  const img = document.createElement("img");
+
+  // Definir handlers antes de definir src para garantir que eles sejam ativados
+  img.onload = () => {
+    // Imagem carregada com sucesso
+    console.log(`Imagem carregada com sucesso: ${img.src}`);
+  };
+
+  img.onerror = () => {
+    // Se a imagem primária falhar, tentar carregar a fallback
+    if (img.src === primaryImagePath) {
+      console.log(`Imagem primária não encontrada: ${primaryImagePath}`);
+
+      if (fallbackImagePath) {
+        console.log(`Tentando fallback: ${fallbackImagePath}`);
+        img.src = fallbackImagePath;
+      } else {
+        // Se não houver fallback, usar cor de fundo
+        console.log(`Sem imagem fallback disponível`);
+        thumbnail.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+      }
+    } else {
+      // Se a imagem fallback também falhar
+      console.log(`Imagem fallback não encontrada: ${fallbackImagePath}`);
+      thumbnail.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+    }
+  };
+
+  // Definir atributos da imagem
+  img.alt = gameName;
+  img.src = primaryImagePath; // Isso dispara o carregamento
+
+  // Adicionar ao DOM
+  thumbnail.appendChild(img);
+}
+
+// Atualizar as classes visuais dos jogos
+const FIXED_SELECTION_INDEX = 0; // A posição do item fixo (0 = primeiro item, 1 = segundo item)
+let currentGameIndex = 0; // Índice atual na lista completa de jogos
+
+function updateGameSelectionClasses(games) {
+  // Remover a classe 'selected' de todos os jogos
+  games.forEach((game) => game.classList.remove("selected"));
+
+  // Adicionar a classe ao jogo atual
+  if (games[currentGameIndex]) {
+    games[currentGameIndex].classList.add("selected");
+  }
+}
+function initFixedPositionNavigation() {
+  // Inicializar a seleção fixa ao carregar a lista de jogos
+  const gamesContainer = document.getElementById("games-list");
+
+  // Criar o elemento de seleção fixa se ainda não existir
+  if (!document.getElementById("fixed-selection")) {
+    const fixedSelection = document.createElement("div");
+    fixedSelection.id = "fixed-selection";
+    fixedSelection.className = "fixed-selection";
+
+    // Inserir antes da lista de jogos
+    gamesContainer.parentNode.insertBefore(fixedSelection, gamesContainer);
+
+    // Posicionar adequadamente
+    setTimeout(positionFixedSelection, 100);
+  }
+}
+function positionFixedSelection() {
+  const gamesContainer = document.getElementById("games-list");
+  const fixedSelection = document.getElementById("fixed-selection");
+  const gameItems = document.querySelectorAll(".game-item");
+
+  if (gameItems.length === 0 || !fixedSelection) return;
+
+  // Calcular a posição do segundo item (índice 1)
+  if (gameItems.length > FIXED_SELECTION_INDEX) {
+    const targetItem = gameItems[FIXED_SELECTION_INDEX];
+    const containerRect = gamesContainer.getBoundingClientRect();
+    const itemRect = targetItem.getBoundingClientRect();
+
+    // Posicionar o elemento de seleção fixa sobre o segundo item
+    fixedSelection.style.left = `${
+      itemRect.left - containerRect.left + gamesContainer.scrollLeft
+    }px`;
+    fixedSelection.style.top = `${itemRect.top - containerRect.top}px`;
+    fixedSelection.style.width = `${itemRect.width}px`;
+    fixedSelection.style.height = `${itemRect.height}px`;
+
+    // Tornar visível
+    fixedSelection.style.display = "block";
+  }
 }

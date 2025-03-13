@@ -238,6 +238,7 @@ app.use("/roms-media", (req, res) => {
   const paths = configService.getPaths();
 
   if (!paths.romsDir) {
+    logger.error("Diretório de ROMs não configurado");
     return res.status(404).json({
       success: false,
       message: "Diretório de ROMs não configurado",
@@ -247,8 +248,14 @@ app.use("/roms-media", (req, res) => {
   // Pegar o caminho relativo da URL (remover a barra inicial)
   const relativePath = req.url.replace(/^\//, "");
 
+  // Decodificar o caminho para lidar com caracteres especiais
+  const decodedPath = decodeURIComponent(relativePath);
+
+  logger.info(`Requisição de mídia para: ${decodedPath}`);
+
   // Construir o caminho absoluto para o arquivo
-  const filePath = path.resolve(paths.romsDir, relativePath);
+  const filePath = path.resolve(paths.romsDir, decodedPath);
+  logger.info(`Caminho absoluto do arquivo: ${filePath}`);
 
   // Verificar se o arquivo existe
   if (fs.existsSync(filePath)) {
@@ -270,7 +277,7 @@ app.use("/roms-media", (req, res) => {
         `Enviando arquivo ${filePath} com content-type ${contentType}`
       );
 
-      // Enviar o arquivo como uma stream em vez de usar sendFile
+      // Enviar o arquivo como uma stream
       const stream = fs.createReadStream(filePath);
       res.setHeader("Content-Type", contentType);
 
@@ -294,6 +301,123 @@ app.use("/roms-media", (req, res) => {
     }
   } else {
     logger.warn(`Arquivo não encontrado: ${filePath}`);
+
+    // Tentar caminhos alternativos
+    const systemId = decodedPath.split("/")[0]; // Ex: "switch"
+    const fileName = path.basename(decodedPath); // Ex: "Yakuza Kiwami-thumb.png"
+    const baseFileName = path.basename(fileName, path.extname(fileName)); // Ex: "Yakuza Kiwami-thumb"
+    const gameName = baseFileName.replace(/-thumb$/, ""); // Ex: "Yakuza Kiwami"
+
+    logger.info(
+      `Tentando encontrar alternativas para ${gameName} no sistema ${systemId}`
+    );
+
+    // Possíveis localizações alternativas
+    const alternativePaths = [
+      // Caminho com espaços alternativos
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        "images",
+        `${gameName.replace(/\s+/g, "")}-thumb${path.extname(fileName)}`
+      ),
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        "images",
+        `${gameName.replace(/\s+/g, "_")}-thumb${path.extname(fileName)}`
+      ),
+      // Caminhos sem o sufixo -thumb
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        "images",
+        `${gameName}${path.extname(fileName)}`
+      ),
+      // Diretórios alternativos comuns
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        "boxart",
+        `${gameName}${path.extname(fileName)}`
+      ),
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        "thumbnails",
+        `${gameName}${path.extname(fileName)}`
+      ),
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        "media",
+        `${gameName}${path.extname(fileName)}`
+      ),
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        "media/images",
+        `${gameName}${path.extname(fileName)}`
+      ),
+      // Raiz do diretório do sistema
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        `${gameName}${path.extname(fileName)}`
+      ),
+      path.resolve(
+        paths.romsDir,
+        systemId,
+        `${gameName}-thumb${path.extname(fileName)}`
+      ),
+    ];
+
+    logger.info(
+      `Verificando caminhos alternativos: ${JSON.stringify(alternativePaths)}`
+    );
+
+    // Verificar cada caminho alternativo
+    for (const altPath of alternativePaths) {
+      if (fs.existsSync(altPath)) {
+        logger.info(`Arquivo alternativo encontrado: ${altPath}`);
+        try {
+          const extname = path.extname(altPath).toLowerCase();
+          const contentType =
+            {
+              ".png": "image/png",
+              ".jpg": "image/jpeg",
+              ".jpeg": "image/jpeg",
+              ".gif": "image/gif",
+              ".webp": "image/webp",
+              ".mp4": "video/mp4",
+              ".webm": "video/webm",
+            }[extname] || "application/octet-stream";
+
+          const stream = fs.createReadStream(altPath);
+          res.setHeader("Content-Type", contentType);
+          stream.pipe(res);
+          return;
+        } catch (error) {
+          logger.error(`Erro ao enviar arquivo alternativo: ${error.message}`);
+          continue;
+        }
+      }
+    }
+
+    // Se não encontrou nenhum arquivo alternativo, tentar enviar um placeholder
+    const placeholderPath = path.join(
+      __dirname,
+      "themes/default/img/placeholder.png"
+    );
+    if (fs.existsSync(placeholderPath)) {
+      logger.info(`Enviando placeholder para ${fileName}`);
+      const stream = fs.createReadStream(placeholderPath);
+      res.setHeader("Content-Type", "image/png");
+      stream.pipe(res);
+      return;
+    }
+
+    // Se chegou aqui, não há alternativas nem placeholder
     return res.status(404).json({
       success: false,
       message: "Arquivo de mídia não encontrado",

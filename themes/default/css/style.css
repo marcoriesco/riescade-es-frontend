@@ -23,7 +23,7 @@
   --spacing-xl: 32px;
 
   /* Tamanhos */
-  --border-radius: 8px;
+  --border-radius: 16px;
   --header-height: 64px;
   --footer-height: 48px;
 }
@@ -44,7 +44,10 @@ body {
 
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-image: url("../img/default.jpg");
   background-color: var(--background-color);
+  background-repeat: no-repeat;
+  background-size: cover;
   color: var(--text-primary);
   line-height: 1.5;
 }
@@ -103,12 +106,12 @@ body {
 /* Cabeçalho e rodapé */
 header {
   height: var(--header-height);
-  padding: 0 var(--spacing-lg);
-  background-color: var(--surface-color);
+  padding: 0 70px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100vw;
+  z-index: 10;
 }
 
 header h1 {
@@ -130,11 +133,10 @@ header h1 {
 footer {
   height: var(--footer-height);
   padding: 0 var(--spacing-lg);
-  background-color: var(--surface-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10;
 }
 
 .controls-help {
@@ -224,34 +226,82 @@ main {
 
 /* Tela de jogos */
 .game-details {
-  display: flex;
-  margin-bottom: var(--spacing-lg);
-  background-color: var(--surface-color);
-  border-radius: var(--border-radius);
-  overflow: hidden;
+  position: fixed;
+  left: 75px;
+  top: 160px;
 }
 
 .game-media {
-  width: 300px;
-  height: 200px;
-  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+}
+.game-media::before {
+  content: "";
+  background-image: url(../img/overlay.png);
+  background-position: center;
+  background-size: cover;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
 }
 
 #game-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+
+  transition: opacity 0.3s ease-in-out, transform 0.5s ease-in-out;
+  opacity: 1;
+  transform: scale(1);
+}
+
+#game-image.fade-out {
+  opacity: 0;
+  transform: scale(1.25);
+}
+/* Zoom-out - imagem saindo (fica menor e desaparece) */
+#game-image.zoom-out {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+/* Zoom-in - imagem entrando (vem de maior para o tamanho normal) */
+#game-image.zoom-in {
+  opacity: 1;
+  transform: scale(1);
+  animation: zoomEffect 0.5s ease-in-out;
+}
+
+@keyframes zoomEffect {
+  0% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .game-info {
   flex: 1;
-  padding: var(--spacing-lg);
-  overflow: hidden;
+  position: relative;
+  z-index: 10;
 }
 
 #game-title {
   font-size: 24px;
-  margin-bottom: var(--spacing-md);
 }
 
 #game-description {
@@ -270,6 +320,7 @@ main {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-sm);
+  display: none;
 }
 
 .metadata-item {
@@ -280,38 +331,38 @@ main {
   color: var(--text-secondary);
 }
 
-.games-list {
+/* .games-list {
   max-height: calc(
     100vh - var(--header-height) - var(--footer-height) - 200px -
       var(--spacing-lg) * 3
   );
-  overflow-y: auto;
-}
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 70px;
+  left: 70px;
+  gap: 10px;
+} */
 
 .game-item {
-  padding: var(--spacing-md);
-  background-color: var(--surface-color);
   border-radius: var(--border-radius);
-  margin-bottom: var(--spacing-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
 }
 
-.game-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
+.game-item:hover,
 .game-item.selected {
   background-color: rgba(33, 150, 243, 0.15);
-  border-left: 4px solid var(--primary-color);
+  border: 4px solid #fff;
+  transform: scale(1.2);
+  transition: 300ms transform ease-in-out;
 }
 
 .game-item-thumbnail {
-  width: 48px;
-  height: 48px;
-  border-radius: 4px;
-  margin-right: var(--spacing-md);
+  width: 80px;
+  height: 80px;
+  border-radius: var(--border-radius);
   background-color: rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
 }
@@ -319,12 +370,13 @@ main {
 .game-item-thumbnail img {
   width: 100%;
   height: 100%;
+  border-radius: var(--border-radius);
   object-fit: cover;
-  border-radius: 4px;
 }
 
 .game-item-info {
   flex: 1;
+  display: none;
 }
 
 .game-item-title {
@@ -463,4 +515,27 @@ main {
 /* Utilitários */
 .hidden {
   display: none !important;
+}
+
+/* TESTE DE SCROLL */
+#games-list {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding: 15px 0;
+  gap: 15px;
+  position: relative; /* Para posicionamento relativo */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+
+  /* Adicionando padding para garantir espaço para o primeiro item */
+  padding-left: 20px;
+  /* Adicione padding no final para garantir que o último item possa ser rolado para a posição fixa */
+  padding-right: 100px;
+}
+
+#games-list::-webkit-scrollbar {
+  display: none;
 }

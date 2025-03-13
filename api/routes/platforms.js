@@ -379,6 +379,7 @@ router.get("/:id/games", (req, res) => {
             thumbnail: processPath(game.thumbnail),
             video: processPath(game.video),
             marquee: processPath(game.marquee),
+            mix: processPath(game.mix),
             fanart: processPath(game.fanart),
             rating: parseFloat(game.rating) || 0,
             releaseDate: game.releasedate,

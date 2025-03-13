@@ -309,10 +309,35 @@ router.get("/:id", (req, res) => {
             path: path.join(platformRomsDir, romFilename),
             desc:
               foundGame.desc || `Jogo para ${system.fullName || system.name}`,
-            image: processPath(foundGame.image),
-            thumbnail: processPath(foundGame.thumbnail),
+            image: processPath(
+              getValidImagePath(
+                foundGame.image,
+                null, // sem fallback
+                "/themes/default/img/placeholder.png"
+              )
+            ),
+            thumbnail: processPath(
+              getValidImagePath(
+                foundGame.thumbnail,
+                null, // sem fallback
+                "/themes/default/img/placeholder.png"
+              )
+            ),
+            marquee: processPath(
+              getValidImagePath(
+                foundGame.marquee,
+                null, // sem fallback
+                "/themes/default/img/placeholder.png"
+              )
+            ),
             video: processPath(foundGame.video),
-            marquee: processPath(foundGame.marquee),
+            mix: processPath(
+              getValidImagePath(
+                foundGame.mix,
+                null, // usar thumbnail como fallback para mix
+                "/themes/default/img/placeholder.png"
+              )
+            ),
             fanart: processPath(foundGame.fanart),
             rating: parseFloat(foundGame.rating) || 0,
             releaseDate: foundGame.releasedate,
@@ -1064,10 +1089,8 @@ router.post("/:id/launch", async (req, res) => {
     }
 
     // Adicionar o caminho do arquivo game.xml (completo)
-    args.push(
-      "-gameinfo",
-      path.join("%TEMP%", "emulationstation.tmp", "game.xml")
-    );
+    const romGameInfo = path.join("%TEMP%", "emulationstation.tmp", "game.xml");
+    args.push("-gameinfo", `"${romGameInfo}"`);
 
     // Adicionar informações do controle (completas)
     args.push("-p1index", "0");
@@ -1245,6 +1268,58 @@ router.get("/:id/status", (req, res) => {
     data: status,
   });
 });
+
+// Esta função deve ficar no seu servidor Node.js (no routes/games.js ou services)
+/**
+ * Verifica a existência de um arquivo de imagem e retorna o caminho válido
+ * @param {string} primaryPath - Caminho primário da imagem
+ * @param {string} fallbackPath - Caminho alternativo caso a primária não exista
+ * @param {string} placeholderPath - Caminho do placeholder caso nenhuma imagem exista
+ * @returns {string} - Caminho da imagem que existe
+ */
+function getValidImagePath(primaryPath, fallbackPath, placeholderPath) {
+  const configService = require("../services/configService");
+  const paths = configService.getPaths();
+
+  // Remover o prefixo de URL, se houver (como /roms-media/)
+  const getAbsolutePath = (urlPath) => {
+    if (!urlPath) return null;
+
+    // Se é uma URL completa externa, retornar como está
+    if (urlPath.startsWith("http://") || urlPath.startsWith("https://")) {
+      return urlPath;
+    }
+
+    // Se começa com /roms-media/, converter para caminho absoluto
+    if (urlPath.startsWith("/roms-media/")) {
+      const relativePath = urlPath.replace(/^\/roms-media\//, "");
+      return path.join(paths.romsDir, relativePath);
+    }
+
+    // Se já é um caminho absoluto, retornar como está
+    if (path.isAbsolute(urlPath)) {
+      return urlPath;
+    }
+
+    // Caso contrário, assumir caminho relativo ao rootDir
+    return path.join(paths.rootDir, urlPath);
+  };
+
+  // Verificar a imagem primária
+  const primaryAbsPath = getAbsolutePath(primaryPath);
+  if (primaryAbsPath && fs.existsSync(primaryAbsPath)) {
+    return primaryPath; // Retorna o caminho original (URL), não o absoluto
+  }
+
+  // Verificar a imagem de fallback
+  const fallbackAbsPath = getAbsolutePath(fallbackPath);
+  if (fallbackAbsPath && fs.existsSync(fallbackAbsPath)) {
+    return fallbackPath; // Retorna o caminho original (URL)
+  }
+
+  // Se nenhuma existir, retornar o placeholder
+  return placeholderPath;
+}
 
 // Exportar o router
 module.exports = router;
