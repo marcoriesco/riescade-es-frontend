@@ -9,24 +9,36 @@
       "id": "background_color",
       "name": "Cor de Fundo",
       "type": "color",
-      "default": "#000000"
+      "default": "#000000",
+      "value": "#000000"
     },
     {
       "id": "show_clock",
       "name": "Exibir Relógio",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "value": true
     },
     {
       "id": "transition_style",
       "name": "Estilo de Transição",
       "type": "select",
       "options": [
-        { "value": "fade", "label": "Fade" },
-        { "value": "slide", "label": "Slide" },
-        { "value": "none", "label": "Nenhum" }
+        {
+          "value": "fade",
+          "label": "Fade"
+        },
+        {
+          "value": "slide",
+          "label": "Slide"
+        },
+        {
+          "value": "none",
+          "label": "Nenhum"
+        }
       ],
-      "default": "fade"
+      "default": "fade",
+      "value": "fade"
     }
   ]
 }

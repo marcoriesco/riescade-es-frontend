@@ -112,9 +112,6 @@ function initAPI() {
       showGameLoading(gameId);
     });
 
-    // Inicializar tela de configurações
-    initSettingsScreen();
-
     // Esconder loader quando tudo estiver pronto
     hideLoader();
   });
@@ -478,11 +475,15 @@ function loadGames(platformId) {
       thumbnail.className = "game-item-thumbnail";
 
       const gameCarouselImage = game.mix ? game.mix : game.marquee;
+      const gameCarouselClass = game.mix
+        ? "game-item-mix"
+        : "game-item-marquee";
 
       if (gameCarouselImage) {
         const img = document.createElement("img");
         img.src = gameCarouselImage;
         img.alt = game.name;
+        img.className = gameCarouselClass;
         img.onerror = () => {
           thumbnail.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
         };
@@ -730,52 +731,6 @@ function showGameLoading(gameId) {
         setCurrentScreen("games-screen");
       });
   }, 2000); // Verificar a cada 2 segundos
-}
-
-/**
- * Inicializa a tela de configurações
- */
-function initSettingsScreen() {
-  // Preencher seletor de temas
-  const themeSelect = document.getElementById("theme-select");
-  themeSelect.innerHTML = "";
-
-  const themes = ESAPI.getThemes();
-  const currentTheme = ESAPI.getCurrentTheme();
-
-  themes.forEach((theme) => {
-    const option = document.createElement("option");
-    option.value = theme.id;
-    option.textContent = theme.name;
-
-    if (theme.id === currentTheme.id) {
-      option.selected = true;
-      document.getElementById("current-theme-name").textContent = theme.name;
-    }
-
-    themeSelect.appendChild(option);
-  });
-
-  // Evento de mudança de tema
-  themeSelect.addEventListener("change", () => {
-    const themeId = themeSelect.value;
-    ESAPI.setCurrentTheme(themeId).then(() => {
-      // Recarregar a página para aplicar o novo tema
-      window.location.reload();
-    });
-  });
-
-  // Configuração de formato de hora
-  const clockFormat = document.getElementById("clock-format");
-  const settings = ESAPI.getSettings();
-
-  if (settings?.ui?.ClockFormat) {
-    clockFormat.value = settings.ui.ClockFormat;
-  }
-
-  clockFormat.addEventListener("change", () => {
-    ESAPI.updateSetting("ClockFormat", clockFormat.value);
-  });
 }
 
 /**

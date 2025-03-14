@@ -553,11 +553,11 @@ function loadGames(platformId) {
         const img = document.createElement("img");
         img.src = gameCarouselImage;
         img.alt = game.name;
+        img.className = gameCarouselClass;
         img.onerror = () => {
           thumbnail.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
         };
         thumbnail.appendChild(img);
-        thumbnail.classList.add(gameCarouselClass);
       }
 
       // Informações do jogo

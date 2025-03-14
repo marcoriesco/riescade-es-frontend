@@ -236,7 +236,7 @@ main {
 /* Tela de jogos */
 .game-details {
   position: fixed;
-  left: 325px;
+  left: 360px;
   top: 240px;
 }
 
@@ -346,7 +346,7 @@ main {
   position: fixed;
   top: 50px;
   left: -58%;
-  width: 135%;
+  width: 135.5%;
   z-index: 10;
 }
 
@@ -385,11 +385,9 @@ main {
 
 /* Estilo para os itens não centrais */
 .slick-slide:not(.slick-center) .game-item {
-  opacity: 0.5;
+  opacity: 1;
   transform: scale(1);
   z-index: 10;
-  /* min-width: 118px;
-  min-height: 118px; */
   width: 118px;
   height: 118px;
 }
@@ -411,6 +409,12 @@ main {
   max-height: 80%;
   object-fit: contain;
   border-radius: var(--border-radius);
+}
+
+.game-item-thumbnail img.game-item-mix {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100%;
 }
 
 /* Informações do jogo - mostradas apenas no item selecionado */
