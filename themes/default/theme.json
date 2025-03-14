@@ -1,0 +1,51 @@
+{
+  "id": "default",
+  "name": "RIESCADE Default",
+  "version": "1.0.0",
+  "author": "RIESCADE",
+  "description": "Descrição do tema",
+  "settings": [
+    {
+      "id": "background_color",
+      "name": "Cor de Fundo",
+      "type": "color",
+      "default": "#000000",
+      "value": "#000000"
+    },
+    {
+      "id": "show_clock",
+      "name": "Exibir Relógio",
+      "type": "boolean",
+      "default": true,
+      "value": true
+    },
+    {
+      "id": "show_clock_12h",
+      "name": "Relógio 12h",
+      "type": "boolean",
+      "default": true,
+      "value": true
+    },
+    {
+      "id": "transition_style",
+      "name": "Estilo de Transição",
+      "type": "select",
+      "options": [
+        {
+          "value": "fade",
+          "label": "Fade"
+        },
+        {
+          "value": "slide",
+          "label": "Slide"
+        },
+        {
+          "value": "none",
+          "label": "Nenhum"
+        }
+      ],
+      "default": "fade",
+      "value": "slide"
+    }
+  ]
+}

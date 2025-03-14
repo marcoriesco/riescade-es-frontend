@@ -1,4 +1,4 @@
-// Servidor principal da ES Theme Engine
+// Servidor principal da RIESCADE Theme Engine
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -10,11 +10,7 @@ require("dotenv").config();
 // Rotas da API
 const platformsRouter = require("./api/routes/platforms");
 const gamesRouter = require("./api/routes/games");
-const configRouter = require("./api/routes/config");
-const themesRouter = require("./api/routes/themes");
-
-// Utils
-const pathFinder = require("./api/utils/pathFinder");
+const settingsRouter = require("./api/routes/settings");
 
 // Inicialização
 const app = express();
@@ -31,7 +27,7 @@ const logger = createLogger({
     format.splat(),
     format.json()
   ),
-  defaultMeta: { service: "es-theme-engine" },
+  defaultMeta: { service: "riescade-theme-engine" },
   transports: [
     new transports.File({ filename: "error.log", level: "error" }),
     new transports.File({ filename: "combined.log" }),
@@ -87,16 +83,13 @@ if (!fs.existsSync(defaultThemeDir)) {
   }
 }
 
-// Descobrir caminhos do EmulationStation
-const esPaths = pathFinder.findEmulationStationPaths();
-if (!esPaths.configDir) {
-  logger.warn(
-    "Diretório de configuração do EmulationStation não encontrado. Alguns recursos podem não funcionar."
-  );
+// Verificar e criar diretório de configuração
+const configDir = path.join(__dirname, "config");
+if (!fs.existsSync(configDir)) {
+  fs.mkdirSync(configDir, { recursive: true });
+  logger.info(`Diretório de configuração criado: ${configDir}`);
 } else {
-  logger.info(
-    `Diretório de configuração do EmulationStation encontrado em: ${esPaths.configDir}`
-  );
+  logger.info(`Usando diretório de configuração existente: ${configDir}`);
 }
 
 // Definir o tema atual como um middleware
@@ -105,11 +98,21 @@ app.use((req, res, next) => {
   req.currentTheme = "default";
 
   try {
-    const configFile = path.join(esPaths.configDir || "", "es_settings.cfg");
+    const configFile = path.join(configDir, "current_theme.json");
     if (fs.existsSync(configFile)) {
-      // Se encontrarmos um arquivo de configuração, podemos ler o tema
-      // Implementação real será no configService
-      // req.currentTheme = ... (lido do arquivo)
+      const config = JSON.parse(fs.readFileSync(configFile, "utf8"));
+      if (config.currentTheme) {
+        req.currentTheme = config.currentTheme;
+        logger.info(`Usando tema atual: ${req.currentTheme}`);
+      } else {
+        logger.info(
+          `Arquivo de configuração de tema não encontrado, usando tema padrão`
+        );
+      }
+    } else {
+      logger.info(
+        `Arquivo de configuração de tema não encontrado, usando tema padrão`
+      );
     }
   } catch (err) {
     logger.error("Erro ao ler tema atual:", err);
@@ -139,8 +142,27 @@ app.use("/themes", express.static(path.join(__dirname, "themes")));
 // Rotas da API
 app.use("/api/platforms", platformsRouter);
 app.use("/api/games", gamesRouter);
-app.use("/api/config", configRouter);
-app.use("/api/themes", themesRouter);
+app.use("/api/frontend", settingsRouter);
+
+/**
+ * Função para injetar os arquivos CSS e JS do sistema de configurações
+ * nos temas antes de enviá-los ao cliente
+ */
+function injectSettingsFiles(htmlContent) {
+  // Injetar o CSS do modal de configurações antes do </head>
+  htmlContent = htmlContent.replace(
+    "</head>",
+    '  <link rel="stylesheet" href="/css/settings-modal.css">\n</head>'
+  );
+
+  // Injetar o JS do gerenciador de configurações antes do </body>
+  htmlContent = htmlContent.replace(
+    "</body>",
+    '  <script src="/js/settings-manager.js"></script>\n</body>'
+  );
+
+  return htmlContent;
+}
 
 /**
  * Função para enviar um arquivo como stream, com o tipo de conteúdo apropriado
@@ -172,7 +194,17 @@ function sendFileAsStream(res, filePath) {
   logger.info(`Enviando arquivo ${filePath} com content-type ${contentType}`);
 
   try {
-    // Enviar o arquivo como uma stream
+    // Para arquivos HTML, injetar os arquivos CSS e JS do sistema de configurações
+    if (extname === ".html") {
+      const htmlContent = fs.readFileSync(filePath, "utf8");
+      const modifiedContent = injectSettingsFiles(htmlContent);
+
+      res.setHeader("Content-Type", contentType);
+      res.send(modifiedContent);
+      return true;
+    }
+
+    // Para outros tipos de arquivo, enviar como stream
     const stream = fs.createReadStream(filePath);
     res.setHeader("Content-Type", contentType);
 
@@ -202,12 +234,18 @@ function sendFileAsStream(res, filePath) {
 
 // Rota para o tema atual
 app.get("/", (req, res) => {
+  logger.info(
+    `Requisição para a página inicial, tema atual: ${req.currentTheme}`
+  );
+
   const themePath = path.join(
     __dirname,
     "themes",
     req.currentTheme,
     "index.html"
   );
+
+  logger.info(`Verificando existência do tema em: ${themePath}`);
 
   if (fs.existsSync(themePath)) {
     logger.info(`Enviando tema atual: ${themePath}`);
@@ -216,6 +254,8 @@ app.get("/", (req, res) => {
       res.status(500).send("Erro ao carregar tema");
     }
   } else {
+    logger.warn(`Tema ${req.currentTheme} não encontrado em ${themePath}`);
+
     // Fallback para o tema padrão se o tema atual não for encontrado
     const defaultThemePath = path.join(__dirname, "themes/default/index.html");
     logger.info(`Usando tema padrão: ${defaultThemePath}`);
@@ -234,10 +274,15 @@ app.get("/", (req, res) => {
 
 // Rota para servir as imagens e mídias dos jogos
 app.use("/roms-media", (req, res) => {
+  // Importar o configService para obter o caminho das ROMs
   const configService = require("./api/services/configService");
   const paths = configService.getPaths();
 
-  if (!paths.romsDir) {
+  // Usar o diretório de ROMs do configService ou um diretório padrão
+  const romsDir =
+    paths.romsDir || process.env.MEDIA_DIR || path.join(__dirname, "media");
+
+  if (!romsDir) {
     logger.error("Diretório de ROMs não configurado");
     return res.status(404).json({
       success: false,
@@ -253,176 +298,85 @@ app.use("/roms-media", (req, res) => {
 
   logger.info(`Requisição de mídia para: ${decodedPath}`);
 
-  // Construir o caminho absoluto para o arquivo
-  const filePath = path.resolve(paths.romsDir, decodedPath);
-  logger.info(`Caminho absoluto do arquivo: ${filePath}`);
+  // Construir o caminho completo para o arquivo
+  const filePath = path.join(romsDir, decodedPath);
 
   // Verificar se o arquivo existe
-  if (fs.existsSync(filePath)) {
-    try {
-      // Verificar o tipo de arquivo para definir o content-type
-      const extname = path.extname(filePath).toLowerCase();
-      const contentType =
-        {
-          ".png": "image/png",
-          ".jpg": "image/jpeg",
-          ".jpeg": "image/jpeg",
-          ".gif": "image/gif",
-          ".webp": "image/webp",
-          ".mp4": "video/mp4",
-          ".webm": "video/webm",
-        }[extname] || "application/octet-stream";
-
-      logger.info(
-        `Enviando arquivo ${filePath} com content-type ${contentType}`
-      );
-
-      // Enviar o arquivo como uma stream
-      const stream = fs.createReadStream(filePath);
-      res.setHeader("Content-Type", contentType);
-
-      stream.on("error", (error) => {
-        logger.error(`Erro na stream: ${error.message}`);
-        if (!res.headersSent) {
-          res.status(500).json({
-            success: false,
-            message: `Erro ao ler arquivo: ${error.message}`,
-          });
-        }
-      });
-
-      stream.pipe(res);
-    } catch (error) {
-      logger.error(`Erro ao enviar arquivo: ${error.stack}`);
-      return res.status(500).json({
-        success: false,
-        message: `Erro ao enviar arquivo: ${error.message}`,
-      });
-    }
-  } else {
+  if (!fs.existsSync(filePath)) {
     logger.warn(`Arquivo não encontrado: ${filePath}`);
 
     // Tentar caminhos alternativos
-    const systemId = decodedPath.split("/")[0]; // Ex: "switch"
-    const fileName = path.basename(decodedPath); // Ex: "Yakuza Kiwami-thumb.png"
-    const baseFileName = path.basename(fileName, path.extname(fileName)); // Ex: "Yakuza Kiwami-thumb"
-    const gameName = baseFileName.replace(/-thumb$/, ""); // Ex: "Yakuza Kiwami"
-
-    logger.info(
-      `Tentando encontrar alternativas para ${gameName} no sistema ${systemId}`
-    );
+    const systemId = decodedPath.split("/")[0]; // Ex: "naomi2"
+    const fileName = path.basename(decodedPath); // Ex: "vstrik3c.jpg"
+    const baseFileName = path.basename(fileName, path.extname(fileName)); // Ex: "vstrik3c"
 
     // Possíveis localizações alternativas
     const alternativePaths = [
-      // Caminho com espaços alternativos
-      path.resolve(
-        paths.romsDir,
+      // Caminho com estrutura diferente
+      path.join(
+        romsDir,
         systemId,
         "images",
-        `${gameName.replace(/\s+/g, "")}-thumb${path.extname(fileName)}`
+        baseFileName + path.extname(fileName)
       ),
-      path.resolve(
-        paths.romsDir,
-        systemId,
-        "images",
-        `${gameName.replace(/\s+/g, "_")}-thumb${path.extname(fileName)}`
-      ),
-      // Caminhos sem o sufixo -thumb
-      path.resolve(
-        paths.romsDir,
-        systemId,
-        "images",
-        `${gameName}${path.extname(fileName)}`
-      ),
-      // Diretórios alternativos comuns
-      path.resolve(
-        paths.romsDir,
+      path.join(
+        romsDir,
         systemId,
         "boxart",
-        `${gameName}${path.extname(fileName)}`
+        baseFileName + path.extname(fileName)
       ),
-      path.resolve(
-        paths.romsDir,
+      path.join(
+        romsDir,
         systemId,
-        "thumbnails",
-        `${gameName}${path.extname(fileName)}`
+        "screenshots",
+        baseFileName + path.extname(fileName)
       ),
-      path.resolve(
-        paths.romsDir,
+      path.join(
+        romsDir,
         systemId,
-        "media",
-        `${gameName}${path.extname(fileName)}`
+        "fanart",
+        baseFileName + path.extname(fileName)
       ),
-      path.resolve(
-        paths.romsDir,
-        systemId,
-        "media/images",
-        `${gameName}${path.extname(fileName)}`
-      ),
-      // Raiz do diretório do sistema
-      path.resolve(
-        paths.romsDir,
-        systemId,
-        `${gameName}${path.extname(fileName)}`
-      ),
-      path.resolve(
-        paths.romsDir,
-        systemId,
-        `${gameName}-thumb${path.extname(fileName)}`
-      ),
+      // Caminho direto na raiz do sistema
+      path.join(romsDir, systemId, baseFileName + path.extname(fileName)),
     ];
-
-    logger.info(
-      `Verificando caminhos alternativos: ${JSON.stringify(alternativePaths)}`
-    );
 
     // Verificar cada caminho alternativo
     for (const altPath of alternativePaths) {
       if (fs.existsSync(altPath)) {
         logger.info(`Arquivo alternativo encontrado: ${altPath}`);
-        try {
-          const extname = path.extname(altPath).toLowerCase();
-          const contentType =
-            {
-              ".png": "image/png",
-              ".jpg": "image/jpeg",
-              ".jpeg": "image/jpeg",
-              ".gif": "image/gif",
-              ".webp": "image/webp",
-              ".mp4": "video/mp4",
-              ".webm": "video/webm",
-            }[extname] || "application/octet-stream";
-
-          const stream = fs.createReadStream(altPath);
-          res.setHeader("Content-Type", contentType);
-          stream.pipe(res);
-          return;
-        } catch (error) {
-          logger.error(`Erro ao enviar arquivo alternativo: ${error.message}`);
-          continue;
-        }
+        return sendFileAsStream(res, altPath);
       }
     }
 
-    // Se não encontrou nenhum arquivo alternativo, tentar enviar um placeholder
+    // Se não encontrou nenhuma alternativa, enviar uma imagem placeholder
     const placeholderPath = path.join(
       __dirname,
       "themes/default/img/placeholder.png"
     );
     if (fs.existsSync(placeholderPath)) {
       logger.info(`Enviando placeholder para ${fileName}`);
-      const stream = fs.createReadStream(placeholderPath);
-      res.setHeader("Content-Type", "image/png");
-      stream.pipe(res);
-      return;
+      return sendFileAsStream(res, placeholderPath);
     }
 
-    // Se chegou aqui, não há alternativas nem placeholder
+    // Se não tiver placeholder, retornar 404
     return res.status(404).json({
       success: false,
-      message: "Arquivo de mídia não encontrado",
+      message: "Arquivo não encontrado",
     });
   }
+
+  // Verificar se é um diretório
+  if (fs.statSync(filePath).isDirectory()) {
+    logger.error(`O caminho é um diretório, não um arquivo: ${filePath}`);
+    return res.status(400).json({
+      success: false,
+      message: "O caminho é um diretório, não um arquivo",
+    });
+  }
+
+  // Enviar o arquivo
+  sendFileAsStream(res, filePath);
 });
 
 // Rota para compatibilidade com URLs antigas (/roms/...)

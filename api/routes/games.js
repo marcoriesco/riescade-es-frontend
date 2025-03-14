@@ -7,6 +7,7 @@ const fs = require("fs-extra");
 const { execFile, spawn } = require("child_process");
 const configService = require("../services/configService");
 const fileScanner = require("../utils/fileScanner");
+const os = require("os");
 
 const router = express.Router();
 
@@ -1111,6 +1112,14 @@ router.post("/:id/launch", async (req, res) => {
         message: "emulatorLauncher.exe não encontrado",
       });
     }
+
+    // Adicionar caminho para o arquivo de informações do jogo
+    const gameInfoPath = path.join(
+      os.tmpdir(),
+      "emulationstation.tmp",
+      "game.xml"
+    );
+    args.push("-gameinfo", `"${gameInfoPath}"`);
 
     // Criar string do comando completo para log
     // Montar o comando completo com todos os argumentos

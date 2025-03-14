@@ -1,8 +1,8 @@
 /**
- * Script principal para o tema padrão do EmulationStation
+ * Script principal para o tema padrão do RIESCADE
  */
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("Iniciando tema web do EmulationStation...");
+  console.log("Iniciando tema web do RIESCADE...");
 
   // Inicializar API
   initAPI();
@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Configurar navegação por teclado
   initKeyboardNavigation();
+
+  // Aplicar configurações visuais do tema
+  applyThemeSettings();
 });
 
 /**
@@ -49,7 +52,7 @@ function convertPathToUrl(path) {
 }
 
 /**
- * Inicializa a API do EmulationStation
+ * Inicializa a API do RIESCADE
  */
 function initAPI() {
   // Mostrar loader
@@ -73,8 +76,18 @@ function initAPI() {
       showGameLoading(gameId);
     });
 
-    // Inicializar tela de configurações
-    initSettingsScreen();
+    // Adicionar callback para mudanças nas configurações
+    ESAPI.onSettingsChange(() => {
+      console.log("Configurações alteradas, atualizando interface...");
+
+      // Atualizar configurações visuais com forceRefresh=true para obter as configurações mais recentes
+      applyThemeSettings(true);
+
+      // Atualizar visibilidade do relógio
+      if (ESAPI.updateClockVisibility) {
+        ESAPI.updateClockVisibility();
+      }
+    });
 
     // Esconder loader quando tudo estiver pronto
     hideLoader();
@@ -92,7 +105,43 @@ function initAPI() {
  * Inicializa o relógio do sistema
  */
 function initSystemClock() {
-  const updateClock = () => {
+  // Verificar se o relógio deve ser exibido com base nas configurações do tema
+  const checkClockVisibility = () => {
+    // Obter as configurações do tema atual
+    ESAPI.getThemeSettings()
+      .then((settings) => {
+        console.log("Configurações do tema carregadas:", settings);
+
+        // Verificar a configuração show_clock
+        const showClock =
+          settings.show_clock !== undefined ? settings.show_clock : true;
+        console.log("Exibir relógio:", showClock);
+
+        // Obter todos os elementos de relógio
+        const clockElements = [
+          document.getElementById("system-time"),
+          document.getElementById("system-time-games"),
+        ].filter((el) => el); // Filtrar elementos nulos
+
+        // Atualizar a visibilidade dos relógios
+        clockElements.forEach((clock) => {
+          clock.style.display = showClock ? "block" : "none";
+        });
+
+        // Se o relógio estiver visível, atualizar o tempo
+        if (showClock) {
+          updateClockTime();
+        }
+      })
+      .catch((error) => {
+        console.error("Erro ao carregar configurações do tema:", error);
+        // Em caso de erro, manter o relógio visível por padrão
+        updateClockTime();
+      });
+  };
+
+  // Função para atualizar o tempo exibido no relógio
+  const updateClockTime = () => {
     const now = new Date();
     let timeString;
 
@@ -113,230 +162,235 @@ function initSystemClock() {
       });
     }
 
-    document.getElementById("system-time").textContent = timeString;
-    document.getElementById("system-time-games").textContent = timeString;
+    // Atualizar todos os elementos de relógio
+    const systemTime = document.getElementById("system-time");
+    if (systemTime) {
+      systemTime.textContent = timeString;
+    }
+
+    const gamesTimeClock = document.getElementById("system-time-games");
+    if (gamesTimeClock) {
+      gamesTimeClock.textContent = timeString;
+    }
   };
 
-  // Atualizar relógio imediatamente
-  updateClock();
+  // Verificar a visibilidade do relógio inicialmente
+  checkClockVisibility();
 
-  // Atualizar a cada minuto
-  setInterval(updateClock, 60000);
+  // Atualizar o relógio a cada minuto
+  setInterval(() => {
+    // Verificar a visibilidade e atualizar o tempo
+    checkClockVisibility();
+  }, 60000);
+
+  // Adicionar um método à API ESAPI para atualizar a visibilidade do relógio
+  // quando as configurações do tema forem alteradas
+  if (!ESAPI.updateClockVisibility) {
+    ESAPI.updateClockVisibility = checkClockVisibility;
+  }
 }
 
 /**
  * Inicializa a navegação por teclado
  */
 function initKeyboardNavigation() {
-  let currentScreen = "platforms-screen";
-  let selectedPlatformIndex = -1;
-  let selectedGameIndex = 0;
+  // Definir a tela atual como uma propriedade global
+  window.currentScreen = "platforms-screen";
+  let selectedPlatformIndex = 0;
+  window.selectedGameIndex = 0;
 
-  document.addEventListener("keydown", (event) => {
-    switch (currentScreen) {
+  document.addEventListener("keydown", (e) => {
+    // Ignorar eventos de teclado se o loader estiver visível
+    if (document.getElementById("loader").style.display !== "none") {
+      return;
+    }
+
+    console.log(
+      "Tecla pressionada:",
+      e.key,
+      "Tela atual:",
+      window.currentScreen
+    );
+
+    // Tecla F para favoritar jogos
+    if (e.key === "f" && window.currentScreen === "games-screen") {
+      const selectedGame = document.querySelector(".game-item.selected");
+      if (selectedGame) {
+        const gameId = selectedGame.dataset.id;
+        toggleFavorite(gameId);
+      }
+      return;
+    }
+
+    // Tecla Escape para voltar
+    if (e.key === "Escape") {
+      switch (window.currentScreen) {
+        case "games-screen":
+          showScreen("platforms-screen");
+          window.currentScreen = "platforms-screen";
+          break;
+        case "game-loading-screen":
+          // Cancelar carregamento do jogo
+          showScreen("games-screen");
+          window.currentScreen = "games-screen";
+          break;
+      }
+      return;
+    }
+
+    // Tecla Enter para selecionar
+    if (e.key === "Enter") {
+      switch (window.currentScreen) {
+        case "platforms-screen":
+          const selectedPlatform = document.querySelector(
+            ".platform-card.selected"
+          );
+          if (selectedPlatform) {
+            const platformId = selectedPlatform.dataset.id;
+            ESAPI.selectPlatform(platformId);
+            showScreen("games-screen");
+            window.currentScreen = "games-screen";
+          }
+          break;
+        case "games-screen":
+          const selectedGame = document.querySelector(".game-item.selected");
+          if (selectedGame) {
+            const gameId = selectedGame.dataset.id;
+            ESAPI.launchGame(gameId);
+          }
+          break;
+      }
+      return;
+    }
+
+    // Navegação com setas
+    switch (window.currentScreen) {
       case "platforms-screen":
-        handlePlatformsNavigation(event);
+        navigatePlatforms(e);
         break;
       case "games-screen":
-        handleGamesNavigation(event);
-        break;
-      case "settings-screen":
-        handleSettingsNavigation(event);
+        navigateGames(e);
         break;
     }
   });
 
-  function handlePlatformsNavigation(event) {
-    const platforms = document.querySelectorAll(".platform-card");
+  /**
+   * Navega entre as plataformas usando as teclas de seta
+   * @param {KeyboardEvent} e - Evento de teclado
+   */
+  function navigatePlatforms(e) {
+    const platformElements = document.querySelectorAll(".platform-card");
     const container = document.querySelector(".platforms-grid");
 
-    if (platforms.length === 0) return;
+    if (platformElements.length === 0) return;
+
+    // Garantir que haja uma plataforma selecionada
+    if (
+      !document.querySelector(".platform-card.selected") &&
+      platformElements.length > 0
+    ) {
+      platformElements[0].classList.add("selected");
+      selectedPlatformIndex = 0;
+    }
 
     let newIndex = selectedPlatformIndex;
 
-    switch (event.key) {
+    // Determinar a quantidade de plataformas por linha
+    const platformWidth = platformElements[0].offsetWidth;
+    const containerWidth = container.offsetWidth;
+    const platformsPerRow = Math.floor(containerWidth / platformWidth) || 4;
+
+    switch (e.key) {
       case "ArrowUp":
-        newIndex = Math.max(0, selectedPlatformIndex - 4);
+        newIndex = Math.max(0, selectedPlatformIndex - platformsPerRow);
         break;
       case "ArrowDown":
-        newIndex = Math.min(platforms.length - 1, selectedPlatformIndex + 4);
+        newIndex = Math.min(
+          platformElements.length - 1,
+          selectedPlatformIndex + platformsPerRow
+        );
         break;
       case "ArrowLeft":
         newIndex = Math.max(0, selectedPlatformIndex - 1);
         break;
       case "ArrowRight":
-        newIndex = Math.min(platforms.length - 1, selectedPlatformIndex + 1);
+        newIndex = Math.min(
+          platformElements.length - 1,
+          selectedPlatformIndex + 1
+        );
         break;
-      case "Enter":
-        if (
-          selectedPlatformIndex >= 0 &&
-          selectedPlatformIndex < platforms.length
-        ) {
-          platforms[selectedPlatformIndex].click();
-        }
-        break;
-      case "F1":
-        showScreen("settings-screen");
-        currentScreen = "settings-screen";
-        return;
     }
 
     if (newIndex !== selectedPlatformIndex) {
-      // Remove previous selection
-      if (
-        selectedPlatformIndex >= 0 &&
-        selectedPlatformIndex < platforms.length
-      ) {
-        platforms[selectedPlatformIndex].classList.remove("selected");
-      }
+      // Remover seleção anterior
+      platformElements[selectedPlatformIndex].classList.remove("selected");
 
-      // Update index and add selection
+      // Atualizar índice e adicionar seleção
       selectedPlatformIndex = newIndex;
-      platforms[selectedPlatformIndex].classList.add("selected");
+      platformElements[selectedPlatformIndex].classList.add("selected");
 
-      // Rolagem automática
-      scrollItemIntoView(platforms[selectedPlatformIndex], container);
+      // Garantir que a plataforma selecionada esteja visível
+      platformElements[selectedPlatformIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
     }
   }
 
-  function handleGamesNavigation(event) {
+  /**
+   * Navega entre os jogos usando as teclas de seta
+   * @param {KeyboardEvent} e - Evento de teclado
+   */
+  function navigateGames(e) {
     const games = document.querySelectorAll(".game-item");
-    const container = document.querySelector(".ps5-carousel");
+    const container = document.getElementById("games-list");
 
     if (games.length === 0) return;
 
-    let newIndex = selectedGameIndex;
+    // Garantir que haja um jogo selecionado
+    if (!document.querySelector(".game-item.selected") && games.length > 0) {
+      games[0].classList.add("selected");
+      window.selectedGameIndex = 0;
 
-    switch (event.key) {
+      // Mostrar detalhes do primeiro jogo
+      const gameId = games[0].dataset.id;
+      ESAPI.selectGame(gameId);
+    }
+
+    let newIndex = window.selectedGameIndex;
+
+    switch (e.key) {
+      case "ArrowUp":
       case "ArrowLeft":
-        newIndex = (selectedGameIndex - 1 + games.length) % games.length;
+        newIndex = Math.max(0, window.selectedGameIndex - 1);
         break;
+      case "ArrowDown":
       case "ArrowRight":
-        newIndex = (selectedGameIndex + 1) % games.length;
-        break;
-      case "Enter":
-        if (selectedGameIndex >= 0 && selectedGameIndex < games.length) {
-          // Lançar o jogo selecionado
-          const gameId = games[selectedGameIndex].dataset.id;
-          ESAPI.launchGame(gameId);
-        }
-        break;
-      case "Escape":
-        // Voltar para a tela de plataformas
-        showScreen("platforms-screen");
-        currentScreen = "platforms-screen";
-        break;
-      case "f":
-      case "F":
-        if (selectedGameIndex >= 0 && selectedGameIndex < games.length) {
-          // Toggle favorito
-          const gameId = games[selectedGameIndex].dataset.id;
-          toggleFavorite(gameId);
-        }
+        newIndex = Math.min(games.length - 1, window.selectedGameIndex + 1);
         break;
     }
 
-    if (newIndex !== selectedGameIndex) {
-      // Remove a seleção anterior
-      if (selectedGameIndex >= 0 && selectedGameIndex < games.length) {
-        games[selectedGameIndex].classList.remove("selected");
-      }
+    if (newIndex !== window.selectedGameIndex) {
+      console.log(`Navegando de ${window.selectedGameIndex} para ${newIndex}`);
 
-      // Atualiza o índice e adiciona a seleção
-      selectedGameIndex = newIndex;
-      games[selectedGameIndex].classList.add("selected");
+      // Remover seleção anterior
+      games[window.selectedGameIndex].classList.remove("selected");
 
-      // Rola a visualização para mostrar o item selecionado
-      scrollPS5Carousel(games[selectedGameIndex], container);
+      // Atualizar índice e adicionar seleção
+      window.selectedGameIndex = newIndex;
+      games[window.selectedGameIndex].classList.add("selected");
 
-      // Mostrar detalhes do jogo
-      const gameId = games[selectedGameIndex].dataset.id;
+      // Garantir que o jogo selecionado esteja visível
+      games[window.selectedGameIndex].scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+
+      // Mostrar detalhes do jogo selecionado
+      const gameId = games[window.selectedGameIndex].dataset.id;
       ESAPI.selectGame(gameId);
     }
   }
-
-  function handleSettingsNavigation(event) {
-    switch (event.key) {
-      case "Escape":
-        // Voltar para a tela anterior
-        showScreen("platforms-screen");
-        currentScreen = "platforms-screen";
-        break;
-    }
-  }
-
-  /**
-   * Rola o container para garantir que o item selecionado esteja visível
-   * @param {HTMLElement} item - O elemento selecionado
-   * @param {HTMLElement} container - O container com overflow
-   */
-  function scrollItemIntoView(item, container) {
-    if (!item || !container) return;
-
-    const containerRect = container.getBoundingClientRect();
-    const itemRect = item.getBoundingClientRect();
-
-    // Verificar se o item está fora da área visível
-    if (itemRect.left < containerRect.left) {
-      container.scrollLeft += itemRect.left - containerRect.left - 20;
-    } else if (itemRect.right > containerRect.right) {
-      container.scrollLeft += itemRect.right - containerRect.right + 20;
-    }
-  }
-
-  /**
-   * Rola o carrossel estilo PS5 para centralizar o item selecionado
-   * @param {HTMLElement} item - O elemento selecionado
-   * @param {HTMLElement} container - O container do carrossel
-   */
-  function scrollPS5Carousel(item, container) {
-    if (!item || !container) return;
-
-    const containerWidth = container.offsetWidth;
-    const itemWidth = item.offsetWidth;
-    const itemLeft = item.offsetLeft;
-
-    // Calcular a posição para centralizar o item
-    const scrollPosition = itemLeft - containerWidth / 2 + itemWidth / 2;
-
-    // Aplicar rolagem com animação suave
-    container.scrollTo({
-      left: scrollPosition,
-      behavior: "smooth",
-    });
-  }
-
-  // Função para definir a tela atual
-  window.setCurrentScreen = function (screen) {
-    currentScreen = screen;
-
-    // Resetar seleções
-    if (screen === "platforms-screen") {
-      selectedPlatformIndex = 0;
-      const platforms = document.querySelectorAll(".platform-card");
-      if (platforms.length > 0) {
-        platforms.forEach((p) => p.classList.remove("selected"));
-        platforms[0].classList.add("selected");
-      }
-    } else if (screen === "games-screen") {
-      selectedGameIndex = 0;
-      const games = document.querySelectorAll(".game-item");
-      if (games.length > 0) {
-        games.forEach((g) => g.classList.remove("selected"));
-        games[0].classList.add("selected");
-
-        // Mostrar detalhes do primeiro jogo
-        const gameId = games[0].dataset.id;
-        ESAPI.selectGame(gameId);
-
-        // Garantir que o primeiro jogo esteja visível
-        const container = document.querySelector(".ps5-carousel");
-        if (container) {
-          container.scrollLeft = 0;
-        }
-      }
-    }
-  };
 }
 
 /**
@@ -425,11 +479,16 @@ function loadPlatforms() {
 
   // Mostrar tela de plataformas
   showScreen("platforms-screen");
-  setCurrentScreen("platforms-screen");
+
+  // Selecionar a primeira plataforma
+  const platformElements = document.querySelectorAll(".platform-card");
+  if (platformElements.length > 0) {
+    platformElements[0].classList.add("selected");
+  }
 }
 
 /**
- * Carrega e exibe os jogos de uma plataforma usando o estilo de carrossel do PS5
+ * Carrega e exibe os jogos de uma plataforma
  * @param {string} platformId - ID da plataforma
  */
 function loadGames(platformId) {
@@ -469,39 +528,26 @@ function loadGames(platformId) {
 
       // Mostrar a tela de jogos mesmo sem jogos
       showScreen("games-screen");
-      setCurrentScreen("games-screen");
       hideLoader();
       return;
     }
 
-    // Criar o container do carrossel estilo PS5
-    const carouselContainer = document.createElement("div");
-    carouselContainer.className = "ps5-carousel-container";
-    gamesList.appendChild(carouselContainer);
-
-    // Criar o carrossel
-    const carousel = document.createElement("div");
-    carousel.className = "ps5-carousel";
-    carouselContainer.appendChild(carousel);
-
-    // Para cada jogo, criar um item no carrossel
-    games.forEach((game, index) => {
+    // Para cada jogo, criar um item na lista
+    games.forEach((game) => {
       console.log("Processando jogo:", game);
 
       const item = document.createElement("div");
       item.className = "game-item";
       item.dataset.id = game.id;
 
-      // Selecionar o primeiro item por padrão
-      if (index === 0) {
-        item.classList.add("selected");
-      }
-
       // Thumbnail
       const thumbnail = document.createElement("div");
       thumbnail.className = "game-item-thumbnail";
 
       const gameCarouselImage = game.mix ? game.mix : game.marquee;
+      const gameCarouselClass = game.mix
+        ? "game-item-mix"
+        : "game-item-marquee";
 
       if (gameCarouselImage) {
         const img = document.createElement("img");
@@ -511,12 +557,32 @@ function loadGames(platformId) {
           thumbnail.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
         };
         thumbnail.appendChild(img);
+        thumbnail.classList.add(gameCarouselClass);
       }
 
-      // Título do jogo
+      // Informações do jogo
+      const info = document.createElement("div");
+      info.className = "game-item-info";
+
       const title = document.createElement("div");
       title.className = "game-item-title";
       title.textContent = game.name;
+
+      const details = document.createElement("div");
+      details.className = "game-item-details";
+
+      if (game.releaseDate) {
+        details.textContent = `${game.releaseDate} • `;
+      }
+
+      if (game.publisher) {
+        details.textContent += game.publisher;
+      } else if (game.developer) {
+        details.textContent += game.developer;
+      }
+
+      info.appendChild(title);
+      info.appendChild(details);
 
       // Favorito
       if (game.favorite) {
@@ -528,38 +594,38 @@ function loadGames(platformId) {
 
       // Montar item
       item.appendChild(thumbnail);
-      item.appendChild(title);
+      item.appendChild(info);
 
-      // Evento de clique
-      item.addEventListener("click", () => {
-        // Remover seleção de todos os itens
-        const allItems = carousel.querySelectorAll(".game-item");
-        allItems.forEach((g) => g.classList.remove("selected"));
-
-        // Selecionar este item
-        item.classList.add("selected");
-
-        // Atualizar o índice selecionado
-        const selectedIndex = Array.from(allItems).indexOf(item);
-        document.dispatchEvent(
-          new CustomEvent("gameSelected", { detail: { index: selectedIndex } })
-        );
-
-        // Mostrar detalhes do jogo
-        ESAPI.selectGame(game.id);
-      });
-
-      // Adicionar ao carrossel
-      carousel.appendChild(item);
+      // Adicionar à lista
+      gamesList.appendChild(item);
     });
 
     // Mostrar tela de jogos
     showScreen("games-screen");
-    setCurrentScreen("games-screen");
 
-    // Mostrar detalhes do primeiro jogo
-    if (games.length > 0) {
-      const gameId = games[0].id;
+    // Definir a tela atual
+    window.currentScreen = "games-screen";
+
+    // Inicializar a seleção fixa
+    initFixedPositionNavigation();
+
+    // Resetar o índice atual para 0
+    window.selectedGameIndex = 0;
+
+    // Atualizar as classes visuais
+    const gamesItems = document.querySelectorAll(".game-item");
+    updateGameSelectionClasses(gamesItems);
+
+    // Garantir que o primeiro jogo esteja na posição fixa
+    if (gamesItems.length > 0) {
+      const container = document.getElementById("games-list");
+      container.scrollLeft = 0;
+
+      // Selecionar o primeiro jogo
+      gamesItems[0].classList.add("selected");
+
+      // Mostrar detalhes do primeiro jogo
+      const gameId = gamesItems[0].dataset.id;
       ESAPI.selectGame(gameId);
     }
   } catch (error) {
@@ -597,7 +663,7 @@ function showGameDetails(gameId) {
     if (gameDetails.image) {
       gameImage.src = gameDetails.image;
     } else {
-      gameImage.src = "/themes/default/img/default.jpg";
+      gameImage.src = "themes/default/img/default.jpg";
     }
 
     // Força reflow para que a transição de opacity funcione
@@ -619,8 +685,6 @@ function showGameDetails(gameId) {
   if (gameDetails.releaseDate) {
     document.getElementById("game-release-date").textContent =
       gameDetails.releaseDate;
-  } else {
-    document.getElementById("game-release-date").textContent = "-";
   }
 }
 
@@ -673,52 +737,6 @@ function showGameLoading(gameId) {
 }
 
 /**
- * Inicializa a tela de configurações
- */
-function initSettingsScreen() {
-  // Preencher seletor de temas
-  const themeSelect = document.getElementById("theme-select");
-  themeSelect.innerHTML = "";
-
-  const themes = ESAPI.getThemes();
-  const currentTheme = ESAPI.getCurrentTheme();
-
-  themes.forEach((theme) => {
-    const option = document.createElement("option");
-    option.value = theme.id;
-    option.textContent = theme.name;
-
-    if (theme.id === currentTheme.id) {
-      option.selected = true;
-      document.getElementById("current-theme-name").textContent = theme.name;
-    }
-
-    themeSelect.appendChild(option);
-  });
-
-  // Evento de mudança de tema
-  themeSelect.addEventListener("change", () => {
-    const themeId = themeSelect.value;
-    ESAPI.setCurrentTheme(themeId).then(() => {
-      // Recarregar a página para aplicar o novo tema
-      window.location.reload();
-    });
-  });
-
-  // Configuração de formato de hora
-  const clockFormat = document.getElementById("clock-format");
-  const settings = ESAPI.getSettings();
-
-  if (settings?.ui?.ClockFormat) {
-    clockFormat.value = settings.ui.ClockFormat;
-  }
-
-  clockFormat.addEventListener("change", () => {
-    ESAPI.updateSetting("ClockFormat", clockFormat.value);
-  });
-}
-
-/**
  * Mostra uma tela específica e esconde as outras
  * @param {string} screenId - ID da tela a ser mostrada
  */
@@ -745,7 +763,6 @@ function hideLoader() {
   document.getElementById("loader").style.opacity = "0";
   setTimeout(() => {
     document.getElementById("loader").style.display = "none";
-    document.getElementById("loader").style.opacity = "1";
   }, 300);
 }
 
@@ -803,45 +820,150 @@ async function validateGamelistIDs(platformId) {
   }
 }
 
-// Função para verificar se a imagem existe e carregar com fallback
+/**
+ * Função para verificar se a imagem existe e carregar com fallback
+ * @param {HTMLElement} thumbnail - O elemento de miniatura do jogo
+ * @param {string} primaryImagePath - O caminho da imagem primária
+ * @param {string} fallbackImagePath - O caminho da imagem de fallback
+ * @param {string} gameName - O nome do jogo
+ */
 function loadImageWithFallback(
   thumbnail,
   primaryImagePath,
   fallbackImagePath,
   gameName
 ) {
-  const img = document.createElement("img");
+  // Converter caminhos para URLs
+  const primaryUrl = convertPathToUrl(primaryImagePath);
+  const fallbackUrl = convertPathToUrl(fallbackImagePath);
 
-  // Definir handlers antes de definir src para garantir que eles sejam ativados
-  img.onload = () => {
-    // Imagem carregada com sucesso
-    console.log(`Imagem carregada com sucesso: ${img.src}`);
-  };
+  // Tentar carregar a imagem primária
+  thumbnail.src = primaryUrl;
+  thumbnail.alt = gameName;
 
-  img.onerror = () => {
-    // Se a imagem primária falhar, tentar carregar a fallback
-    if (img.src === primaryImagePath) {
-      console.log(`Imagem primária não encontrada: ${primaryImagePath}`);
+  // Se a imagem primária falhar, tentar a imagem de fallback
+  thumbnail.onerror = function () {
+    console.log(
+      `Erro ao carregar imagem primária para ${gameName}, tentando fallback`
+    );
 
-      if (fallbackImagePath) {
-        console.log(`Tentando fallback: ${fallbackImagePath}`);
-        img.src = fallbackImagePath;
-      } else {
-        // Se não houver fallback, usar cor de fundo
-        console.log(`Sem imagem fallback disponível`);
-        thumbnail.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
-      }
+    if (fallbackUrl && fallbackUrl !== primaryUrl) {
+      thumbnail.src = fallbackUrl;
+      thumbnail.onerror = function () {
+        console.log(
+          `Erro ao carregar imagem de fallback para ${gameName}, usando placeholder`
+        );
+        thumbnail.src = "/themes/default/img/placeholder.png";
+        thumbnail.onerror = null; // Remover handler para evitar loops
+      };
     } else {
-      // Se a imagem fallback também falhar
-      console.log(`Imagem fallback não encontrada: ${fallbackImagePath}`);
-      thumbnail.style.backgroundColor = "rgba(0, 0, 0, 0.2)";
+      console.log(`Sem fallback para ${gameName}, usando placeholder`);
+      thumbnail.src = "/themes/default/img/placeholder.png";
+      thumbnail.onerror = null; // Remover handler para evitar loops
     }
   };
+}
 
-  // Definir atributos da imagem
-  img.alt = gameName;
-  img.src = primaryImagePath; // Isso dispara o carregamento
+// Atualizar as classes visuais dos jogos
+const FIXED_SELECTION_INDEX = 0; // A posição do item fixo (0 = primeiro item, 1 = segundo item)
 
-  // Adicionar ao DOM
-  thumbnail.appendChild(img);
+function updateGameSelectionClasses(games) {
+  // Remover a classe 'selected' de todos os jogos
+  games.forEach((game) => game.classList.remove("selected"));
+
+  // Adicionar a classe ao jogo atual
+  if (games[window.selectedGameIndex]) {
+    games[window.selectedGameIndex].classList.add("selected");
+  }
+}
+
+function initFixedPositionNavigation() {
+  // Inicializar a seleção fixa ao carregar a lista de jogos
+  const gamesContainer = document.getElementById("games-list");
+
+  // Criar o elemento de seleção fixa se ainda não existir
+  if (!document.getElementById("fixed-selection")) {
+    const fixedSelection = document.createElement("div");
+    fixedSelection.id = "fixed-selection";
+    fixedSelection.className = "fixed-selection";
+
+    // Inserir antes da lista de jogos
+    gamesContainer.parentNode.insertBefore(fixedSelection, gamesContainer);
+
+    // Posicionar adequadamente
+    setTimeout(positionFixedSelection, 100);
+  }
+}
+
+function positionFixedSelection() {
+  const gamesContainer = document.getElementById("games-list");
+  const fixedSelection = document.getElementById("fixed-selection");
+  const gameItems = document.querySelectorAll(".game-item");
+
+  if (gameItems.length === 0 || !fixedSelection) return;
+
+  // Calcular a posição do segundo item (índice 1)
+  if (gameItems.length > FIXED_SELECTION_INDEX) {
+    const targetItem = gameItems[FIXED_SELECTION_INDEX];
+    const containerRect = gamesContainer.getBoundingClientRect();
+    const itemRect = targetItem.getBoundingClientRect();
+
+    // Posicionar o elemento de seleção fixa sobre o segundo item
+    fixedSelection.style.left = `${
+      itemRect.left - containerRect.left + gamesContainer.scrollLeft
+    }px`;
+    fixedSelection.style.top = `${itemRect.top - containerRect.top}px`;
+    fixedSelection.style.width = `${itemRect.width}px`;
+    fixedSelection.style.height = `${itemRect.height}px`;
+
+    // Tornar visível
+    fixedSelection.style.display = "block";
+  }
+}
+
+/**
+ * Aplica as configurações visuais do tema
+ */
+function applyThemeSettings(forceRefresh = false) {
+  console.log(
+    `Aplicando configurações do tema (forceRefresh: ${forceRefresh})...`
+  );
+
+  // Obter as configurações do tema atual
+  ESAPI.getThemeSettings(forceRefresh)
+    .then((settings) => {
+      console.log("Aplicando configurações visuais do tema:", settings);
+
+      // Aplicar cor de fundo
+      if (settings.background_color) {
+        console.log(`Aplicando cor de fundo: ${settings.background_color}`);
+        document.body.style.backgroundColor = settings.background_color;
+
+        // Também podemos aplicar a cor a outros elementos
+        const mainContainer = document.querySelector(".main-container");
+        if (mainContainer) {
+          mainContainer.style.backgroundColor = settings.background_color;
+        }
+      }
+
+      // Aplicar estilo de transição
+      if (settings.transition_style) {
+        console.log(
+          `Aplicando estilo de transição: ${settings.transition_style}`
+        );
+
+        // Remover classes de transição existentes
+        document.body.classList.remove(
+          "transition-fade",
+          "transition-slide",
+          "transition-none"
+        );
+
+        // Adicionar a classe de transição selecionada
+        document.body.classList.add(`transition-${settings.transition_style}`);
+      }
+    })
+    .catch((error) => {
+      console.error("Erro ao aplicar configurações do tema:", error);
+    });
 }

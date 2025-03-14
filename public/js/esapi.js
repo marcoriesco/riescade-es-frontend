@@ -1,6 +1,6 @@
 /**
- * Cliente JavaScript para a API do EmulationStation
- * Esta biblioteca deve ser incluída nos temas web para acessar as funcionalidades do EmulationStation
+ * Cliente JavaScript para a API do RIESCADE Theme Engine
+ * Esta biblioteca deve ser incluída nos temas web para acessar as funcionalidades do sistema
  */
 const ESAPI = (function () {
   // URL base da API
@@ -101,12 +101,28 @@ const ESAPI = (function () {
 
   /**
    * Registra um callback para quando as configurações forem alteradas
-   * @param {Function} callback - Função a ser chamada com as novas configurações
+   * @param {Function} callback - Função a ser chamada quando as configurações forem alteradas
    */
   function onSettingsChange(callback) {
     if (typeof callback === "function") {
       callbacks.onSettingsChange.push(callback);
     }
+  }
+
+  /**
+   * Notifica os callbacks de alteração de configurações
+   */
+  function notifySettingsChange() {
+    callbacks.onSettingsChange.forEach((callback) => {
+      try {
+        callback();
+      } catch (error) {
+        console.error(
+          "Erro ao executar callback de alteração de configurações:",
+          error
+        );
+      }
+    });
   }
 
   /**
@@ -270,7 +286,7 @@ const ESAPI = (function () {
 
     try {
       const response = await fetch(
-        `${API_BASE}/config/settings?refresh=${forceRefresh}`
+        `${API_BASE}/frontend/settings/theme?refresh=${forceRefresh}`
       );
       const data = await response.json();
 
@@ -297,35 +313,30 @@ const ESAPI = (function () {
   /**
    * Atualiza uma configuração
    * @param {string} key - Chave da configuração
-   * @param {string} value - Novo valor
-   * @returns {Promise<boolean>} Promessa que resolve com true se atualizado com sucesso
+   * @param {*} value - Novo valor
+   * @returns {Promise<boolean>} Promessa que resolve com o resultado da operação
    */
   async function updateSetting(key, value) {
     try {
-      const response = await fetch(`${API_BASE}/config/settings`, {
+      const response = await fetch(`${API_BASE}/frontend/settings/theme`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ key, value }),
+        body: JSON.stringify({ [key]: value }),
       });
 
       const data = await response.json();
 
       if (data.success) {
         // Atualizar cache
-        if (cache.settings) {
-          if (!cache.settings.general) {
-            cache.settings.general = {};
-          }
-
-          cache.settings.general[key] = value;
+        if (!cache.settings) {
+          cache.settings = {};
         }
+        cache.settings[key] = value;
 
-        // Notificar sobre alteração
-        for (const callback of callbacks.onSettingsChange) {
-          callback(cache.settings);
-        }
+        // Notificar alteração
+        notifySettingsChange();
 
         return true;
       }
@@ -333,7 +344,7 @@ const ESAPI = (function () {
       throw new Error(data.message || "Erro ao atualizar configuração");
     } catch (error) {
       console.error(`Erro ao atualizar configuração ${key}:`, error);
-      throw error;
+      return false;
     }
   }
 
@@ -349,7 +360,7 @@ const ESAPI = (function () {
 
     try {
       const response = await fetch(
-        `${API_BASE}/config/themes?refresh=${forceRefresh}`
+        `${API_BASE}/frontend/themes?refresh=${forceRefresh}`
       );
       const data = await response.json();
 
@@ -385,7 +396,7 @@ const ESAPI = (function () {
 
     try {
       const response = await fetch(
-        `${API_BASE}/config/themes/current?refresh=${forceRefresh}`
+        `${API_BASE}/frontend/themes/current?refresh=${forceRefresh}`
       );
       const data = await response.json();
 
@@ -412,11 +423,11 @@ const ESAPI = (function () {
   /**
    * Define o tema atual
    * @param {string} themeId - ID do tema
-   * @returns {Promise<boolean>} Promessa que resolve com true se definido com sucesso
+   * @returns {Promise<boolean>} Promessa que resolve com o resultado da operação
    */
   async function setCurrentTheme(themeId) {
     try {
-      const response = await fetch(`${API_BASE}/config/themes/current`, {
+      const response = await fetch(`${API_BASE}/frontend/themes/current`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -430,18 +441,16 @@ const ESAPI = (function () {
         // Atualizar cache
         cache.currentTheme = data.data;
 
-        // Notificar sobre alteração
-        for (const callback of callbacks.onThemeChange) {
-          callback(cache.currentTheme);
-        }
+        // Notificar alteração
+        notifyCallbacks("onThemeChange", data.data);
 
         return true;
       }
 
       throw new Error(data.message || "Erro ao definir tema atual");
     } catch (error) {
-      console.error(`Erro ao definir tema atual ${themeId}:`, error);
-      throw error;
+      console.error("Erro ao definir tema atual:", error);
+      return false;
     }
   }
 
@@ -651,40 +660,133 @@ const ESAPI = (function () {
 
   /**
    * Limpa o cache local
+   * @param {string} [cacheKey] - Chave específica do cache para limpar (opcional)
    */
-  function clearCache() {
-    cache.platforms = null;
-    cache.currentPlatform = null;
-    cache.games = {};
-    cache.gameDetails = {};
-    cache.settings = null;
-    cache.themes = null;
-    cache.currentTheme = null;
+  function clearCache(cacheKey) {
+    console.log(
+      `Limpando cache${cacheKey ? ` para ${cacheKey}` : " completo"}`
+    );
+
+    if (cacheKey) {
+      // Limpar apenas a chave específica
+      switch (cacheKey) {
+        case "platforms":
+          cache.platforms = null;
+          break;
+        case "currentPlatform":
+          cache.currentPlatform = null;
+          break;
+        case "games":
+          cache.games = {};
+          break;
+        case "gameDetails":
+          cache.gameDetails = {};
+          break;
+        case "settings":
+          cache.settings = null;
+          break;
+        case "themes":
+          cache.themes = null;
+          break;
+        case "currentTheme":
+          cache.currentTheme = null;
+          break;
+        default:
+          console.warn(`Chave de cache desconhecida: ${cacheKey}`);
+      }
+    } else {
+      // Limpar todo o cache
+      cache.platforms = null;
+      cache.currentPlatform = null;
+      cache.games = {};
+      cache.gameDetails = {};
+      cache.settings = null;
+      cache.themes = null;
+      cache.currentTheme = null;
+    }
+  }
+
+  /**
+   * Obtém as configurações do tema atual
+   * @param {boolean} [forceRefresh=false] - Força a atualização do cache
+   * @returns {Promise<Object>} Promessa que resolve com as configurações do tema
+   */
+  async function getThemeSettings(forceRefresh = false) {
+    try {
+      // Se já temos o tema atual em cache e não estamos forçando a atualização, usar suas configurações
+      if (cache.currentTheme && cache.currentTheme.settings && !forceRefresh) {
+        console.log(
+          "Usando configurações do tema em cache:",
+          cache.currentTheme.settings
+        );
+
+        // Extrair as configurações do tema
+        const themeSettings = {};
+
+        // Se o tema tem configurações definidas
+        if (
+          cache.currentTheme.settings &&
+          Array.isArray(cache.currentTheme.settings)
+        ) {
+          // Para cada configuração, obter o valor atual ou o valor padrão
+          cache.currentTheme.settings.forEach((setting) => {
+            themeSettings[setting.id] =
+              setting.value !== undefined ? setting.value : setting.default;
+          });
+        }
+
+        return themeSettings;
+      }
+
+      // Caso contrário, buscar o tema atual
+      console.log("Buscando configurações atualizadas do tema do servidor...");
+      const currentTheme = await fetchCurrentTheme(true); // Forçar atualização
+
+      // Extrair as configurações do tema
+      const themeSettings = {};
+
+      // Se o tema tem configurações definidas
+      if (currentTheme.settings && Array.isArray(currentTheme.settings)) {
+        // Para cada configuração, obter o valor atual ou o valor padrão
+        currentTheme.settings.forEach((setting) => {
+          themeSettings[setting.id] =
+            setting.value !== undefined ? setting.value : setting.default;
+        });
+      }
+
+      console.log("Configurações do tema obtidas do servidor:", themeSettings);
+      return themeSettings;
+    } catch (error) {
+      console.error("Erro ao obter configurações do tema:", error);
+      return {};
+    }
   }
 
   // API pública
   return {
     init,
     onReady,
-    onPlatformSelect,
-    onGameSelect,
-    onGameLaunch,
-    onSettingsChange,
-    onThemeChange,
     getPlatforms,
+    getPlatform,
+    getCurrentPlatform,
     getGames,
     getGameDetails,
     getSettings,
     getThemes,
     getCurrentTheme,
-    getCurrentPlatform,
-    getPlatform,
+    onPlatformSelect,
+    onGameSelect,
+    onGameLaunch,
+    onSettingsChange,
+    onThemeChange,
     selectPlatform,
     selectGame,
     launchGame,
     updateSetting,
     setCurrentTheme,
     clearCache,
+    getThemeSettings,
+    notifySettingsChange,
   };
 })();
 

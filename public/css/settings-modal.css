@@ -1,0 +1,244 @@
+/* Modal de configurações */
+.settings-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.settings-modal.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.settings-modal-content {
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  transform: translateY(-20px);
+  transition: transform 0.3s;
+}
+
+.settings-modal.visible .settings-modal-content {
+  transform: translateY(0);
+}
+
+/* Cabeçalho do modal */
+.settings-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #333;
+}
+
+.settings-modal-header h2 {
+  margin: 0;
+  color: #fff;
+}
+
+.settings-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.settings-modal-close:hover {
+  color: #fff;
+}
+
+/* Corpo do modal */
+.settings-modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Rodapé do modal */
+.settings-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px 20px;
+  border-top: 1px solid #333;
+}
+
+.settings-modal-footer button {
+  padding: 8px 16px;
+  margin-left: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.settings-modal-cancel {
+  background-color: transparent;
+  border: 1px solid #666;
+  color: #ccc;
+}
+
+.settings-modal-cancel:hover {
+  background-color: #333;
+}
+
+.settings-modal-save {
+  background-color: #0078d7;
+  border: none;
+  color: white;
+}
+
+.settings-modal-save:hover {
+  background-color: #0086f5;
+}
+
+/* Estilos para as seções de configurações */
+.settings-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #333;
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+}
+
+.settings-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+/* Estilos para itens de configuração */
+.setting-item {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-label {
+  margin-bottom: 5px;
+  color: #ccc;
+}
+
+.setting-input,
+.setting-select {
+  padding: 8px;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.setting-input:focus,
+.setting-select:focus {
+  outline: none;
+  border-color: #0078d7;
+}
+
+/* Estilos para seletor de temas */
+.theme-selector {
+  margin-top: 10px;
+}
+
+.theme-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.theme-list-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s;
+  background-color: #2a2a2a;
+}
+
+.theme-list-item:hover {
+  background-color: #333;
+}
+
+.theme-list-item.selected {
+  border-color: #0078d7;
+  background-color: #333;
+}
+
+.theme-preview {
+  width: 80px;
+  height: 60px;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.theme-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.theme-details {
+  flex-grow: 1;
+}
+
+.theme-name {
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 5px;
+}
+
+.theme-description {
+  font-size: 12px;
+  color: #ccc;
+}
+
+/* Informações do tema atual */
+.current-theme-preview {
+  width: 100%;
+  height: 150px;
+  margin-bottom: 15px;
+}
+
+.current-theme-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.current-theme-details {
+  background-color: #2a2a2a;
+  padding: 15px;
+  border-radius: 4px;
+}
+
+.current-theme-details p {
+  margin: 5px 0;
+  color: #ccc;
+}
+
+.current-theme-details strong {
+  color: #fff;
+}

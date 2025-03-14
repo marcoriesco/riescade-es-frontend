@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tema Web Padrão - EmulationStation</title>
+    <title>Tema Web Padrão - RIESCADE</title>
     <link rel="stylesheet" href="/themes/default/css/style.css" />
     <link rel="icon" href="/themes/default/favicon.ico" />
   </head>
@@ -18,7 +18,7 @@
       <!-- Tela de Plataformas -->
       <div id="platforms-screen" class="screen">
         <header>
-          <h1>EmulationStation</h1>
+          <h1>RIESCADE</h1>
           <div class="system-info">
             <span id="system-time"></span>
             <span id="system-battery"></span>
@@ -34,7 +34,9 @@
             <div class="control"><span class="key">↑↓←→</span> Navegar</div>
             <div class="control"><span class="key">Enter</span> Selecionar</div>
             <div class="control"><span class="key">Esc</span> Voltar</div>
-            <div class="control"><span class="key">F1</span> Configurações</div>
+            <div class="control">
+              <span class="key">Space</span> Configurações
+            </div>
           </div>
         </footer>
       </div>
@@ -60,6 +62,8 @@
             </div>
             <div class="game-info">
               <h2 id="game-title">Título do Jogo</h2>
+              <h3 id="game-path">Caminho do jogo</h3>
+
               <p id="game-description">
                 Descrição do jogo será exibida aqui...
               </p>
@@ -88,16 +92,17 @@
             </div>
           </div>
 
-          <!-- Container para o carrossel estilo PS5 -->
-          <div id="games-list" class="games-container"></div>
+          <div class="games-list" id="games-list"></div>
         </main>
 
         <footer>
           <div class="controls-help">
-            <div class="control"><span class="key">←→</span> Navegar</div>
+            <div class="control"><span class="key">↑↓</span> Navegar</div>
             <div class="control"><span class="key">Enter</span> Jogar</div>
             <div class="control"><span class="key">Esc</span> Voltar</div>
-            <div class="control"><span class="key">F</span> Favorito</div>
+            <div class="control">
+              <span class="key">Space</span> Configurações
+            </div>
           </div>
         </footer>
       </div>
@@ -110,57 +115,6 @@
           <div class="loading-spinner"></div>
           <p id="loading-game-system">Sistema</p>
         </div>
-      </div>
-
-      <!-- Tela de Configurações -->
-      <div id="settings-screen" class="screen">
-        <header>
-          <h1>Configurações</h1>
-        </header>
-
-        <main>
-          <div class="settings-container">
-            <div class="settings-section">
-              <h2>Temas</h2>
-              <div class="setting-item">
-                <label for="theme-select">Tema Atual:</label>
-                <select id="theme-select"></select>
-              </div>
-            </div>
-
-            <div class="settings-section">
-              <h2>Interface</h2>
-              <div class="setting-item">
-                <label for="transition-enable">Transições:</label>
-                <input type="checkbox" id="transition-enable" checked />
-              </div>
-              <div class="setting-item">
-                <label for="clock-format">Formato de Hora:</label>
-                <select id="clock-format">
-                  <option value="12">12 horas</option>
-                  <option value="24" selected>24 horas</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="settings-section">
-              <h2>Sobre</h2>
-              <div class="about-info">
-                <p><strong>ES Theme Engine</strong></p>
-                <p>Versão: <span id="version">1.0.0</span></p>
-                <p>Tema: <span id="current-theme-name">Default</span></p>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        <footer>
-          <div class="controls-help">
-            <div class="control"><span class="key">↑↓←→</span> Navegar</div>
-            <div class="control"><span class="key">Enter</span> Selecionar</div>
-            <div class="control"><span class="key">Esc</span> Voltar</div>
-          </div>
-        </footer>
       </div>
     </div>
 
